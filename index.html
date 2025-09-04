@@ -200,16 +200,22 @@
       action="https://docs.google.com/forms/d/e/1FAIpQLSeL7xL7X9sJjGYvYQDvNAb9C7OzoxN5pQI9R-krJkXgAg7l3Q/formResponse" 
       method="POST" 
       target="_blank"
-      class="row justify-content-center align-items-end"
-      style="gap: 10px;"
+      class="row justify-content-center align-items-start"
     >
-      <div class="col-md-6 col-sm-8">
-        <input 
-          type="email" 
-          name="entry.1144783397"  <!-- ✅ Replace 876543210 with YOUR Field ID -->
-         />
+      <div class="col-md-6 col-sm-8 mb-3">
+        <div class="form-floating">
+          <input 
+            type="email" 
+            name="entry.1144783397" 
+            class="form-control form-control-lg" 
+            id="floatingEmail" 
+            placeholder="name@example.com" 
+            required 
+          />
+          <label for="floatingEmail">Email Address</label>
+        </div>
       </div>
-      <div class="col-md-2 col-sm-4">
+      <div class="col-md-2 col-sm-4 d-flex align-items-start">
         <button type="submit" class="btn btn-primary btn-lg w-100">Subscribe</button>
       </div>
       <div class="col-12 mt-3 text-center">
