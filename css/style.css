@@ -94,6 +94,28 @@ body.dark-mode .genre-btn {
 #darkModeToggle:hover i {
   transform: rotate(30deg);
 }
+/* Newsletter Form Styling */
+#newsletter {
+  border-top: 1px solid var(--border-color);
+}
+
+#newsletter .form-control,
+#newsletter .btn {
+  border-radius: 8px;
+}
+
+#newsletter .btn-primary {
+  background-color: #0d6efd;
+  border: none;
+}
+
+#newsletter .btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+#newsletter small.text-muted {
+  color: #6c757d !important;
+}
 
 /* Smooth Scrolling */
 html {
