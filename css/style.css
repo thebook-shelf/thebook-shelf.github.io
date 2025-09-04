@@ -94,9 +94,10 @@ body.dark-mode .genre-btn {
 #darkModeToggle:hover i {
   transform: rotate(30deg);
 }
-/* Newsletter Form Styling */
-#newsletter {
-  border-top: 1px solid var(--border-color);
+/* Newsletter Form */
+#newsletter .form-label {
+  font-size: 0.9rem;
+  color: #495057;
 }
 
 #newsletter .form-control,
@@ -104,19 +105,10 @@ body.dark-mode .genre-btn {
   border-radius: 8px;
 }
 
-#newsletter .btn-primary {
-  background-color: #0d6efd;
-  border: none;
+#newsletter .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
-
-#newsletter .btn-primary:hover {
-  background-color: #0b5ed7;
-}
-
-#newsletter small.text-muted {
-  color: #6c757d !important;
-}
-
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
