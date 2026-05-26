@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Book Shelf | Membership</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #2c3e50; --accent: #c0392b; --bg-light: #f8f9fa; }
+    body { font-family: 'Open Sans', sans-serif; background-color: var(--bg-light); }
+    h1, h2, h3, .brand-font { font-family: 'Merriweather', serif; }
+    .navbar-brand { font-weight: 700; font-size: 1.5rem; color: var(--primary) !important; }
+    .hero { background: linear-gradient(135deg, #2c3e50 0%, #4a6985 100%); color: white; padding: 4rem 0; }
+    .price-card { transition: transform 0.3s ease, box-shadow 0.3s ease; border: none; border-radius: 12px; }
+    .price-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .price-card.featured { border: 2px solid var(--accent); }
+    .btn-accent { background-color: var(--accent); border: none; color: white; padding: 0.6rem 1.5rem; border-radius: 6px; transition: all 0.2s; }
+    .btn-accent:hover { background-color: #a93226; color: white; transform: scale(1.02); }
+    .discount-badge { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    #finalPriceDisplay { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+    .loading-spinner { display: none; }
+    .required-asterisk { color: var(--accent); font-weight: bold; }
+    .dashboard-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 20px; }
+    
+    /* 🖨️ PRINT CARD STYLES */
+    .membership-card-print { width: 85.6mm; height: 53.98mm; border: 2px solid #2c3e50; border-radius: 10px; background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); padding: 15px; font-family: 'Open Sans', sans-serif; color: #2c3e50; position: relative; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin: 0 auto; }
+    .card-print-header { background: var(--primary); color: white; margin: -15px -15px 12px -15px; padding: 8px 15px; text-align: center; border-radius: 8px 8px 0 0; }
+    .card-print-row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 11px; }
+    .card-print-label { font-weight: 600; color: #64748b; }
+    .card-print-value { font-weight: 700; }
+    .card-print-qr { position: absolute; bottom: 10px; right: 12px; width: 50px; height: 50px; }
+    .card-print-footer { position: absolute; bottom: 12px; left: 15px; font-size: 9px; color: #64748b; font-style: italic; }
+    @media print { body * { visibility: hidden; } #printCardContainer, #printCardContainer * { visibility: visible; } #printCardContainer { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; } }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">📚 The Book Shelf</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#plans">Plans</a></li>
+          <li class="nav-item"><a class="nav-link" href="#register">Join Now</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">👤 Member Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero text-center">
+    <div class="container">
+      <h1 class="display-4 fw-bold mb-3">Unlock Endless Reading</h1>
+      <p class="lead mb-4">Become a member and enjoy exclusive discounts on every book purchase.</p>
+      <a href="#register" class="btn btn-accent btn-lg px-4">Get Your Membership</a>
+    </div>
+  </header>
+
+  <!-- Plans -->
+  <section id="plans" class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-5 fw-bold">Choose Your Membership</h2>
+      <div class="row justify-content-center g-4">
+        <!-- 1 Year -->
+        <div class="col-md-4"><div class="card price-card p-4 text-center h-100"><h3 class="mt-2">1 Year Pass</h3><p class="text-muted">Perfect for casual readers</p><h2 class="display-6 fw-bold my-3">Rs. 1000 <span class="fs-6 text-muted fw-normal">/ year</span></h2><ul class="list-unstyled text-start mx-auto" style="max-width: 260px;"><li class="mb-2">📖 <strong>10% OFF</strong> on all bookstore purchases</li><li class="mb-2">📧 Monthly reading newsletter</li><li class="mb-2">🔖 Priority book ordering</li></ul></div></div>
+        
+        <!-- 3 Years -->
+        <div class="col-md-4"><div class="card price-card featured p-4 text-center h-100 position-relative"><div class="discount-badge">POPULAR</div><h3 class="mt-2">3 Year Pass</h3><p class="text-muted">For dedicated book lovers</p><h2 class="display-6 fw-bold my-3">Rs. 2000 <span class="fs-6 text-muted fw-normal">/ 3 years</span></h2><ul class="list-unstyled text-start mx-auto" style="max-width: 260px;"><li class="mb-2">📖 <strong>15% OFF</strong> on all bookstore purchases</li><li class="mb-2">🎁 Free quarterly bookmark set</li><li class="mb-2">🌟 Exclusive member events</li></ul></div></div>
+        
+        <!-- Lifetime -->
+        <div class="col-md-4"><div class="card price-card p-4 text-center h-100"><h3 class="mt-2">Lifetime Pass</h3><p class="text-muted">Forever reader's club</p><h2 class="display-6 fw-bold my-3">Rs. 5000 <span class="fs-6 text-muted fw-normal">/ once</span></h2><ul class="list-unstyled text-start mx-auto" style="max-width: 260px;"><li class="mb-2">📖 <strong>20% OFF</strong> on all bookstore purchases</li><li class="mb-2">👑 Permanent membership badge</li><li class="mb-2">🚚 Free shipping on orders > Rs. 500</li></ul></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Registration Form -->
+  <section id="register" class="py-5 bg-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 p-4">
+            <h3 class="text-center mb-4 fw-bold">Complete Your Membership</h3>
+            <form id="membershipForm" novalidate>
+              <div class="mb-3"><label class="form-label">Full Name <span class="required-asterisk">*</span></label><input type="text" class="form-control" id="fullName" required minlength="2"></div>
+              <div class="mb-3"><label class="form-label">Email Address <span class="required-asterisk">*</span></label><input type="email" class="form-control" id="email" required></div>
+              <div class="mb-3"><label class="form-label">Phone Number <span class="required-asterisk">*</span></label><input type="tel" class="form-control" id="phone" required pattern="[0-9]{10}"></div>
+              <div class="mb-3"><label class="form-label">Membership Plan <span class="required-asterisk">*</span></label>
+                <select class="form-select" id="planSelect" required>
+                  <option value="" disabled selected>Select a plan</option>
+                  <option value="1yr" data-price="1000" data-label="1 Year" data-discount="10%">1 Year - Rs. 1000 (10% OFF)</option>
+                  <option value="3yr" data-price="2000" data-label="3 Years" data-discount="15%">3 Years - Rs. 2000 (15% OFF)</option>
+                  <option value="life" data-price="5000" data-label="Lifetime" data-discount="20%">Lifetime - Rs. 5000 (20% OFF)</option>
+                </select>
+              </div>
+              <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 p-3"><span class="fw-semibold">Membership Fee:</span><span id="finalPriceDisplay">Select a plan</span></div>
+              <div class="d-grid"><button type="submit" class="btn btn-accent btn-lg" id="submitBtn"><span class="spinner-border spinner-border-sm loading-spinner me-2" style="display:none;"></span><span class="btn-text">Proceed to Payment</span></button></div>
+            </form>
+            <div class="text-center mt-3"><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-muted small">Already have a Member ID? Login here</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Modal -->
+  <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light"><h5 class="modal-title fw-bold">📧 Payment Instructions Sent!</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="alert alert-success mb-3"><strong>Check your email!</strong> Sent to <span id="userEmailDisplay" class="fw-bold"></span></div>
+          <div class="payment-info-box"><h6 class="fw-bold mb-2"><span class="step-badge">1</span>Pay via App</h6><p class="mb-0">Open your eSewa/Khalti app and pay <span id="modalAmount"></span> to our account.</p></div>
+          
+          <div class="text-center my-4">
+            <p class="text-muted small mb-1">Your Membership ID (Save this for login):</p>
+            <h3 class="fw-bold text-primary mb-0" id="modalMemberId">TBS-XXXX</h3>
+          </div>
+
+          <div class="d-grid"><button class="btn btn-outline-secondary" onclick="location.reload()">Close & Return Home</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <svg class="text-success mb-3" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <h4 class="fw-bold">Membership Activated! 🎉</h4>
+        <div class="alert alert-success fw-bold mx-auto my-3" style="max-width:280px;">ID: <span id="finalMemberId" class="fs-5"></span></div>
+        <p class="text-muted small mb-3">Show this ID at checkout for instant discount.</p>
+        <button class="btn btn-accent w-100" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👤 Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-light"><h5 class="modal-title fw-bold">📖 Member Dashboard</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div id="loginFormContainer">
+            <form id="loginForm">
+              <div class="mb-3"><label class="form-label">Enter Member ID</label><input type="text" class="form-control form-control-lg" id="loginMemberId" required placeholder="TBS-XXXXXX"></div>
+              <div class="d-grid"><button type="submit" class="btn btn-accent btn-lg" id="loginBtn"><span class="spinner-border spinner-border-sm loading-spinner me-2" style="display:none;"></span><span class="btn-text">Login</span></button></div>
+            </form>
+          </div>
+
+          <div id="memberDashboard" class="dashboard-card" style="display:none;">
+            <div class="text-center mb-3"><h4 class="mt-2 mb-1">Welcome, <span id="dashName" class="text-primary"></span></h4><p class="text-muted mb-0">ID: <span id="dashId" class="fw-bold"></span></p></div>
+            <div class="list-group list-group-flush rounded-3">
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent"><span>📋 Plan</span><span class="badge bg-primary" id="dashPlan"></span></div>
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent"><span>📖 Discount</span><span class="badge bg-success" id="dashDiscount"></span></div>
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent"><span>💳 Status</span><span class="badge" id="dashStatus"></span></div>
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent"><span>📅 Activated</span><span id="dashActivated"></span></div>
+              <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent"><span>⏳ Expires</span><span id="dashExpiry" class="fw-bold text-danger"></span></div>
+            </div>
+
+            <div id="pendingVerificationSection" style="display:none;" class="mt-3 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+              <h6 class="fw-bold text-warning-emphasis">⏳ Pending Owner Verification</h6>
+              <p class="small mb-2">Submit your eSewa/Khalti Transaction ID below. Our team will verify it in our records and activate your membership.</p>
+              <input type="text" id="dashboardTid" class="form-control mb-2" placeholder="e.g., ESP123456789">
+              <button class="btn btn-success btn-sm w-100" id="dashboardSubmitBtn"><span class="spinner-border spinner-border-sm loading-spinner me-1" style="display:none;"></span><span class="btn-text">Submit Transaction ID</span></button>
+            </div>
+
+            <button class="btn btn-outline-primary w-100 mt-3" onclick="printMembershipCard()">🖨️ Print Membership Card</button>
+            <button class="btn btn-outline-secondary w-100 mt-2" onclick="resetLogin()">🔙 Logout</button>
+          </div>
+          <div id="loginError" class="alert alert-danger mt-3" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🖨️ Print Card Container -->
+  <div id="printCardContainer" style="display:none;">
+    <div class="membership-card-print">
+      <div class="card-print-header"><h4 style="margin:0;font-size:14px;">📚 The Book Shelf</h4><small style="opacity:0.9;">MEMBERSHIP CARD</small></div>
+      <div class="card-print-row"><span class="card-print-label">Member:</span><span class="card-print-value" id="printName"></span></div>
+      <div class="card-print-row"><span class="card-print-label">ID:</span><span class="card-print-value" id="printId"></span></div>
+      <div class="card-print-row"><span class="card-print-label">Plan:</span><span class="card-print-value" id="printPlan"></span></div>
+      <div class="card-print-row"><span class="card-print-label">Discount:</span><span class="card-print-value" id="printDiscount"></span></div>
+      <div class="card-print-row"><span class="card-print-label">Valid Until:</span><span class="card-print-value" id="printExpiry"></span></div>
+      <img id="printQR" src="" class="card-print-qr" alt="QR">
+      <div class="card-print-footer">Scan at checkout • Non-transferable</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMessage"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-5"><div class="container text-center"><p class="mb-0">© <span id="year"></span> The Book Shelf. All rights reserved.</p></div></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxu_2ov9WO8pDe5igHyKBzKfceujLE7UXdIiuzFj8TOnzV3FROn9glYXGHriN0iAXI1nA/exec';
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const form = document.getElementById('membershipForm');
+    const planSelect = document.getElementById('planSelect');
+    const finalPriceDisplay = document.getElementById('finalPriceDisplay');
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    const submitBtn = document.getElementById('submitBtn');
+    let currentMemberId = '';
+
+    planSelect.addEventListener('change', () => {
+      finalPriceDisplay.textContent = planSelect.value ? `Rs. ${planSelect.options[planSelect.selectedIndex].dataset.price}` : 'Select a plan';
+    });
+
+    // 1️⃣ REGISTRATION
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) { e.stopPropagation(); form.classList.add('was-validated'); return; }
+      
+      submitBtn.disabled = true; submitBtn.querySelector('.loading-spinner').style.display = 'inline-block'; submitBtn.querySelector('.btn-text').textContent = 'Checking Email...';
+      
+      const opt = planSelect.options[planSelect.selectedIndex];
+      const memberId = `TBS-${Date.now().toString(36).slice(-4).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      
+      try {
+        const payload = new URLSearchParams({
+          action: 'sendPaymentEmail',
+          name: document.getElementById('fullName').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          planLabel: opt.dataset.label,
+          bookDiscount: opt.dataset.discount,
+          membershipFee: finalPriceDisplay.textContent,
+          memberId: memberId
+        });
+
+        const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: payload });
+        const result = await res.json();
+
+        if (result.status === 'error') {
+          showToast(result.message || 'Email already registered.', 'danger');
+          return;
+        }
+
+        document.getElementById('userEmailDisplay').textContent = document.getElementById('email').value.trim();
+        document.getElementById('modalMemberId').textContent = memberId;
+        document.getElementById('modalAmount').textContent = finalPriceDisplay.textContent;
+        paymentModal.show(); form.reset(); form.classList.remove('was-validated'); finalPriceDisplay.textContent = 'Select a plan';
+      } catch (err) { showToast('Failed to connect to server.', 'danger'); }
+      finally { submitBtn.disabled = false; submitBtn.querySelector('.loading-spinner').style.display = 'none'; submitBtn.querySelector('.btn-text').textContent = 'Proceed to Payment'; }
+    });
+
+    // 2️⃣ LOGIN & DASHBOARD
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      currentMemberId = document.getElementById('loginMemberId').value.trim().toUpperCase();
+      if (!currentMemberId) return;
+
+      loginBtn.disabled = true; loginBtn.querySelector('.loading-spinner').style.display = 'inline-block'; loginBtn.querySelector('.btn-text').textContent = 'Verifying...';
+      document.getElementById('loginError').style.display = 'none';
+
+      try {
+        const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: new URLSearchParams({ action: 'loginMember', memberId: currentMemberId }) });
+        const data = await res.json();
+        
+        if (data.found) {
+          document.getElementById('loginFormContainer').style.display = 'none';
+          document.getElementById('memberDashboard').style.display = 'block';
+          document.getElementById('dashName').textContent = data.name;
+          document.getElementById('dashId').textContent = currentMemberId;
+          document.getElementById('dashPlan').textContent = data.plan;
+          
+          let disc = String(data.discount);
+          if (!disc.includes('%')) disc = `${parseFloat(disc) * 100}%`;
+          document.getElementById('dashDiscount').textContent = disc;
+          
+          const statusEl = document.getElementById('dashStatus');
+          statusEl.textContent = data.status;
+          statusEl.className = data.status === 'Active' ? 'badge bg-success' : 'badge bg-warning text-dark';
+          
+          document.getElementById('dashActivated').textContent = data.activationDate;
+          document.getElementById('dashExpiry').textContent = data.expiryDate;
+
+          if (data.status !== 'Active') {
+            document.getElementById('pendingVerificationSection').style.display = 'block';
+          } else {
+            document.getElementById('pendingVerificationSection').style.display = 'none';
+          }
+        } else {
+          document.getElementById('loginError').textContent = '❌ Member ID not found. Please check and try again.';
+          document.getElementById('loginError').style.display = 'block';
+        }
+      } catch (err) { document.getElementById('loginError').textContent = '❌ Connection error. Try again later.'; document.getElementById('loginError').style.display = 'block'; }
+      finally { loginBtn.disabled = false; loginBtn.querySelector('.loading-spinner').style.display = 'none'; loginBtn.querySelector('.btn-text').textContent = 'Login'; }
+    });
+
+    // 3️⃣ SUBMIT TXID FOR VERIFICATION
+    const dashSubmitBtn = document.getElementById('dashboardSubmitBtn');
+    dashSubmitBtn.addEventListener('click', async () => {
+      const tid = document.getElementById('dashboardTid').value.trim();
+      if (!tid) { showToast('Please enter your Transaction ID.', 'warning'); return; }
+
+      dashSubmitBtn.disabled = true; dashSubmitBtn.querySelector('.loading-spinner').style.display = 'inline-block'; dashSubmitBtn.querySelector('.btn-text').textContent = 'Submitting...';
+
+      try {
+        const payload = new URLSearchParams({ action: 'submitTxId', memberId: currentMemberId, transactionId: tid });
+        await fetch(GAS_WEB_APP_URL, { method: 'POST', body: payload });
+        
+        showToast('Transaction ID submitted! We will verify it shortly.', 'success');
+        document.getElementById('dashboardTid').value = '';
+      } catch (err) { showToast('Submission failed. Please try again.', 'danger'); }
+      finally { dashSubmitBtn.disabled = false; dashSubmitBtn.querySelector('.loading-spinner').style.display = 'none'; dashSubmitBtn.querySelector('.btn-text').textContent = 'Submit Transaction ID'; }
+    });
+
+    // 4️⃣ PRINT CARD
+    function printMembershipCard() {
+      document.getElementById('printName').textContent = document.getElementById('dashName').textContent;
+      document.getElementById('printId').textContent = document.getElementById('dashId').textContent;
+      document.getElementById('printPlan').textContent = document.getElementById('dashPlan').textContent;
+      document.getElementById('printDiscount').textContent = document.getElementById('dashDiscount').textContent;
+      document.getElementById('printExpiry').textContent = document.getElementById('dashExpiry').textContent;
+      document.getElementById('printQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${currentMemberId}`;
+      const p = document.getElementById('printCardContainer'); p.style.display = 'block'; window.print(); p.style.display = 'none';
+    }
+
+    function resetLogin() {
+      document.getElementById('loginForm').reset();
+      document.getElementById('loginFormContainer').style.display = 'block';
+      document.getElementById('memberDashboard').style.display = 'none';
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('pendingVerificationSection').style.display = 'none';
+    }
+
+    function showToast(msg, type) {
+      const t = document.getElementById('liveToast');
+      t.className = `toast align-items-center text-bg-${type} border-0`;
+      document.getElementById('toastMessage').textContent = msg;
+      new bootstrap.Toast(t).show();
+    }
+  </script>
+</body>
+</html>
