@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Book Shelf - Online Bookstore</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; }
+    .book-card { transition: transform 0.2s, box-shadow 0.2s; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; cursor: pointer; }
+    .book-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+    .book-img { height: 280px; object-fit: cover; background: #e9ecef; }
+    .genre-badge { font-size: 0.75em; padding: 4px 10px; border-radius: 12px; background: #6c757d; color: white; }
+    .status-badge { font-size: 0.85em; padding: 5px 10px; border-radius: 15px; }
+    .bg-pending { background: #ffc107; color: #000; }
+    .bg-verification { background: #0dcaf0; color: #000; }
+    .bg-confirmed { background: #198754; color: #fff; }
+    #formMessage, #loginMessage, #payMessage { margin-top: 1rem; }
+    .filter-btn { margin: 5px; }
+    .filter-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; }
+    .book-detail-img { max-height: 400px; object-fit: cover; border-radius: 8px; }
+    .price-tag { font-size: 1.5rem; font-weight: bold; color: #0d6efd; }
+    .discount-banner { background: #d1e7dd; color: #0f5132; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; display: none; font-size: 0.9em; }
+    .discount-banner.show { display: block; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">📚 The Book Shelf</a>
+      <button class="btn btn-outline-light ms-auto" data-bs-toggle="modal" data-bs-target="#memberModal">🔐 Member Login</button>
+    </div>
+  </nav>
+
+  <header class="bg-light py-5 text-center border-bottom">
+    <div class="container">
+      <h1 class="display-5 fw-bold">Find Your Next Great Read</h1>
+      <p class="lead text-muted">Browse our curated collection by genre</p>
+    </div>
+  </header>
+
+  <main class="container my-5">
+    <div class="text-center mb-4">
+      <h3 class="mb-3">Browse by Genre</h3>
+      <div id="genreFilters" class="d-flex flex-wrap justify-content-center">
+        <button class="btn btn-outline-primary filter-btn active" data-genre="all">All Books</button>
+      </div>
+    </div>
+    <h2 class="text-center mb-4" id="booksHeading">All Books</h2>
+    <div id="books-container" class="row g-4">
+      <div class="col-12 text-center text-muted py-5">Loading books...</div>
+    </div>
+  </main>
+
+  <!-- Book Details Modal -->
+  <div class="modal fade" id="bookDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body px-4 pb-4">
+          <div class="row g-4">
+            <div class="col-md-5"><img id="detailImg" src="" alt="Book Cover" class="img-fluid book-detail-img"></div>
+            <div class="col-md-7">
+              <span id="detailGenre" class="genre-badge mb-2 d-inline-block"></span>
+              <h3 id="detailTitle" class="fw-bold mb-2"></h3>
+              <p class="text-muted mb-3">by <span id="detailAuthor"></span></p>
+              <p id="detailDesc" class="mb-4"></p>
+              <div class="price-tag mb-4">Rs. <span id="detailPrice"></span></div>
+              <button id="orderFromDetailBtn" class="btn btn-primary btn-lg w-100">🛒 Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Modal -->
+  <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-light"><h5 class="modal-title">🛒 Place Your Order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <form id="orderForm">
+            <input type="hidden" id="bookId">
+            <input type="number" step="0.01" id="bookPrice" value="0">
+            <div class="mb-2"><label class="form-label fw-semibold">Book</label><input type="text" class="form-control" id="displayBookTitle" readonly></div>
+            <div class="row g-2 mb-2">
+              <div class="col-6"><label class="form-label fw-semibold">Quantity</label><input type="number" class="form-control" id="quantity" min="1" value="1" required></div>
+              <div class="col-6"><label class="form-label fw-semibold">Membership ID</label><input type="text" class="form-control" id="membershipId" placeholder="Optional"></div>
+            </div>
+            <div class="mb-2"><label class="form-label fw-semibold">Promo Code</label><input type="text" class="form-control" id="promoCode" placeholder="Optional"></div>
+            <div id="discountBanner" class="discount-banner show mb-2"><span id="discountText" class="fw-bold"></span> <span class="spinner-border spinner-border-sm text-success ms-2 d-none" id="discSpinner"></span></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Total</label><input type="text" class="form-control" id="totalPrice" readonly></div>
+            <hr>
+            <div class="mb-2"><label class="form-label">Full Name *</label><input type="text" class="form-control" id="name" required></div>
+            <div class="mb-2"><label class="form-label">Email *</label><input type="email" class="form-control" id="email" required></div>
+            <div class="mb-2"><label class="form-label">Phone *</label><input type="tel" class="form-control" id="phone" required></div>
+            <div class="mb-3"><label class="form-label">Shipping Address *</label><textarea class="form-control" id="address" rows="2" required></textarea></div>
+            <div id="formMessage" class="alert d-none" role="alert"></div>
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">Confirm Order</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Login Modal -->
+  <div class="modal fade" id="memberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light"><h5 class="modal-title">🔐 Member Login</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div id="loginView">
+            <p class="text-muted">Enter your Order ID to view details & payment status.</p>
+            <div class="mb-3"><label class="form-label">Order ID</label><input type="text" class="form-control" id="loginOrderId" placeholder="e.g., ORD-12345678" required></div>
+            <div id="loginMessage" class="alert d-none" role="alert"></div>
+            <button id="loginBtn" class="btn btn-success w-100">View Order</button>
+          </div>
+          <div id="dashboardView" class="d-none">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6"><div class="p-3 bg-light rounded"><strong>Customer:</strong> <span id="dashName"></span></div></div>
+              <div class="col-md-6"><div class="p-3 bg-light rounded"><strong>Email:</strong> <span id="dashEmail"></span></div></div>
+              <div class="col-md-6"><div class="p-3 bg-light rounded"><strong>Book:</strong> <span id="dashBook"></span></div></div>
+              <div class="col-md-3"><div class="p-3 bg-light rounded"><strong>Qty:</strong> <span id="dashQty"></span></div></div>
+              <div class="col-md-3"><div class="p-3 bg-light rounded"><strong>Total:</strong> <span id="dashTotal"></span></div></div>
+              <div class="col-12"><div class="p-3 bg-light rounded"><strong>Address:</strong> <span id="dashAddress"></span></div></div>
+            </div>
+            <div class="mb-3"><strong>Status:</strong> <span id="dashStatus" class="badge status-badge"></span></div>
+            <div id="paymentSection" class="mt-4">
+              <hr><h6 class="fw-bold mb-3">💳 Submit Payment Transaction ID</h6>
+              <p class="text-muted small">Enter your bank reference ID. Owner will verify before confirmation.</p>
+              <div class="mb-3"><input type="text" class="form-control" id="txnId" placeholder="e.g., TXN987654321"></div>
+              <button id="submitPaymentBtn" class="btn btn-outline-success w-100">Submit for Verification</button>
+              <div id="payMessage" class="alert d-none mt-2" role="alert"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center"><p class="mb-0">&copy; 2026 The Book Shelf. All rights reserved.</p></div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUVU5MGcG_TgjryNlG5SidTEmJ_ywFzwy2-cy24pEldFVrx8gHWxF-iKmsdAsq32lQkA/exec';
+    let orderModal, memberModal, bookDetailModal;
+    let allBooks = [];
+    let memDiscount = 0;
+    let promoDiscount = 0;
+
+    // 🔑 STRICT NUMBER PARSER (Frontend)
+    function toNum(val) {
+      if (val === null || val === undefined || val === '') return 0;
+      const clean = String(val).replace(/[^0-9.]/g, '');
+      const num = parseFloat(clean);
+      return isNaN(num) ? 0 : num;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+      memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
+      bookDetailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
+      fetchBooks();
+      setupOrderForm();
+      setupMemberLogin();
+      setupDiscountLookups();
+    });
+
+    async function fetchBooks() {
+      const container = document.getElementById('books-container');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+        if (result.status === 'success') {
+          allBooks = result.data || [];
+          setupGenreFilters(result.genres || []);
+          renderBooks(allBooks);
+        } else throw new Error(result.message);
+      } catch (err) { container.innerHTML = `<div class="col-12 text-center text-danger py-5">❌ Failed to load books.</div>`; }
+    }
+
+    function setupGenreFilters(genres) {
+      const container = document.getElementById('genreFilters');
+      genres.forEach(genre => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-primary filter-btn';
+        btn.textContent = genre;
+        btn.addEventListener('click', function() {
+          container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById('booksHeading').textContent = this.dataset.genre === 'all' ? 'All Books' : `${this.dataset.genre} Books`;
+          renderBooks(this.dataset.genre === 'all' ? allBooks : allBooks.filter(b => b.genre === this.dataset.genre));
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function renderBooks(books) {
+      const container = document.getElementById('books-container'); 
+      container.innerHTML = '';
+      if (!books.length) { container.innerHTML = '<div class="col-12 text-center text-muted py-5">No books available.</div>'; return; }
+      
+      books.forEach(book => {
+        const col = document.createElement('div'); col.className = 'col-lg-3 col-md-4 col-sm-6';
+        col.innerHTML = `
+          <div class="card book-card h-100" data-price="${toNum(book.price)}" data-title="${book.title}" data-author="${book.author}" data-desc="${book.description || ''}" data-img="${book.image_url || ''}" data-genre="${book.genre || ''}" data-id="${book.id}">
+            <img src="${book.image_url || 'https://via.placeholder.com/300x400?text=Book+Cover'}" class="card-img-top book-img" alt="${book.title}">
+            <div class="card-body d-flex flex-column">
+              ${book.genre ? `<span class="genre-badge mb-2">${book.genre}</span>` : ''}
+              <h6 class="card-title fw-bold mb-1">${book.title}</h6>
+              <p class="text-muted small mb-2">by ${book.author}</p>
+              <p class="card-text text-truncate small flex-grow-1">${book.description || ''}</p>
+              <div class="mt-auto d-flex justify-content-between align-items-center">
+                <span class="price-tag small">Rs. ${toNum(book.price).toFixed(2)}</span>
+                <button class="btn btn-sm btn-outline-primary view-detail-btn">View Details</button>
+              </div>
+            </div>
+          </div>`;
+        container.appendChild(col);
+      });
+
+      document.querySelectorAll('.book-card').forEach(card => card.addEventListener('click', e => {
+        if (!e.target.closest('.view-detail-btn')) openBookDetail(card.dataset);
+      }));
+      document.querySelectorAll('.view-detail-btn').forEach(btn => btn.addEventListener('click', e => {
+        e.stopPropagation(); openBookDetail(btn.closest('.book-card').dataset);
+      }));
+    }
+
+    function openBookDetail(data) {
+      document.getElementById('detailImg').src = data.img || 'https://via.placeholder.com/300x400?text=Book+Cover';
+      document.getElementById('detailGenre').textContent = data.genre;
+      document.getElementById('detailGenre').style.display = data.genre ? 'inline-block' : 'none';
+      document.getElementById('detailTitle').textContent = data.title;
+      document.getElementById('detailAuthor').textContent = data.author;
+      document.getElementById('detailDesc').textContent = data.desc;
+      document.getElementById('detailPrice').textContent = toNum(data.price).toFixed(2);
+      document.getElementById('orderFromDetailBtn').onclick = () => { bookDetailModal.hide(); setTimeout(() => openOrderModal(data), 300); };
+      bookDetailModal.show();
+    }
+
+    function openOrderModal(data) {
+      document.getElementById('bookId').value = data.id;
+      document.getElementById('bookPrice').value = toNum(data.price);
+      document.getElementById('displayBookTitle').value = data.title;
+      document.getElementById('quantity').value = 1;
+      document.getElementById('membershipId').value = '';
+      document.getElementById('promoCode').value = '';
+      memDiscount = 0; promoDiscount = 0;
+      updateDiscountUI();
+      updateTotal();
+      hideMsg('formMessage'); orderModal.show();
+    }
+
+    function setupDiscountLookups() {
+      let debounce;
+      const triggerLookup = (type, inputId) => {
+        document.getElementById(inputId).addEventListener('input', (e) => {
+          clearTimeout(debounce);
+          const val = e.target.value.trim();
+          document.getElementById('discSpinner').classList.remove('d-none');
+          if (!val) {
+            if (type === 'mem') memDiscount = 0; else promoDiscount = 0;
+            updateDiscountUI(); updateTotal();
+            document.getElementById('discSpinner').classList.add('d-none'); return;
+          }
+          debounce = setTimeout(async () => {
+            try {
+              const res = await fetch(APPS_SCRIPT_URL, { 
+                method:'POST', body:JSON.stringify({ action: type === 'mem' ? 'get_membership' : 'get_promo', [type === 'mem' ? 'membershipId' : 'promoCode']: val }), 
+                headers:{'Content-Type':'text/plain'} });
+              const result = await res.json();
+              if (result.status === 'success') {
+                const disc = toNum(result.data.discountPercent);
+                const normalized = disc <= 1 ? disc * 100 : disc;
+                if (type === 'mem') memDiscount = normalized; else promoDiscount = normalized;
+              } else { if (type === 'mem') memDiscount = 0; else promoDiscount = 0; }
+            } catch { if (type === 'mem') memDiscount = 0; else promoDiscount = 0; }
+            finally { updateDiscountUI(); updateTotal(); document.getElementById('discSpinner').classList.add('d-none'); }
+          }, 600);
+        });
+      };
+      triggerLookup('mem', 'membershipId');
+      triggerLookup('promo', 'promoCode');
+    }
+
+    function updateDiscountUI() {
+      const banner = document.getElementById('discountBanner');
+      const textEl = document.getElementById('discountText');
+      const lines = [];
+      if (memDiscount > 0) lines.push(`✅ Membership: ${memDiscount}%`);
+      if (promoDiscount > 0) lines.push(`✅ Promo Code: ${promoDiscount}%`);
+      if (lines.length > 0) { textEl.innerHTML = lines.join('<br>'); banner.classList.add('show'); } 
+      else banner.classList.remove('show');
+    }
+
+    function updateTotal() {
+      const base = toNum(document.getElementById('bookPrice').value);
+      const qty = toNum(document.getElementById('quantity').value);
+      const totalDisc = Math.min(memDiscount + promoDiscount, 100);
+      const final = Math.round((base * qty) * (1 - totalDisc / 100) * 100) / 100;
+      document.getElementById('totalPrice').value = `Rs. ${final.toFixed(2)}`;
+      console.log(`💡 Debug: Base=${base}, Qty=${qty}, Disc=${totalDisc}%, Final=${final}`);
+    }
+
+    function setupOrderForm() {
+      document.getElementById('quantity').addEventListener('input', updateTotal);
+      document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn'); 
+        btn.disabled = true; btn.textContent = 'Processing...'; hideMsg('formMessage');
+        
+        const totalVal = toNum(document.getElementById('totalPrice').value);
+        const data = { 
+          action: 'place_order', name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(), address: document.getElementById('address').value.trim(),
+          bookId: document.getElementById('bookId').value, bookTitle: document.getElementById('displayBookTitle').value,
+          quantity: parseInt(document.getElementById('quantity').value) || 1, total: totalVal,
+          membershipId: document.getElementById('membershipId').value.trim() || 'None',
+          memberDiscount: memDiscount, promoCode: document.getElementById('promoCode').value.trim() || 'None',
+          promoDiscount: promoDiscount
+        };
+        
+        console.log('📤 Sending Order Data:', JSON.stringify(data, null, 2));
+        
+        if (!data.name || !data.email || !data.phone || !data.address) { showMsg('formMessage','⚠️ Fill all fields','warning'); resetBtn(btn); return; }
+        if (data.total <= 0) { showMsg('formMessage','⚠️ Invalid price calculation','warning'); resetBtn(btn); return; }
+        
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(data), headers:{'Content-Type':'text/plain'} });
+          const result = await res.json();
+          if (result.status === 'success') { 
+            showMsg('formMessage', `order placed : ${result.orderId}<br>email sent to the ${data.email}, please check your email.`, 'success'); 
+            document.getElementById('orderForm').reset(); memDiscount = 0; promoDiscount = 0; updateDiscountUI();
+            setTimeout(() => orderModal.hide(), 4000); 
+          } else throw new Error(result.message);
+        } catch (err) { showMsg('formMessage', `❌ ${err.message}`, 'danger'); }
+        finally { resetBtn(btn); }
+      });
+    }
+
+    function setupMemberLogin() {
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('loginBtn'); btn.disabled = true; btn.textContent = 'Checking...'; hideMsg('loginMessage');
+        const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase();
+        if (!orderId) { showMsg('loginMessage','⚠️ Enter Order ID','warning'); resetBtn(btn); return; }
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'get_order', orderId}), headers:{'Content-Type':'text/plain'} });
+          const result = await res.json();
+          if (result.status === 'success') {
+            const d = result.data;
+            document.getElementById('dashName').textContent = d.customer_name;
+            document.getElementById('dashEmail').textContent = d.email;
+            document.getElementById('dashBook').textContent = d.book_title;
+            document.getElementById('dashQty').textContent = d.quantity;
+            document.getElementById('dashTotal').textContent = `Rs. ${toNum(d.total_price).toFixed(2)}`;
+            document.getElementById('dashAddress').textContent = d.address;
+            const statusEl = document.getElementById('dashStatus');
+            statusEl.textContent = d.payment_status || 'Pending';
+            statusEl.className = `badge status-badge ${d.payment_status === 'Confirmed' ? 'bg-confirmed' : d.payment_status === 'Pending Verification' ? 'bg-verification' : 'bg-pending'}`;
+            document.getElementById('paymentSection').style.display = d.payment_status === 'Confirmed' ? 'none' : 'block';
+            document.getElementById('loginView').classList.add('d-none');
+            document.getElementById('dashboardView').classList.remove('d-none');
+          } else throw new Error(result.message);
+        } catch (err) { showMsg('loginMessage', `❌ ${err.message}`, 'danger'); }
+        finally { resetBtn(btn); }
+      });
+
+      document.getElementById('submitPaymentBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('submitPaymentBtn'); btn.disabled = true; btn.textContent = 'Submitting...'; hideMsg('payMessage');
+        const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase();
+        const txnId = document.getElementById('txnId').value.trim();
+        if (!txnId) { showMsg('payMessage','⚠️ Enter Transaction ID','warning'); resetBtn(btn); return; }
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'submit_payment', orderId, transactionId: txnId}), headers:{'Content-Type':'text/plain'} });
+          const result = await res.json();
+          if (result.status === 'success') {
+            showMsg('payMessage', '✅ Txn ID submitted. Awaiting owner verification.', 'success');
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('dashStatus').textContent = 'Pending Verification';
+            document.getElementById('dashStatus').className = 'badge status-badge bg-verification';
+          } else throw new Error(result.message);
+        } catch (err) { showMsg('payMessage', `❌ ${err.message}`, 'danger'); }
+        finally { resetBtn(btn); }
+      });
+    }
+
+    function resetBtn(btn) { 
+      btn.disabled = false; 
+      btn.textContent = btn.id === 'loginBtn' ? 'View Order' : btn.id === 'submitPaymentBtn' ? 'Submit for Verification' : 'Confirm Order'; 
+    }
+    function showMsg(id, msg, type) { const el = document.getElementById(id); el.innerHTML = msg; el.className = `alert alert-${type} show`; el.classList.remove('d-none'); }
+    function hideMsg(id) { document.getElementById(id).className = 'alert d-none'; }
+  </script>
+</body>
+</html>
