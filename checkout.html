@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - The Book Shelf</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; }
+    .cart-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+    .cart-item:last-child { border-bottom: none; }
+    .qty-control { display: inline-flex; align-items: center; gap: 5px; }
+    .qty-btn { width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .order-summary { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; }
+    .free-shipping-badge { display: none; background: #198754; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin-left: 8px; }
+    #cartMsg, #formMsg { margin-top: 1rem; }
+    .discount-banner { background: #d1e7dd; color: #0f5132; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; display: none; font-size: 0.9em; }
+    .discount-banner.show { display: block; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">📚 The Book Shelf</a>
+      <span class="text-white">Checkout</span>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="row g-4">
+      <!-- Cart Section -->
+      <div class="col-lg-7">
+        <h3 class="mb-3">🛒 Your Cart (<span id="cartCount">0</span>)</h3>
+        <div id="cartItems" class="bg-white p-3 rounded shadow-sm"><p class="text-center text-muted py-4">Your cart is empty.</p></div>
+      </div>
+
+      <!-- Checkout Section -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h4 class="mb-3">📦 Checkout Details</h4>
+            <form id="checkoutForm">
+              <div class="mb-2"><label class="form-label fw-semibold">Country</label><select class="form-select" id="country" required></select></div>
+              <div class="mb-2"><label class="form-label fw-semibold">Shipping Method <span class="free-shipping-badge" id="freeShipBadge">FREE</span></label>
+                <select class="form-select" id="shippingMethod">
+                  <option value="Home Delivery Kathmandu Valley|100">Kathmandu Valley (Rs. 100)</option>
+                  <option value="Other Delivery Outside Valley|200">Outside Valley (Rs. 200)</option>
+                </select>
+                <small class="text-muted">🎉 Orders Rs. 1500 & above get FREE delivery!</small>
+              </div>
+              <div class="mb-2"><label class="form-label fw-semibold">Payment Method</label>
+                <select class="form-select" id="paymentMethod" required>
+                  <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+                  <option value="eSewa">eSewa</option><option value="Khalti">Khalti</option>
+                </select>
+              </div>
+              <div class="mb-2"><label class="form-label fw-semibold">Kathmandu Valley Area (Optional)</label>
+                <select class="form-select" id="kathmanduArea">
+                  <option value="">-- Select Area --</option>
+                  <option value="Kathmandu">Kathmandu</option><option value="Lalitpur">Lalitpur (Patan)</option>
+                  <option value="Bhaktapur">Bhaktapur</option><option value="Kirtipur">Kirtipur</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="mb-2"><label class="form-label fw-semibold">Membership ID</label><input type="text" class="form-control" id="membershipId" placeholder="Optional"></div>
+              <div class="mb-2"><label class="form-label fw-semibold">Promo Code</label><input type="text" class="form-control" id="promoCode" placeholder="Optional"></div>
+              <div id="discountBanner" class="discount-banner show mb-2"><span id="discountText" class="fw-bold"></span></div>
+              <hr>
+              <div class="mb-2"><label class="form-label">Full Name *</label><input type="text" class="form-control" id="name" required></div>
+              <div class="mb-2"><label class="form-label">Email *</label><input type="email" class="form-control" id="email" required></div>
+              <div class="mb-2"><label class="form-label">Phone *</label><input type="tel" class="form-control" id="phone" required></div>
+              <div class="mb-3"><label class="form-label">Shipping Address *</label><textarea class="form-control" id="address" rows="2" placeholder="House No., Street, Landmark..." required></textarea></div>
+              <div id="formMsg" class="alert d-none" role="alert"></div>
+              <button type="submit" id="submitOrderBtn" class="btn btn-primary w-100" disabled>Place Order</button>
+            </form>
+
+            <!-- Live Summary -->
+            <div class="order-summary">
+              <div class="d-flex justify-content-between"><span>Subtotal:</span><span id="summarySubtotal">Rs. 0.00</span></div>
+              <div class="d-flex justify-content-between text-success" id="discountRow" style="display:none;"><span>Discount:</span><span id="summaryDiscount">- Rs. 0.00</span></div>
+              <div class="d-flex justify-content-between"><span>Shipping:</span><span id="summaryShipping">Rs. 0.00</span></div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between fw-bold fs-5"><span>Grand Total:</span><span id="summaryTotal">Rs. 0.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center"><p class="mb-0">&copy; 2026 The Book Shelf. All rights reserved.</p></div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+    let memDiscount = 0; let promoDiscount = 0;
+    let cart = JSON.parse(localStorage.getItem('bookshelf_cart')) || [];
+
+    function toRawNumber(val) { if (val === null || val === undefined || val === '') return 0; const match = String(val).match(/(\d+\.?\d*)/); return match ? parseFloat(match[1]) : 0; }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Populate Countries
+      const countries = ["Nepal","India","China","Pakistan","Bangladesh","Sri Lanka","Maldives","Bhutan","Afghanistan"]; // Simplified for checkout
+      const sel = document.getElementById('country');
+      countries.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; if(c==='Nepal') opt.selected=true; sel.appendChild(opt); });
+
+      updateCartUI();
+      document.getElementById('shippingMethod').addEventListener('change', updateTotals);
+      document.getElementById('kathmanduArea').addEventListener('change', function() {
+        const val = this.value; const addr = document.getElementById('address');
+        if(val && val!=='Other' && !addr.value.trim()) addr.value = val + ', Kathmandu Valley, Nepal\n';
+      });
+      setupDiscountLookups(); setupCheckout();
+    });
+
+    function updateCartUI() {
+      document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+      const c = document.getElementById('cartItems');
+      if(cart.length===0) { c.innerHTML='<p class="text-center text-muted py-4">Your cart is empty. <a href="index.html">Continue Shopping</a></p>'; document.getElementById('submitOrderBtn').disabled=true; return; }
+      document.getElementById('submitOrderBtn').disabled=false;
+      c.innerHTML = cart.map((it, idx) => `
+        <div class="cart-item d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center"><img src="${it.img||'https://via.placeholder.com/50x70'}" style="width:45px;height:60px;object-fit:cover;border-radius:4px;margin-right:12px;"><div><strong>${it.title}</strong><br><small class="text-muted">Rs. ${toRawNumber(it.price).toFixed(2)}</small></div></div>
+          <div class="qty-control"><button class="btn btn-outline-secondary btn-sm" onclick="changeQty(${idx},-1)">-</button><span class="mx-2">${it.qty}</span><button class="btn btn-outline-secondary btn-sm" onclick="changeQty(${idx},1)">+</button><button class="btn btn-outline-danger btn-sm ms-2" onclick="removeItem(${idx})">🗑️</button></div>
+        </div>`).join('');
+      updateTotals();
+    }
+
+    window.changeQty = (i,d) => { cart[i].qty+=d; if(cart[i].qty<=0)cart.splice(i,1); localStorage.setItem('bookshelf_cart',JSON.stringify(cart)); updateCartUI(); }
+    window.removeItem = (i) => { cart.splice(i,1); localStorage.setItem('bookshelf_cart',JSON.stringify(cart)); updateCartUI(); }
+
+    function updateTotals() {
+      const sub = cart.reduce((s,it)=>s+(toRawNumber(it.price)*it.qty),0);
+      const discPct = Math.min(memDiscount+promoDiscount,100);
+      const discAmt = Math.round(sub*(discPct/100)*100)/100;
+      const afterDisc = sub - discAmt;
+      let ship = afterDisc >= 1500 ? 0 : toRawNumber(document.getElementById('shippingMethod').value.split('|')[1]);
+      if(afterDisc>=1500) document.getElementById('freeShipBadge').style.display='inline-block'; else document.getElementById('freeShipBadge').style.display='none';
+      const total = Math.round((afterDisc+ship)*100)/100;
+
+      document.getElementById('summarySubtotal').textContent = `Rs. ${sub.toFixed(2)}`;
+      document.getElementById('summaryDiscount').textContent = `- Rs. ${discAmt.toFixed(2)} (${discPct}%)`;
+      document.getElementById('discountRow').style.display = discAmt>0?'flex':'none';
+      document.getElementById('summaryShipping').textContent = ship===0?'FREE 🎉':`Rs. ${ship.toFixed(2)}`;
+      document.getElementById('summaryTotal').textContent = `Rs. ${total.toFixed(2)}`;
+    }
+
+    function setupDiscountLookups() {
+      let deb;
+      const check = (t, id) => {
+        document.getElementById(id).addEventListener('input', e=>{
+          clearTimeout(deb); const v=e.target.value.trim();
+          if(!v){ if(t==='m')memDiscount=0; else promoDiscount=0; updateDiscUI(); updateTotals(); return; }
+          deb=setTimeout(async()=>{
+            try{ const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:t==='m'?'get_membership':'get_promo',[t==='m'?'membershipId':'promoCode']:v}),headers:{'Content-Type':'text/plain'}}); const j=await r.json();
+              if(j.status==='success'){ const d=toRawNumber(j.data.discountPercent); const n=d<=1?d*100:d; if(t==='m')memDiscount=n; else promoDiscount=n; }
+              else{ if(t==='m')memDiscount=0; else promoDiscount=0; }
+            }catch{ if(t==='m')memDiscount=0; else promoDiscount=0; }
+            finally{ updateDiscUI(); updateTotals(); }
+          },500);
+        });
+      };
+      check('m','membershipId'); check('p','promoCode');
+    }
+    function updateDiscUI(){ const b=document.getElementById('discountBanner'); const t=document.getElementById('discountText'); const l=[]; if(memDiscount>0)l.push(`✅ Membership: ${memDiscount}%`); if(promoDiscount>0)l.push(`✅ Promo: ${promoDiscount}%`); if(l.length>0){t.innerHTML=l.join('<br>');b.classList.add('show');}else b.classList.remove('show'); }
+
+    function setupCheckout() {
+      document.getElementById('checkoutForm').addEventListener('submit', async e=>{
+        e.preventDefault(); const btn=document.getElementById('submitOrderBtn'); btn.disabled=true; btn.textContent='Processing...'; hideMsg('formMsg');
+        if(document.getElementById('country').value!=='Nepal'){ showMsg('formMsg','⚠️ We only deliver to Nepal.','warning'); resetBtn(btn); return; }
+        if(cart.length===0){ showMsg('formMsg','⚠️ Cart empty.','warning'); resetBtn(btn); return; }
+        const shipOpt=document.getElementById('shippingMethod').value.split('|');
+        const sub=cart.reduce((s,it)=>s+(toRawNumber(it.price)*it.qty),0);
+        const discPct=Math.min(memDiscount+promoDiscount,100); const afterDisc=Math.round(sub*(1-discPct/100)*100)/100;
+        let ship=afterDisc>=1500?0:toRawNumber(shipOpt[1]);
+        const total=Math.round((afterDisc+ship)*100)/100;
+        const data={ action:'place_order', name:document.getElementById('name').value.trim(), email:document.getElementById('email').value.trim(), phone:document.getElementById('phone').value.trim(), address:document.getElementById('address').value.trim(), country:'Nepal', shippingMethod:shipOpt[0], shippingCharge:ship, paymentMethod:document.getElementById('paymentMethod').value, items:cart.map(i=>({id:i.id,title:i.title,price:toRawNumber(i.price),qty:i.qty})), membershipId:document.getElementById('membershipId').value.trim()||'None', memberDiscount:memDiscount, promoCode:document.getElementById('promoCode').value.trim()||'None', promoDiscount:promoDiscount };
+        if(!data.name||!data.email||!data.phone||!data.address){ showMsg('formMsg','⚠️ Fill all fields','warning'); resetBtn(btn); return; }
+        try{
+          const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}}); const j=await r.json();
+          if(j.status==='success'){ showMsg('formMsg',`✅ Order placed: ${j.orderId}<br>📧 Email sent! Redirecting...`, 'success'); cart=[]; localStorage.setItem('bookshelf_cart',JSON.stringify(cart)); setTimeout(()=>window.location.href='index.html', 2500); }
+          else throw new Error(j.message);
+        }catch(err){ showMsg('formMsg',`❌ ${err.message}`,'danger'); } finally{ resetBtn(btn); }
+      });
+    }
+    function resetBtn(b){ b.disabled=false; b.textContent='Place Order'; }
+    function showMsg(id,m,t){ const e=document.getElementById(id); e.innerHTML=m; e.className=`alert alert-${t} show`; e.classList.remove('d-none'); }
+    function hideMsg(id){ document.getElementById(id).className='alert d-none'; }
+  </script>
+</body>
+</html>
