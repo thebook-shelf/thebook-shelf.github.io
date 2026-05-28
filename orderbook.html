@@ -41,7 +41,7 @@
         <button class="btn btn-outline-light position-relative" onclick="showCart(); return false;">
           🛒 Cart <span id="cartCount" class="badge bg-danger rounded-pill cart-badge">0</span>
         </button>
-        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#memberModal">🔐 Member</button>
+        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#memberModal">📦 Check Your Order</button>
         <button class="btn btn-outline-warning text-dark" data-bs-toggle="modal" data-bs-target="#adminModal">🛡️ Admin</button>
       </div>
     </div>
@@ -126,7 +126,7 @@
           <hr>
           <div class="order-summary mt-3">
             <div class="d-flex justify-content-between small"><span>Book Subtotal:</span><span id="cartSubtotal">Rs. 0.00</span></div>
-            <div class="d-flex justify-content-between small text-success" id="discountRow" style="display:none;"><span>Discount:</span><span id="cartDiscount">- Rs. 0.00</span></div>
+            <div class="d-flex justify-content-between small text-success" id="discountRow"><span>Discount:</span><span id="cartDiscount">- Rs. 0.00</span></div>
             <div class="d-flex justify-content-between small"><strong>After Discount:</strong><span id="cartAfterDiscount">Rs. 0.00</span></div>
             <div class="d-flex justify-content-between small"><span>Shipping:</span><span id="cartShipping">Rs. 0.00</span></div>
             <hr class="my-1">
@@ -163,7 +163,7 @@
   <div class="modal fade" id="memberModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header bg-light"><h5 class="modal-title">🔐 Member Login</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header bg-light"><h5 class="modal-title">📦 Check Your Order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
           <div id="loginView">
             <p class="text-muted">Enter your Order ID to view details & payment status.</p>
@@ -191,7 +191,7 @@
             <div class="mb-3 p-2 bg-light rounded">
               <div class="row small">
                 <div class="col-6 text-end"><strong>Book Subtotal:</strong></div><div class="col-6 text-end" id="dashSubtotal">Rs. 0.00</div>
-                <div class="col-6 text-end text-success" id="dashDiscountRow" style="display:none;"><strong>Discount:</strong></div><div class="col-6 text-end text-success" id="dashDiscount">- Rs. 0.00</div>
+                <div class="col-6 text-end text-success" id="dashDiscountRow"><strong>Discount:</strong></div><div class="col-6 text-end text-success" id="dashDiscount">- Rs. 0.00</div>
                 <div class="col-6 text-end"><strong>After Discount:</strong></div><div class="col-6 text-end" id="dashAfterDiscount">Rs. 0.00</div>
                 <div class="col-6 text-end"><strong>Shipping:</strong></div><div class="col-6 text-end" id="dashShipping">Rs. 0.00</div>
                 <hr class="my-1">
@@ -278,7 +278,6 @@
       document.getElementById('printReceiptBtn').addEventListener('click', () => { if (currentOrderData) generateReceipt(currentOrderData); });
     });
 
-    // 🔹 NAVIGATION LOGIC
     window.showShop = function() {
       document.getElementById('cartPageView').classList.add('d-none');
       document.getElementById('shopView').classList.remove('d-none');
@@ -333,14 +332,17 @@
     function updateCartUI() {
       document.getElementById('cartCount').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
       const container = document.getElementById('cartItems');
-      if (cart.length === 0) { container.innerHTML = '<p class="text-center text-muted py-4">Your cart is empty.</p>'; document.getElementById('submitOrderBtn').disabled = true; return; }
-      document.getElementById('submitOrderBtn').disabled = false;
-      container.innerHTML = cart.map((item, idx) => `
-        <div class="cart-item d-flex align-items-center justify-content-between">
-          <div class="d-flex align-items-center"><img src="${item.img || 'https://via.placeholder.com/50x70'}" style="width:40px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px;"><div><strong>${item.title}</strong><br><small class="text-muted">Rs. ${toRawNumber(item.price).toFixed(2)}</small></div></div>
-          <div class="d-flex align-items-center gap-2"><div class="qty-control"><button class="btn btn-outline-secondary btn-sm qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="mx-2">${item.qty}</span><button class="btn btn-outline-secondary btn-sm qty-btn" onclick="changeQty(${idx}, 1)">+</button></div><button class="btn btn-outline-danger btn-sm" onclick="removeItem(${idx})">🗑️</button></div>
-        </div>
-      `).join(''); updateCartTotals();
+      if (cart.length === 0) { container.innerHTML = '<p class="text-center text-muted py-4">Your cart is empty.</p>'; document.getElementById('submitOrderBtn').disabled = true; }
+      else {
+        document.getElementById('submitOrderBtn').disabled = false;
+        container.innerHTML = cart.map((item, idx) => `
+          <div class="cart-item d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center"><img src="${item.img || 'https://via.placeholder.com/50x70'}" style="width:40px; height:55px; object-fit:cover; border-radius:4px; margin-right:10px;"><div><strong>${item.title}</strong><br><small class="text-muted">Rs. ${toRawNumber(item.price).toFixed(2)}</small></div></div>
+            <div class="d-flex align-items-center gap-2"><div class="qty-control"><button class="btn btn-outline-secondary btn-sm qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="mx-2">${item.qty}</span><button class="btn btn-outline-secondary btn-sm qty-btn" onclick="changeQty(${idx}, 1)">+</button></div><button class="btn btn-outline-danger btn-sm" onclick="removeItem(${idx})">🗑️</button></div>
+          </div>
+        `).join('');
+      }
+      updateCartTotals();
     }
 
     window.changeQty = function(idx, delta) { cart[idx].qty += delta; if (cart[idx].qty <= 0) cart.splice(idx, 1); localStorage.setItem('bookshelf_cart', JSON.stringify(cart)); updateCartUI(); }
@@ -350,6 +352,7 @@
       document.getElementById('backToShopBtn').addEventListener('click', () => showShop());
     }
 
+    // 🔑 UPDATED: Defaults to Rs. 0.00 when empty
     function updateCartTotals() {
       const subtotal = cart.reduce((sum, item) => sum + (toRawNumber(item.price) * item.qty), 0);
       const totalDisc = Math.min(memDiscount + promoDiscount, 100);
@@ -357,15 +360,27 @@
       const afterDiscount = subtotal - discountAmt;
 
       let shippingCharge = 0;
-      if (afterDiscount < 1500) { const shipOpt = document.getElementById('shippingMethod').selectedOptions[0].value.split('|'); shippingCharge = toRawNumber(shipOpt[1]); document.getElementById('freeShipBadge').style.display = 'none'; }
-      else { shippingCharge = 0; document.getElementById('freeShipBadge').style.display = 'inline-block'; }
+      if (cart.length === 0) {
+        shippingCharge = 0;
+        document.getElementById('freeShipBadge').style.display = 'none';
+        document.getElementById('cartShipping').textContent = 'Rs. 0.00'; // 🔑 Default to Rs. 0.00
+      } else {
+        if (afterDiscount < 1500) { 
+          const shipOpt = document.getElementById('shippingMethod').selectedOptions[0].value.split('|'); 
+          shippingCharge = toRawNumber(shipOpt[1]); 
+          document.getElementById('freeShipBadge').style.display = 'none'; 
+        } else { 
+          shippingCharge = 0; 
+          document.getElementById('freeShipBadge').style.display = 'inline-block'; 
+        }
+        document.getElementById('cartShipping').textContent = shippingCharge === 0 ? 'FREE 🎉' : `Rs. ${shippingCharge.toFixed(2)}`;
+      }
 
       const final = Math.round((afterDiscount + shippingCharge) * 100) / 100;
       document.getElementById('cartSubtotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
-      if (discountAmt > 0) { document.getElementById('discountRow').style.display = 'flex'; document.getElementById('cartDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDisc}%)`; }
-      else document.getElementById('discountRow').style.display = 'none';
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('cartDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDisc}%)`;
       document.getElementById('cartAfterDiscount').textContent = `Rs. ${afterDiscount.toFixed(2)}`;
-      document.getElementById('cartShipping').textContent = shippingCharge === 0 ? 'FREE 🎉' : `Rs. ${shippingCharge.toFixed(2)}`;
       document.getElementById('cartTotal').textContent = `Rs. ${final.toFixed(2)}`;
     }
 
@@ -430,7 +445,6 @@
       });
     }
 
-    // 🔹 UNIFIED RECEIPT RENDERING (Dashboard & Print)
     function renderReceiptUI(info, items) {
       document.getElementById('dashName').textContent = info.customer_name; 
       document.getElementById('dashEmail').textContent = info.email;
@@ -455,8 +469,8 @@
       const shipping = info.shipping_charge || 0;
 
       document.getElementById('dashSubtotal').textContent = `Rs. ${bookSubtotal.toFixed(2)}`;
-      if (totalDiscPercent > 0) { document.getElementById('dashDiscountRow').style.display = 'flex'; document.getElementById('dashDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDiscPercent}%)`; }
-      else document.getElementById('dashDiscountRow').style.display = 'none';
+      document.getElementById('dashDiscountRow').style.display = 'flex';
+      document.getElementById('dashDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDiscPercent}%)`;
       document.getElementById('dashAfterDiscount').textContent = `Rs. ${afterDiscount.toFixed(2)}`;
       document.getElementById('dashShipping').textContent = `Rs. ${shipping.toFixed(2)}`;
       document.getElementById('dashGrandTotal').textContent = `Rs. ${(afterDiscount + shipping).toFixed(2)}`;
@@ -481,7 +495,6 @@
       });
     }
 
-    // 🔑 EXACTLY MATCHING PRINTABLE RECEIPT
     function generateReceipt(data) {
       const info = data.info; const items = data.items;
       const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase();
@@ -521,7 +534,7 @@
         <table style="width: 60%; margin-left: auto;">
           <tr><td colspan="2"><hr style="border-top:1px solid #ccc; margin:0;"></td></tr>
           <tr><td class="text-right"><strong>Book Subtotal:</strong></td><td class="text-right">Rs. ${bookSubtotal.toFixed(2)}</td></tr>
-          ${totalDiscPercent > 0 ? `<tr class="discount-row"><td class="text-right">Discount (${totalDiscPercent}%):</td><td class="text-right">- Rs. ${discountAmt.toFixed(2)}</td></tr>` : ''}
+          <tr class="discount-row"><td class="text-right">Discount (${totalDiscPercent}%):</td><td class="text-right">- Rs. ${discountAmt.toFixed(2)}</td></tr>
           <tr><td class="text-right"><strong>Amount after Discount:</strong></td><td class="text-right">Rs. ${afterDiscount.toFixed(2)}</td></tr>
           <tr class="shipping-row"><td class="text-right">Shipping Charge:</td><td class="text-right">+ Rs. ${shipping.toFixed(2)}</td></tr>
           <tr class="total-row"><td class="text-right">Grand Total:</td><td class="text-right">Rs. ${grandTotal.toFixed(2)}</td></tr>
