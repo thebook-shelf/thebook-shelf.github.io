@@ -223,83 +223,15 @@
     .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
     .reveal.active { opacity: 1; transform: translateY(0); }
 
-   /* FOOTER */
-.footer {
-    padding: 60px 0 30px;
-    background: #060d18;
-    border-top: 1px solid rgba(255,255,255,0.05);
-}
-.footer-brand {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-.footer-desc {
-    color: rgba(255,255,255,0.4);
-    font-size: 0.9rem;
-    line-height: 1.7;
-    max-width: 300px;
-}
-.footer-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #fff;
-}
-.footer-links {
-    list-style: none;
-    padding: 0;
-}
-.footer-links li {
-    margin-bottom: 10px;
-}
-.footer-links a {
-    color: rgba(255,255,255,0.4);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-.footer-links a:hover {
-    color: var(--sky-blue);
-    padding-left: 5px;
-}
-.social-links {
-    display: flex;
-    gap: 12px;
-}
-.social-link {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.5);
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-.social-link:hover {
-    background: var(--accent-blue);
-    color: #fff;
-    transform: translateY(-3px);
-    border-color: var(--accent-blue);
-}
-.footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.05);
-    padding-top: 25px;
-    margin-top: 40px;
-    text-align: center;
-    color: rgba(255,255,255,0.3);
-    font-size: 0.85rem;
-}
+    /* Footer */
+    .footer {
+      padding: 40px 0 20px; background: #060d18;
+      border-top: 1px solid rgba(255,255,255,0.05); margin-top: 60px;
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;
+      text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem;
+    }
 
     /* Toast */
     .toast {
@@ -614,54 +546,13 @@
   <!-- Print Receipt Container -->
   <div id="printReceipt"></div>
 
- <!-- FOOTER -->
-<footer class="footer">
-    <div class="container">
-        <div class="row g-4">
-            <!-- Brand -->
-            <div class="col-lg-4">
-                <div class="footer-brand">
-                    <i class="bi bi-book-half" style="color: var(--accent-blue);"></i>
-                    The Book Shelf
-                </div>
-                <p class="footer-desc">Your trusted companion for discovering incredible stories. We believe every book has the power to change a life.</p>
-                <div class="social-links mt-3">
-                    <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
-                    <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
-                </div>
-            </div>
-            
-            <!-- Quick Links -->
-            <div class="col-lg-4 col-md-6">
-                <h4 class="footer-title">Quick Links</h4>
-                <ul class="footer-links">
-                    <li><a href="index.html#home">Home</a></li>
-                    <li><a href="index.html#features">Features</a></li>
-                    <li><a href="membership.html">Membership</a></li>
-                    <li><a href="order.html">Order Books</a></li>
-                    <li><a href="index.html#newsletter">Newsletter</a></li>
-                </ul>
-            </div>
-            
-            <!-- Contact -->
-            <div class="col-lg-4 col-md-6">
-                <h4 class="footer-title">Contact Us</h4>
-                <ul class="footer-links">
-                    <li><a href="#"><i class="bi bi-geo-alt me-2"></i>123 Literary Lane, Book City</a></li>
-                    <li><a href="#"><i class="bi bi-envelope me-2"></i>hello@thebookshelf.com</a></li>
-                    <li><a href="#"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</a></li>
-                    <li><a href="#"><i class="bi bi-clock me-2"></i>Mon - Sat: 9AM - 9PM</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2026 The Book Shelf. All rights reserved. Made with <i class="bi bi-heart-fill" style="color: var(--rose);"></i> for book lovers.</p>
-        </div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container text-center">
+      <p class="mb-0">© <span id="year"></span> The Book Shelf. All rights reserved.</p>
+      <p class="small text-muted mt-2"><a href="index.html" style="color: var(--sky-blue); text-decoration: none;">← Back to Home</a></p>
     </div>
-</footer>
+  </footer>
 
   <!-- Toast -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
