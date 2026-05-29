@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Book Shelf - Order Books</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #1a3a5f; --accent-blue: #3b82f6; --light-blue: #dbeafe;
+      --sky-blue: #7dd3fc; --gold: #f59e0b; --coral: #f87171; --emerald: #34d399;
+      --violet: #8b5cf6; --rose: #f43f5e; --dark: #0f172a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; }
+    h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
+
+    /* Navbar */
+    .navbar {
+      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+      padding: 15px 0; border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+      transition: all 0.4s ease; z-index: 1000;
+    }
+    .navbar.scrolled { padding: 10px 0; box-shadow: 0 4px 30px rgba(59, 130, 246, 0.2); }
+    .navbar-brand {
+      font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.8rem;
+      color: #fff !important; display: flex; align-items: center; gap: 10px;
+    }
+    .navbar-brand .brand-icon {
+      width: 45px; height: 45px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--violet));
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    .nav-link {
+      color: rgba(255,255,255,0.75) !important; font-weight: 500; margin: 0 8px;
+      position: relative; transition: all 0.3s ease;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--sky-blue) !important; }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 50%;
+      transform: translateX(-50%); width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent-blue), var(--violet));
+      border-radius: 2px; transition: width 0.3s ease;
+    }
+    .nav-link:hover::after, .nav-link.active::after { width: 80%; }
+
+    /* Hero */
+    .hero {
+      min-height: 40vh; display: flex; align-items: center;
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #1a2744 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -30%; right: -20%;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      border-radius: 50%; animation: pulse 10s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.15); opacity: 1; } }
+    .hero-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--accent-blue), var(--sky-blue), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-subtitle { color: rgba(255,255,255,0.65); font-size: 1.05rem; }
+
+    /* View Transitions */
+    .view-transition { animation: fadeIn 0.4s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Book Cards */
+    .book-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; overflow: hidden; transition: all 0.4s ease;
+      cursor: pointer; height: 100%;
+    }
+    .book-card:hover {
+      transform: translateY(-8px);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(59,130,246,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .book-img { height: 240px; object-fit: cover; background: linear-gradient(135deg, var(--accent-blue), var(--violet)); }
+    .genre-badge {
+      font-size: 0.7rem; padding: 4px 12px; border-radius: 20px;
+      background: rgba(59,130,246,0.2); color: var(--sky-blue);
+      border: 1px solid rgba(59,130,246,0.3);
+    }
+    .price-tag { font-size: 1.3rem; font-weight: 700; color: var(--gold); font-family: 'Playfair Display', serif; }
+
+    /* Buttons */
+    .btn-primary-custom {
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: #fff; border: none; padding: 10px 24px; border-radius: 50px;
+      font-weight: 600; font-size: 0.9rem; display: inline-flex;
+      align-items: center; gap: 8px; transition: all 0.4s ease;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6); color: #fff;
+    }
+    .btn-outline-custom {
+      background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.2);
+      padding: 10px 24px; border-radius: 50px; font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-outline-custom:hover {
+      background: rgba(255,255,255,0.1); border-color: var(--sky-blue);
+      color: var(--sky-blue); transform: translateY(-2px);
+    }
+    .btn-success-custom {
+      background: linear-gradient(135deg, var(--emerald), #059669);
+      color: #fff; border: none; padding: 10px 24px; border-radius: 50px;
+      font-weight: 600; transition: all 0.4s ease;
+      box-shadow: 0 4px 20px rgba(52, 211, 153, 0.4);
+    }
+    .btn-success-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(52, 211, 153, 0.6); color: #fff;
+    }
+
+    /* Genre Filters */
+    .filter-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7); padding: 8px 20px; border-radius: 50px;
+      font-size: 0.85rem; margin: 4px; transition: all 0.3s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent-blue); border-color: var(--accent-blue);
+      color: #fff; box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+    }
+
+    /* Cart & Checkout */
+    .cart-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 25px;
+    }
+    .cart-item {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 15px 0; display: flex; align-items: center; gap: 15px;
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-img { width: 50px; height: 70px; object-fit: cover; border-radius: 8px; }
+    .qty-control { display: inline-flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 30px; height: 30px; padding: 0; border-radius: 8px;
+      background: rgba(59,130,246,0.2); border: none; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .qty-btn:hover { background: var(--accent-blue); }
+
+    /* Form Styles */
+    .form-label { color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.9rem; }
+    .form-control, .form-select {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 0.95rem;
+    }
+    .form-control:focus, .form-select:focus {
+      background: rgba(255,255,255,0.08); border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(59,130,246,0.2); color: #fff;
+    }
+    .form-control::placeholder { color: rgba(255,255,255,0.35); }
+    .required-asterisk { color: var(--rose); font-weight: bold; }
+
+    /* Price Summary */
+    .price-summary {
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 16px; padding: 20px; margin-top: 20px;
+    }
+    .price-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+    .price-row.total { font-size: 1.2rem; font-weight: 700; color: var(--gold); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 12px; }
+
+    /* Status Badges */
+    .status-badge { font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+    .status-pending { background: rgba(245,158,11,0.2); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+    .status-verification { background: rgba(59,130,246,0.2); color: var(--sky-blue); border: 1px solid rgba(59,130,246,0.3); }
+    .status-confirmed { background: rgba(52,211,153,0.2); color: var(--emerald); border: 1px solid rgba(52,211,153,0.3); }
+
+    /* Modal */
+    .modal-content {
+      background: linear-gradient(135deg, #1a2744, #0f172a);
+      border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; color: #fff;
+    }
+    .modal-header { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .modal-footer { border-top: 1px solid rgba(255,255,255,0.08); }
+    .btn-close { filter: invert(1); }
+
+    /* Admin Table */
+    .admin-table { background: rgba(255,255,255,0.03); border-radius: 16px; overflow: hidden; }
+    .admin-table thead { background: rgba(59,130,246,0.2); }
+    .admin-table th { border: none; font-weight: 600; color: var(--sky-blue); }
+    .admin-table td { border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+    .admin-table img { width: 45px; height: 65px; object-fit: cover; border-radius: 8px; }
+
+    /* Discount Banner */
+    .discount-banner {
+      background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3);
+      color: var(--emerald); padding: 10px 15px; border-radius: 12px;
+      margin: 15px 0; font-size: 0.9rem; display: none;
+    }
+    .discount-banner.show { display: block; }
+
+    /* Free Shipping Badge */
+    .free-shipping-badge {
+      background: var(--emerald); color: var(--dark); padding: 3px 10px;
+      border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-left: 10px;
+      display: none;
+    }
+
+    /* Cart Badge */
+    .cart-badge {
+      font-size: 0.65rem; position: absolute; top: -6px; right: -6px;
+      background: var(--rose); color: #fff; padding: 3px 8px; border-radius: 10px;
+    }
+
+    /* Scroll animations */
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+
+    /* Footer */
+    .footer {
+      padding: 40px 0 20px; background: #060d18;
+      border-top: 1px solid rgba(255,255,255,0.05); margin-top: 60px;
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;
+      text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem;
+    }
+
+    /* Toast */
+    .toast {
+      background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 12px; color: #fff;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero-title { font-size: 2rem; }
+      .book-img { height: 200px; }
+    }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 1.75rem; }
+      .price-summary { padding: 15px; }
+    }
+
+    /* Print Receipt */
+    @media print {
+      body * { visibility: hidden; }
+      #printReceipt, #printReceipt * { visibility: visible; }
+      #printReceipt { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: #fff; color: #000; }
+      .no-print { display: none !important; }
+    }
+    #printReceipt { display: none; font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; }
+    #printReceipt h2 { text-align: center; color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; margin-bottom: 20px; }
+    #printReceipt table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    #printReceipt th, #printReceipt td { padding: 8px 10px; border: 1px solid #ddd; text-align: left; }
+    #printReceipt th { background: #f8f9fa; }
+    #printReceipt .text-right { text-align: right; }
+    #printReceipt .bg-light { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px; }
+    #printReceipt .total-row { font-weight: bold; font-size: 1.2em; border-top: 2px solid #333; }
+    #printReceipt .discount-row { color: #198754; }
+    #printReceipt .shipping-row { color: #6c757d; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-icon"><i class="bi bi-book-half"></i></span>
+        The Book Shelf
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <i class="bi bi-list text-white fs-4"></i>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-center gap-2">
+          <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#features">Features</a></li>
+          <li class="nav-item"><a class="nav-link" href="membership.html">Membership</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#shopView">Shop</a></li>
+          <li class="nav-item ms-2">
+            <button class="nav-link btn-primary-custom position-relative" onclick="showCart(); return false;">
+              <i class="bi bi-cart3 me-1"></i> Cart
+              <span id="cartCount" class="cart-badge">0</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title"><span class="highlight">Order Books</span> Online</h1>
+      <p class="hero-subtitle">Browse our curated collection, add to cart, and checkout with ease.</p>
+    </div>
+  </header>
+
+  <!-- SHOP VIEW -->
+  <div id="shopView" class="view-transition">
+    <main class="container my-5">
+      <div class="text-center mb-4 reveal">
+        <h3 class="mb-3">Browse by Genre</h3>
+        <div id="genreFilters" class="d-flex flex-wrap justify-content-center"></div>
+      </div>
+      <h2 class="text-center mb-4 reveal" id="booksHeading">All Books</h2>
+      <div id="books-container" class="row g-4">
+        <div class="col-12 text-center text-muted py-5">Loading books...</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- CART & CHECKOUT VIEW -->
+  <div id="cartPageView" class="container my-5 d-none view-transition">
+    <button id="backToShopBtn" class="btn-outline-custom mb-3">← Back to Shop</button>
+    <h2 class="mb-4 reveal">🛒 Your Cart & Checkout</h2>
+    <div class="row">
+      <div class="col-lg-7 mb-4">
+        <div class="cart-card reveal">
+          <h5 class="card-title mb-3">Items in your Cart</h5>
+          <div id="cartItems" class="mt-3"><p class="text-center text-muted py-4">Your cart is empty.</p></div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="cart-card reveal sticky-top" style="top: 80px;">
+          <h5 class="card-title mb-3">📦 Checkout Details</h5>
+          <form id="checkoutForm">
+            <div class="row g-2 mb-2">
+              <div class="col-md-6">
+                <label class="form-label">Country</label>
+                <select class="form-select" id="country" required>
+                  <option value="Nepal" selected>Nepal</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Shipping Method <span class="free-shipping-badge" id="freeShipBadge">FREE</span></label>
+                <select class="form-select" id="shippingMethod">
+                  <option value="Home Delivery Kathmandu Valley|100">Kathmandu Valley (Rs. 100)</option>
+                  <option value="Other Delivery Outside Valley|200">Outside Valley (Rs. 200)</option>
+                </select>
+                <small class="text-muted" style="color: rgba(255,255,255,0.5);">🎉 Orders Rs. 1500+ get FREE delivery!</small>
+              </div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Payment Method</label>
+              <select class="form-select" id="paymentMethod" required>
+                <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+                <option value="eSewa">eSewa</option>
+                <option value="Khalti">Khalti</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Kathmandu Valley Area (Optional)</label>
+              <select class="form-select" id="kathmanduArea">
+                <option value="">-- Select Your Area --</option>
+                <option value="Kathmandu">Kathmandu</option><option value="Lalitpur">Lalitpur (Patan)</option>
+                <option value="Bhaktapur">Bhaktapur</option><option value="Kirtipur">Kirtipur</option>
+                <option value="Madhyapur Thimi">Madhyapur Thimi</option><option value="Chandragiri">Chandragiri</option>
+                <option value="Dakshinkali">Dakshinkali</option><option value="Gokarneshwar">Gokarneshwar</option>
+                <option value="Kageshwari Manohara">Kageshwari Manohara</option><option value="Nagarjun">Nagarjun</option>
+                <option value="Tarakeshwar">Tarakeshwar</option><option value="Budhanilkantha">Budhanilkantha</option>
+                <option value="Tokha">Tokha</option><option value="Suryabinayak">Suryabinayak</option>
+                <option value="Other">Other (Type manually below)</option>
+              </select>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label">Membership ID</label>
+                <input type="text" class="form-control" id="membershipId" placeholder="Optional">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Promo Code</label>
+                <input type="text" class="form-control" id="promoCode" placeholder="Optional">
+              </div>
+            </div>
+            <div id="discountBanner" class="discount-banner"><span id="discountText" class="fw-bold"></span> <span class="spinner-border spinner-border-sm ms-2 d-none" id="discSpinner"></span></div>
+            <hr style="border-color: rgba(255,255,255,0.1);">
+            <div class="mb-2"><label class="form-label">Full Name <span class="required-asterisk">*</span></label><input type="text" class="form-control" id="name" required></div>
+            <div class="mb-2"><label class="form-label">Email <span class="required-asterisk">*</span></label><input type="email" class="form-control" id="email" required></div>
+            <div class="mb-2"><label class="form-label">Phone <span class="required-asterisk">*</span></label><input type="tel" class="form-control" id="phone" required></div>
+            <div class="mb-2"><label class="form-label">Shipping Address <span class="required-asterisk">*</span></label><textarea class="form-control" id="address" rows="2" placeholder="House No., Street/Lane, Landmark..." required></textarea></div>
+            <div id="formMessage" class="alert d-none py-2" role="alert"></div>
+            <button type="submit" id="submitOrderBtn" class="btn-primary-custom w-100 mt-2">Place Order</button>
+          </form>
+          <div class="price-summary">
+            <div class="price-row"><span>Book Subtotal:</span><span id="cartSubtotal">Rs. 0.00</span></div>
+            <div class="price-row text-success" id="discountRow"><span>Discount:</span><span id="cartDiscount">- Rs. 0.00</span></div>
+            <div class="price-row"><strong>After Discount:</strong><span id="cartAfterDiscount">Rs. 0.00</span></div>
+            <div class="price-row"><span>Shipping:</span><span id="cartShipping">Rs. 0.00</span></div>
+            <div class="price-row total"><span>Grand Total:</span><span id="cartTotal">Rs. 0.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Details Modal -->
+  <div class="modal fade" id="bookDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body px-4 pb-4">
+          <div class="row g-4">
+            <div class="col-md-5"><img id="detailImg" src="" alt="Book Cover" class="img-fluid rounded" style="max-height: 400px; object-fit: cover;"></div>
+            <div class="col-md-7">
+              <span id="detailGenre" class="genre-badge mb-2 d-inline-block"></span>
+              <h3 id="detailTitle" class="fw-bold mb-2"></h3>
+              <p class="text-muted mb-3">by <span id="detailAuthor"></span></p>
+              <p id="detailDesc" class="mb-4" style="color: rgba(255,255,255,0.6);"></p>
+              <div class="price-tag mb-4">Rs. <span id="detailPrice"></span></div>
+              <button id="addToCartFromDetail" class="btn-success-custom btn-lg w-100">🛒 Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Login Modal (Order Tracking) -->
+  <div class="modal fade" id="memberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">📦 Check Your Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="loginView">
+            <p class="text-muted">Enter your Order ID to view details & payment status.</p>
+            <div class="mb-3"><label class="form-label">Order ID</label><input type="text" class="form-control" id="loginOrderId" placeholder="e.g., ORD-12345678" required></div>
+            <div id="loginMessage" class="alert d-none" role="alert"></div>
+            <button id="loginBtn" class="btn-primary-custom w-100">View Order</button>
+          </div>
+          <div id="dashboardView" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">Order Receipt</h5>
+              <button id="printReceiptBtn" class="btn-outline-custom btn-sm">🖨️ Print Receipt</button>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6"><div class="p-2 rounded small" style="background: rgba(255,255,255,0.05);"><strong>Customer:</strong> <span id="dashName"></span></div></div>
+              <div class="col-md-6"><div class="p-2 rounded small" style="background: rgba(255,255,255,0.05);"><strong>Email:</strong> <span id="dashEmail"></span></div></div>
+              <div class="col-md-6"><div class="p-2 rounded small" style="background: rgba(255,255,255,0.05);"><strong>Phone:</strong> <span id="dashPhone"></span></div></div>
+              <div class="col-12"><div class="p-2 rounded small" style="background: rgba(255,255,255,0.05);"><strong>Address:</strong> <span id="dashAddress"></span></div></div>
+            </div>
+            <div class="mb-3 p-2 rounded" style="background: rgba(255,255,255,0.05);">
+              <strong class="small">📦 Items Ordered:</strong>
+              <ul id="dashItemsList" class="list-group list-group-flush mt-2 bg-transparent"></ul>
+            </div>
+            <div class="mb-3 p-2 rounded" style="background: rgba(255,255,255,0.05);">
+              <div class="row small">
+                <div class="col-6 text-end"><strong>Book Subtotal:</strong></div><div class="col-6 text-end" id="dashSubtotal">Rs. 0.00</div>
+                <div class="col-6 text-end text-success" id="dashDiscountRow"><strong>Discount:</strong></div><div class="col-6 text-end text-success" id="dashDiscount">- Rs. 0.00</div>
+                <div class="col-6 text-end"><strong>After Discount:</strong></div><div class="col-6 text-end" id="dashAfterDiscount">Rs. 0.00</div>
+                <div class="col-6 text-end"><strong>Shipping:</strong></div><div class="col-6 text-end" id="dashShipping">Rs. 0.00</div>
+                <hr class="my-1" style="border-color: rgba(255,255,255,0.1);">
+                <div class="col-6 text-end fw-bold"><strong>Grand Total:</strong></div><div class="col-6 text-end fw-bold" style="color: var(--gold);" id="dashGrandTotal">Rs. 0.00</div>
+              </div>
+            </div>
+            <div class="mb-3 d-flex justify-content-between align-items-center small p-2 rounded" style="background: rgba(255,255,255,0.05);">
+              <div><strong>Payment:</strong> <span id="dashPayment"></span></div>
+              <div><strong>Status:</strong> <span id="dashStatus" class="status-badge"></span></div>
+              <div><strong>Txn ID:</strong> <span id="dashTxn">N/A</span></div>
+            </div>
+            <div id="paymentSection" class="mt-4">
+              <hr style="border-color: rgba(255,255,255,0.1);"><h6 class="fw-bold mb-3">💳 Submit Payment Transaction ID</h6>
+              <div class="input-group"><input type="text" class="form-control" id="txnId" placeholder="e.g., TXN987654321"><button id="submitPaymentBtn" class="btn-success-custom">Submit</button></div>
+              <div id="payMessage" class="alert d-none mt-2 small" role="alert"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🛡️ Admin Dashboard</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="adminLoginView" class="text-center py-4">
+          <p>Enter Admin Password</p>
+          <input type="password" id="adminPassword" class="form-control w-50 mx-auto mb-3">
+          <button id="adminLoginBtn" class="btn-primary-custom">Login</button>
+          <div id="adminMsg" class="alert d-none mt-3"></div>
+        </div>
+        <div id="adminDashboard" class="d-none">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">📚 Book Inventory</h5>
+            <div>
+              <button class="btn-success-custom btn-sm" data-bs-toggle="modal" data-bs-target="#bookFormModal" onclick="resetBookForm()">➕ Add New</button>
+              <button id="refreshAdminBtn" class="btn-outline-custom btn-sm">🔄 Refresh</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table admin-table align-middle">
+              <thead><tr><th>ID</th><th>Cover</th><th>Title</th><th>Author</th><th>Price</th><th>Genre</th><th>Actions</th></tr></thead>
+              <tbody id="adminTableBody"><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Book Form Modal -->
+  <div class="modal fade" id="bookFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookFormTitle">Add Book</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="bookForm">
+          <input type="hidden" id="editRowIndex">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Book ID *</label><input type="text" class="form-control" id="f_id" required></div>
+            <div class="col-md-6"><label class="form-label">Title *</label><input type="text" class="form-control" id="f_title" required></div>
+            <div class="col-md-6"><label class="form-label">Author *</label><input type="text" class="form-control" id="f_author" required></div>
+            <div class="col-md-6"><label class="form-label">Price (Rs.) *</label><input type="number" step="0.01" class="form-control" id="f_price" required></div>
+            <div class="col-md-6"><label class="form-label">Genre *</label><input type="text" class="form-control" id="f_genre" required></div>
+            <div class="col-md-6"><label class="form-label">Image URL</label><input type="url" class="form-control" id="f_image"></div>
+            <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" id="f_desc" rows="3"></textarea></div>
+          </div>
+          <div id="bookFormMsg" class="alert d-none mt-3"></div>
+          <div class="mt-4 text-end">
+            <button type="button" class="btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn-primary-custom" id="bookFormBtn">Save Book</button>
+          </div>
+        </form>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Print Receipt Container -->
+  <div id="printReceipt"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container text-center">
+      <p class="mb-0">© <span id="year"></span> The Book Shelf. All rights reserved.</p>
+      <p class="small text-muted mt-2"><a href="index.html" style="color: var(--sky-blue); text-decoration: none;">← Back to Home</a></p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert">
+      <div class="d-flex"><div class="toast-body" id="toastMessage"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUVU5MGcG_TgjryNlG5SidTEmJ_ywFzwy2-cy24pEldFVrx8gHWxF-iKmsdAsq32lQkA/exec';
+    let bookDetailModal, memberModal, adminModal, bookFormModal;
+    let allBooks = []; let memDiscount = 0; let promoDiscount = 0;
+    let cart = JSON.parse(localStorage.getItem('bookshelf_cart')) || [];
+    let currentOrderData = null;
+
+    function toRawNumber(val) { if (val === null || val === undefined || val === '') return 0; const match = String(val).match(/(\d+\.?\d*)/); return match ? parseFloat(match[1]) : 0; }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      bookDetailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
+      memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
+      adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+      bookFormModal = new bootstrap.Modal(document.getElementById('bookFormModal'));
+      
+      fetchBooks(); setupCartNavigation(); setupCheckoutForm(); setupMemberLogin(); setupDiscountLookups(); setupAdminPanel();
+      document.getElementById('shippingMethod').addEventListener('change', updateCartTotals);
+      updateCartUI();
+      document.getElementById('printReceiptBtn').addEventListener('click', () => { if (currentOrderData) generateReceipt(currentOrderData); });
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // Scroll reveal
+      const revealElements = document.querySelectorAll('.reveal');
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+      revealElements.forEach(el => revealObserver.observe(el));
+
+      // Navbar scroll
+      const navbar = document.getElementById('mainNav');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+      });
+    });
+
+    window.showShop = function() {
+      document.getElementById('cartPageView').classList.add('d-none');
+      document.getElementById('shopView').classList.remove('d-none');
+      window.scrollTo(0, 0);
+    }
+    window.showCart = function() {
+      document.getElementById('shopView').classList.add('d-none');
+      document.getElementById('cartPageView').classList.remove('d-none');
+      window.scrollTo(0, 0);
+      updateCartUI();
+    }
+
+    async function fetchBooks() {
+      const container = document.getElementById('books-container');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL); if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json(); if (result.status === 'success') { allBooks = result.data || []; setupGenreFilters(result.genres || []); renderBooks(allBooks); }
+      } catch (err) { container.innerHTML = `<div class="col-12 text-center text-muted py-5">❌ Failed to load books. Please check your connection.</div>`; }
+    }
+
+    function setupGenreFilters(genres) {
+      const container = document.getElementById('genreFilters'); container.innerHTML = '';
+      const handleFilter = function() { container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); const g = this.dataset.genre; document.getElementById('booksHeading').textContent = g === 'all' ? 'All Books' : `${g} Books`; renderBooks(g === 'all' ? allBooks : allBooks.filter(b => b.genre?.trim().toLowerCase() === g.trim().toLowerCase())); };
+      const allBtn = document.createElement('button'); allBtn.className = 'filter-btn active'; allBtn.textContent = 'All Books'; allBtn.dataset.genre = 'all'; allBtn.addEventListener('click', handleFilter); container.appendChild(allBtn);
+      genres.forEach(genre => { const btn = document.createElement('button'); btn.className = 'filter-btn'; btn.textContent = genre; btn.dataset.genre = genre; btn.addEventListener('click', handleFilter); container.appendChild(btn); });
+    }
+
+    function renderBooks(books) {
+      const container = document.getElementById('books-container'); container.innerHTML = '';
+      if (!books.length) { container.innerHTML = '<div class="col-12 text-center text-muted py-5">No books available.</div>'; return; }
+      books.forEach(book => {
+        const rawPrice = toRawNumber(book.price); const col = document.createElement('div'); col.className = 'col-lg-3 col-md-4 col-sm-6';
+        col.innerHTML = `<div class="book-card" data-id="${book.id}" data-title="${book.title}" data-author="${book.author}" data-desc="${book.description || ''}" data-img="${book.image_url || ''}" data-genre="${book.genre || ''}" data-price-raw="${rawPrice}">
+          <img src="${book.image_url || 'https://via.placeholder.com/300x400?text=Book+Cover'}" class="card-img-top book-img" alt="${book.title}">
+          <div class="card-body p-3 d-flex flex-column">${book.genre ? `<span class="genre-badge mb-2">${book.genre}</span>` : ''}
+            <h6 class="card-title fw-bold mb-1">${book.title}</h6><p class="text-muted small mb-2" style="color: rgba(255,255,255,0.5);">by ${book.author}</p><p class="card-text text-truncate small flex-grow-1" style="color: rgba(255,255,255,0.6);">${book.description || ''}</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center"><span class="price-tag small">Rs. ${rawPrice.toFixed(2)}</span><button class="btn btn-sm btn-success-custom add-cart-btn">🛒 Add</button></div></div></div>`;
+        container.appendChild(col);
+      });
+      document.querySelectorAll('.book-card').forEach(card => card.addEventListener('click', e => { if (!e.target.closest('.add-cart-btn')) openBookDetail(card.dataset); }));
+      document.querySelectorAll('.add-cart-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); const card = btn.closest('.book-card'); addToCart(card.dataset.id, card.dataset.title, toRawNumber(card.dataset.priceRaw), card.dataset.img); }));
+    }
+
+    function addToCart(id, title, price, img) {
+      const existing = cart.find(i => i.id === id); if (existing) existing.qty++; else cart.push({ id, title, price, qty: 1, img });
+      localStorage.setItem('bookshelf_cart', JSON.stringify(cart)); updateCartUI();
+      showToast('✅ Added to cart!', 'success');
+    }
+
+    function updateCartUI() {
+      document.getElementById('cartCount').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
+      const container = document.getElementById('cartItems');
+      if (cart.length === 0) { container.innerHTML = '<p class="text-center text-muted py-4">Your cart is empty.</p>'; document.getElementById('submitOrderBtn').disabled = true; }
+      else {
+        document.getElementById('submitOrderBtn').disabled = false;
+        container.innerHTML = cart.map((item, idx) => `
+          <div class="cart-item">
+            <img src="${item.img || 'https://via.placeholder.com/50x70'}" class="cart-item-img">
+            <div class="flex-grow-1"><strong>${item.title}</strong><br><small style="color: rgba(255,255,255,0.5);">Rs. ${toRawNumber(item.price).toFixed(2)}</small></div>
+            <div class="qty-control"><button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="mx-2">${item.qty}</span><button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button></div>
+            <button class="btn btn-outline-danger btn-sm" onclick="removeItem(${idx})">🗑️</button>
+          </div>
+        `).join('');
+      }
+      updateCartTotals();
+    }
+
+    window.changeQty = function(idx, delta) { cart[idx].qty += delta; if (cart[idx].qty <= 0) cart.splice(idx, 1); localStorage.setItem('bookshelf_cart', JSON.stringify(cart)); updateCartUI(); }
+    window.removeItem = function(idx) { cart.splice(idx, 1); localStorage.setItem('bookshelf_cart', JSON.stringify(cart)); updateCartUI(); }
+
+    function setupCartNavigation() {
+      document.getElementById('backToShopBtn').addEventListener('click', () => showShop());
+    }
+
+    function updateCartTotals() {
+      const subtotal = cart.reduce((sum, item) => sum + (toRawNumber(item.price) * item.qty), 0);
+      const totalDisc = Math.min(memDiscount + promoDiscount, 100);
+      const discountAmt = Math.round(subtotal * (totalDisc / 100) * 100) / 100;
+      const afterDiscount = subtotal - discountAmt;
+
+      let shippingCharge = 0;
+      if (cart.length === 0) {
+        shippingCharge = 0;
+        document.getElementById('freeShipBadge').style.display = 'none';
+        document.getElementById('cartShipping').textContent = 'Rs. 0.00';
+      } else {
+        if (afterDiscount < 1500) { 
+          const shipOpt = document.getElementById('shippingMethod').selectedOptions[0].value.split('|'); 
+          shippingCharge = toRawNumber(shipOpt[1]); 
+          document.getElementById('freeShipBadge').style.display = 'none'; 
+        } else { 
+          shippingCharge = 0; 
+          document.getElementById('freeShipBadge').style.display = 'inline-block'; 
+        }
+        document.getElementById('cartShipping').textContent = shippingCharge === 0 ? 'FREE 🎉' : `Rs. ${shippingCharge.toFixed(2)}`;
+      }
+
+      const final = Math.round((afterDiscount + shippingCharge) * 100) / 100;
+      document.getElementById('cartSubtotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('cartDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDisc}%)`;
+      document.getElementById('cartAfterDiscount').textContent = `Rs. ${afterDiscount.toFixed(2)}`;
+      document.getElementById('cartTotal').textContent = `Rs. ${final.toFixed(2)}`;
+    }
+
+    function openBookDetail(data) {
+      const rawPrice = toRawNumber(data.priceRaw);
+      document.getElementById('detailImg').src = data.img || 'https://via.placeholder.com/300x400?text=Book+Cover';
+      document.getElementById('detailGenre').textContent = data.genre; document.getElementById('detailGenre').style.display = data.genre ? 'inline-block' : 'none';
+      document.getElementById('detailTitle').textContent = data.title; document.getElementById('detailAuthor').textContent = data.author; document.getElementById('detailDesc').textContent = data.desc;
+      document.getElementById('detailPrice').textContent = rawPrice.toFixed(2);
+      document.getElementById('addToCartFromDetail').onclick = () => { addToCart(data.id, data.title, rawPrice, data.img); bookDetailModal.hide(); };
+      bookDetailModal.show();
+    }
+
+    function setupDiscountLookups() {
+      let debounce;
+      const triggerLookup = (type, inputId) => {
+        document.getElementById(inputId).addEventListener('input', (e) => {
+          clearTimeout(debounce); const val = e.target.value.trim(); document.getElementById('discSpinner').classList.remove('d-none');
+          if (!val) { if (type === 'mem') memDiscount = 0; else promoDiscount = 0; updateDiscountUI(); updateCartTotals(); document.getElementById('discSpinner').classList.add('d-none'); return; }
+          debounce = setTimeout(async () => {
+            try {
+              const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({ action: type === 'mem' ? 'get_membership' : 'get_promo', [type === 'mem' ? 'membershipId' : 'promoCode']: val }), headers:{'Content-Type':'text/plain'} });
+              const result = await res.json(); if (result.status === 'success') { const disc = toRawNumber(result.data.discountPercent); const normalized = disc <= 1 ? disc * 100 : disc; if (type === 'mem') memDiscount = normalized; else promoDiscount = normalized; } else { if (type === 'mem') memDiscount = 0; else promoDiscount = 0; }
+            } catch { if (type === 'mem') memDiscount = 0; else promoDiscount = 0; }
+            finally { updateDiscountUI(); updateCartTotals(); document.getElementById('discSpinner').classList.add('d-none'); }
+          }, 600);
+        });
+      };
+      triggerLookup('mem', 'membershipId'); triggerLookup('promo', 'promoCode');
+    }
+
+    function updateDiscountUI() {
+      const banner = document.getElementById('discountBanner'); const textEl = document.getElementById('discountText'); const lines = [];
+      if (memDiscount > 0) lines.push(`✅ Membership: ${memDiscount}%`); if (promoDiscount > 0) lines.push(`✅ Promo Code: ${promoDiscount}%`);
+      if (lines.length > 0) { textEl.innerHTML = lines.join('<br>'); banner.classList.add('show'); } else banner.classList.remove('show');
+    }
+
+    function setupCheckoutForm() {
+      document.getElementById('kathmanduArea').addEventListener('change', function() { const val = this.value; const addrField = document.getElementById('address'); if (val && val !== 'Other') { if (!addrField.value.trim()) { addrField.value = val + ', Kathmandu Valley, Nepal\n'; } else if (!addrField.value.toLowerCase().includes(val.toLowerCase())) { addrField.value = val + ', ' + addrField.value; } } });
+      document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); const btn = document.getElementById('submitOrderBtn'); btn.disabled = true; btn.textContent = 'Processing...'; hideMsg('formMessage');
+        if (document.getElementById('country').value !== 'Nepal') { showMsg('formMessage', '⚠️ Currently, we only deliver to Nepal. Please select Nepal.', 'warning'); resetBtn(btn); return; }
+        if (cart.length === 0) { showMsg('formMessage', '⚠️ Cart is empty.', 'warning'); resetBtn(btn); return; }
+        const shipOpt = document.getElementById('shippingMethod').selectedOptions[0].value.split('|');
+        const subtotal = cart.reduce((sum, item) => sum + (toRawNumber(item.price) * item.qty), 0);
+        const totalDisc = Math.min(memDiscount + promoDiscount, 100); const afterDiscount = Math.round(subtotal * (1 - totalDisc / 100) * 100) / 100;
+        let shippingCharge = afterDiscount >= 1500 ? 0 : toRawNumber(shipOpt[1]);
+        const finalTotal = Math.round((afterDiscount + shippingCharge) * 100) / 100;
+        const data = { action: 'place_order', name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), phone: document.getElementById('phone').value.trim(), address: document.getElementById('address').value.trim(), country: 'Nepal', shippingMethod: shipOpt[0], shippingCharge: shippingCharge, paymentMethod: document.getElementById('paymentMethod').value, items: cart.map(i => ({ id: i.id, title: i.title, price: toRawNumber(i.price), qty: i.qty })), membershipId: document.getElementById('membershipId').value.trim() || 'None', memberDiscount: memDiscount, promoCode: document.getElementById('promoCode').value.trim() || 'None', promoDiscount: promoDiscount };
+        if (!data.name || !data.email || !data.phone || !data.address) { showMsg('formMessage','⚠️ Fill all fields','warning'); resetBtn(btn); return; }
+        if (finalTotal <= 0) { showMsg('formMessage','⚠️ Invalid price','warning'); resetBtn(btn); return; }
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(data), headers:{'Content-Type':'text/plain'} }); const result = await res.json();
+          if (result.status === 'success') { 
+            showMsg('formMessage', `✅ Order placed : ${result.orderId}<br>📧 Email sent to ${data.email}`, 'success'); 
+            cart = []; localStorage.setItem('bookshelf_cart', JSON.stringify(cart)); memDiscount = 0; promoDiscount = 0; 
+            updateDiscountUI(); updateCartTotals(); updateCartUI(); 
+            document.getElementById('checkoutForm').reset();
+            setTimeout(() => { showShop(); hideMsg('formMessage'); }, 3000); 
+          } else throw new Error(result.message);
+        } catch (err) { showMsg('formMessage', `❌ ${err.message}`, 'danger'); } finally { resetBtn(btn); }
+      });
+    }
+
+    function renderReceiptUI(info, items) {
+      document.getElementById('dashName').textContent = info.customer_name; 
+      document.getElementById('dashEmail').textContent = info.email;
+      document.getElementById('dashPhone').textContent = info.phone || 'N/A';
+      document.getElementById('dashAddress').textContent = info.address;
+      document.getElementById('dashPayment').textContent = info.payment_method || 'N/A';
+      document.getElementById('dashStatus').textContent = info.payment_status || 'Pending';
+      document.getElementById('dashStatus').className = `status-badge ${info.payment_status === 'Confirmed' ? 'status-confirmed' : info.payment_status === 'Pending Verification' ? 'status-verification' : 'status-pending'}`;
+      document.getElementById('dashTxn').textContent = info.transaction_id || 'N/A';
+
+      const list = document.getElementById('dashItemsList'); list.innerHTML = '';
+      items.forEach(item => {
+        const li = document.createElement('li'); li.className = 'list-group-item d-flex justify-content-between align-items-center small';
+        li.style.background = 'transparent'; li.style.borderBottom = '1px dashed rgba(255,255,255,0.1)'; li.style.color = 'rgba(255,255,255,0.7)';
+        li.innerHTML = `<div><strong>${item.title}</strong><div class="text-muted" style="font-size:0.8em; color: rgba(255,255,255,0.5);">Rs. ${item.unit_price.toFixed(2)} x ${item.quantity}</div></div><span class="fw-bold">Rs. ${item.subtotal.toFixed(2)}</span>`;
+        list.appendChild(li);
+      });
+
+      const bookSubtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+      const totalDiscPercent = (info.member_discount || 0) + (info.promo_discount || 0);
+      const discountAmt = Math.round(bookSubtotal * (totalDiscPercent / 100) * 100) / 100;
+      const afterDiscount = bookSubtotal - discountAmt;
+      const shipping = info.shipping_charge || 0;
+
+      document.getElementById('dashSubtotal').textContent = `Rs. ${bookSubtotal.toFixed(2)}`;
+      document.getElementById('dashDiscountRow').style.display = 'flex';
+      document.getElementById('dashDiscount').textContent = `- Rs. ${discountAmt.toFixed(2)} (${totalDiscPercent}%)`;
+      document.getElementById('dashAfterDiscount').textContent = `Rs. ${afterDiscount.toFixed(2)}`;
+      document.getElementById('dashShipping').textContent = `Rs. ${shipping.toFixed(2)}`;
+      document.getElementById('dashGrandTotal').textContent = `Rs. ${(afterDiscount + shipping).toFixed(2)}`;
+      document.getElementById('paymentSection').style.display = info.payment_status === 'Confirmed' ? 'none' : 'block';
+    }
+
+    function setupMemberLogin() {
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('loginBtn'); btn.disabled = true; btn.textContent = 'Checking...'; hideMsg('loginMessage');
+        const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase(); if (!orderId) { showMsg('loginMessage','⚠️ Enter Order ID','warning'); resetBtn(btn); return; }
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'get_order', orderId}), headers:{'Content-Type':'text/plain'} }); const result = await res.json(); 
+          if (result.status === 'success') { currentOrderData = result.data; renderReceiptUI(currentOrderData.info, currentOrderData.items); document.getElementById('loginView').classList.add('d-none'); document.getElementById('dashboardView').classList.remove('d-none'); }
+          else throw new Error(result.message);
+        } catch (err) { showMsg('loginMessage', `❌ ${err.message}`, 'danger'); } finally { resetBtn(btn); }
+      });
+      document.getElementById('submitPaymentBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('submitPaymentBtn'); btn.disabled = true; btn.textContent = 'Submitting...'; hideMsg('payMessage');
+        const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase(); const txnId = document.getElementById('txnId').value.trim();
+        if (!txnId) { showMsg('payMessage','⚠️ Enter Transaction ID','warning'); resetBtn(btn); return; }
+        try { const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'submit_payment', orderId, transactionId: txnId}), headers:{'Content-Type':'text/plain'} }); const result = await res.json(); if (result.status === 'success') { showMsg('payMessage', '✅ Txn ID submitted. Awaiting owner verification.', 'success'); currentOrderData.info.payment_status = 'Pending Verification'; renderReceiptUI(currentOrderData.info, currentOrderData.items); } else throw new Error(result.message); } catch (err) { showMsg('payMessage', `❌ ${err.message}`, 'danger'); } finally { resetBtn(btn); }
+      });
+    }
+
+    function generateReceipt(data) {
+      const info = data.info; const items = data.items;
+      const orderId = document.getElementById('loginOrderId').value.trim().toUpperCase();
+      const bookSubtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+      const totalDiscPercent = (info.member_discount || 0) + (info.promo_discount || 0);
+      const discountAmt = Math.round(bookSubtotal * (totalDiscPercent / 100) * 100) / 100;
+      const afterDiscount = bookSubtotal - discountAmt;
+      const shipping = info.shipping_charge || 0;
+      const grandTotal = afterDiscount + shipping;
+
+      const printContainer = document.getElementById('printReceipt');
+      printContainer.innerHTML = `
+        <h2>📚 The Book Shelf</h2>
+        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+        <div class="bg-light">
+          <p><strong>Customer:</strong> ${info.customer_name}</p>
+          <p><strong>Phone:</strong> ${info.phone || 'N/A'}</p>
+          <p><strong>Email:</strong> ${info.email}</p>
+          <p><strong>Address:</strong> ${info.address.replace(/\n/g, '<br>')}</p>
+        </div>
+        <table>
+          <thead><tr><th>Book</th><th style="text-align:center">Qty</th><th class="text-right">Price</th><th class="text-right">Subtotal</th></tr></thead>
+          <tbody>${items.map(i => `<tr><td>${i.title}</td><td style="text-align:center">${i.quantity}</td><td class="text-right">Rs. ${i.unit_price.toFixed(2)}</td><td class="text-right">Rs. ${i.subtotal.toFixed(2)}</td></tr>`).join('')}</tbody>
+        </table>
+        <table style="width: 60%; margin-left: auto;">
+          <tr><td colspan="2"><hr style="border-top:1px solid #ccc; margin:0;"></td></tr>
+          <tr><td class="text-right"><strong>Book Subtotal:</strong></td><td class="text-right">Rs. ${bookSubtotal.toFixed(2)}</td></tr>
+          <tr class="discount-row"><td class="text-right">Discount (${totalDiscPercent}%):</td><td class="text-right">- Rs. ${discountAmt.toFixed(2)}</td></tr>
+          <tr><td class="text-right"><strong>Amount after Discount:</strong></td><td class="text-right">Rs. ${afterDiscount.toFixed(2)}</td></tr>
+          <tr class="shipping-row"><td class="text-right">Shipping Charge:</td><td class="text-right">+ Rs. ${shipping.toFixed(2)}</td></tr>
+          <tr class="total-row"><td class="text-right">Grand Total:</td><td class="text-right">Rs. ${grandTotal.toFixed(2)}</td></tr>
+        </table>
+        <div class="bg-light">
+          <p><strong>Payment Method:</strong> ${info.payment_method || 'N/A'}</p>
+          <p><strong>Status:</strong> ${info.payment_status || 'Pending'}</p>
+          <p><strong>Transaction ID:</strong> ${info.transaction_id || 'N/A'}</p>
+        </div>
+        <p style="text-align:center; margin-top:30px; font-size:0.9em; color:#666;">Thank you for shopping with The Book Shelf!</p>
+        <button class="no-print" onclick="window.print()" style="padding: 8px 15px; cursor: pointer; background: var(--accent-blue); color: white; border: none; border-radius: 4px; margin-top: 20px;">🖨️ Print Receipt</button>
+      `;
+      printContainer.style.display = 'block';
+      window.print();
+      printContainer.style.display = 'none';
+    }
+
+    function setupAdminPanel() {
+      document.getElementById('adminLoginBtn').addEventListener('click', async () => { const pwd = document.getElementById('adminPassword').value; const btn = document.getElementById('adminLoginBtn'); btn.disabled = true; btn.textContent = 'Checking...'; try { const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'admin_login', password:pwd}), headers:{'Content-Type':'text/plain'} }); const result = await res.json(); if (result.status === 'success') { document.getElementById('adminLoginView').classList.add('d-none'); document.getElementById('adminDashboard').classList.remove('d-none'); loadAdminBooks(); } else showAdminMsg('❌ ' + result.message, 'danger'); } catch(e) { showAdminMsg('❌ Connection error', 'danger'); } finally { btn.disabled = false; btn.textContent = 'Login'; } });
+      document.getElementById('refreshAdminBtn').addEventListener('click', loadAdminBooks);
+      document.getElementById('bookForm').addEventListener('submit', async (e) => { e.preventDefault(); const btn = document.getElementById('bookFormBtn'); btn.disabled = true; btn.textContent = 'Saving...'; const bookData = { action: document.getElementById('editRowIndex').value ? 'admin_update_book' : 'admin_add_book', rowIndex: parseInt(document.getElementById('editRowIndex').value) || 0, id: document.getElementById('f_id').value.trim(), title: document.getElementById('f_title').value.trim(), author: document.getElementById('f_author').value.trim(), price: document.getElementById('f_price').value, image_url: document.getElementById('f_image').value.trim(), description: document.getElementById('f_desc').value.trim(), genre: document.getElementById('f_genre').value.trim() }; try { const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(bookData), headers:{'Content-Type':'text/plain'} }); const result = await res.json(); if (result.status === 'success') { showBookFormMsg('✅ ' + result.message, 'success'); setTimeout(() => { bookFormModal.hide(); loadAdminBooks(); resetBookForm(); }, 1500); } else throw new Error(result.message); } catch(err) { showBookFormMsg('❌ ' + err.message, 'danger'); } finally { btn.disabled = false; btn.textContent = 'Save Book'; } });
+    }
+
+    async function loadAdminBooks() {
+      const tbody = document.getElementById('adminTableBody'); tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+      try { const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'admin_get_books'}), headers:{'Content-Type':'text/plain'} }); const result = await res.json(); if (result.status === 'success') { tbody.innerHTML = ''; if (!result.data.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No books found. Add one!</td></tr>'; return; } result.data.forEach(book => { const tr = document.createElement('tr'); tr.innerHTML = `<td><small class="text-muted">${book.id}</small></td><td><img src="${book.image_url || 'https://via.placeholder.com/50x70?text=No+Img'}" alt="Cover"></td><td><strong>${book.title}</strong><br><small class="text-muted" style="color: rgba(255,255,255,0.5);">${book.genre || 'Uncategorized'}</small></td><td>${book.author}</td><td class="text-success fw-bold">Rs. ${toRawNumber(book.price).toFixed(2)}</td><td><span class="genre-badge">${book.genre || '-'}</span></td><td><button class="btn btn-sm btn-outline-custom me-1 edit-btn" data-row="${book.rowIndex}">✏️</button><button class="btn btn-sm btn-outline-danger delete-btn" data-row="${book.rowIndex}" data-title="${book.title.replace(/"/g, '&quot;')}">🗑️</button></td>`; tbody.appendChild(tr); }); tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => { const rowIdx = btn.dataset.row; const book = result.data.find(b => b.rowIndex == rowIdx); if (book) openEditBookForm(book); })); tbody.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => { if(confirm(`Delete "${btn.dataset.title}"?`)) deleteBook(btn.dataset.row); })); } } catch(err) { tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">❌ Failed to load</td></tr>`; }
+    }
+    window.openEditBookForm = function(book) { document.getElementById('editRowIndex').value = book.rowIndex; document.getElementById('f_id').value = book.id; document.getElementById('f_title').value = book.title; document.getElementById('f_author').value = book.author; document.getElementById('f_price').value = book.price; document.getElementById('f_image').value = book.image_url || ''; document.getElementById('f_desc').value = book.description || ''; document.getElementById('f_genre').value = book.genre || ''; document.getElementById('bookFormTitle').textContent = 'Edit Book'; document.getElementById('bookFormBtn').textContent = 'Update Book'; document.getElementById('f_id').readOnly = true; bookFormModal.show(); }
+    window.resetBookForm = function() { document.getElementById('bookForm').reset(); document.getElementById('editRowIndex').value = ''; document.getElementById('bookFormTitle').textContent = 'Add Book'; document.getElementById('bookFormBtn').textContent = 'Save Book'; document.getElementById('f_id').readOnly = false; }
+    window.deleteBook = function(rowIndex) { fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'admin_delete_book', rowIndex: parseInt(rowIndex)}), headers:{'Content-Type':'text/plain'} }).then(res => res.json()).then(result => { if(result.status === 'success') { showToast('✅ Deleted', 'success'); loadAdminBooks(); } else showToast('❌ ' + result.message, 'danger'); }).catch(() => showToast('❌ Connection error', 'danger')); }
+    function showAdminMsg(msg, type) { const el = document.getElementById('adminMsg'); el.textContent = msg; el.className = `alert alert-${type === 'danger' ? 'danger' : 'success'} show`; el.classList.remove('d-none'); el.style.background = type === 'danger' ? 'rgba(244,63,94,0.15)' : 'rgba(52,211,153,0.15)'; el.style.border = `1px solid ${type === 'danger' ? 'rgba(244,63,94,0.3)' : 'rgba(52,211,153,0.3)'}`; el.style.color = type === 'danger' ? 'var(--rose)' : 'var(--emerald)'; }
+    function showBookFormMsg(msg, type) { const el = document.getElementById('bookFormMsg'); el.textContent = msg; el.className = `alert alert-${type === 'danger' ? 'danger' : 'success'} show`; el.classList.remove('d-none'); el.style.background = type === 'danger' ? 'rgba(244,63,94,0.15)' : 'rgba(52,211,153,0.15)'; el.style.border = `1px solid ${type === 'danger' ? 'rgba(244,63,94,0.3)' : 'rgba(52,211,153,0.3)'}`; el.style.color = type === 'danger' ? 'var(--rose)' : 'var(--emerald)'; }
+    function resetBtn(btn) { btn.disabled = false; btn.textContent = btn.id === 'loginBtn' ? 'View Order' : btn.id === 'submitPaymentBtn' ? 'Submit' : 'Place Order'; }
+    function showMsg(id, msg, type) { const el = document.getElementById(id); el.innerHTML = msg; el.className = `alert alert-${type === 'danger' ? 'danger' : type === 'warning' ? 'warning' : 'success'} show`; el.classList.remove('d-none'); el.style.background = type === 'danger' ? 'rgba(244,63,94,0.15)' : type === 'warning' ? 'rgba(245,158,11,0.15)' : 'rgba(52,211,153,0.15)'; el.style.border = `1px solid ${type === 'danger' ? 'rgba(244,63,94,0.3)' : type === 'warning' ? 'rgba(245,158,11,0.3)' : 'rgba(52,211,153,0.3)'}`; el.style.color = type === 'danger' ? 'var(--rose)' : type === 'warning' ? 'var(--gold)' : 'var(--emerald)'; }
+    function hideMsg(id) { document.getElementById(id).className = 'alert d-none'; }
+    function showToast(msg, type) {
+      const t = document.getElementById('liveToast');
+      t.className = `toast align-items-center border-0 text-bg-${type === 'danger' ? 'danger' : type === 'warning' ? 'warning' : 'success'}`;
+      document.getElementById('toastMessage').textContent = msg;
+      new bootstrap.Toast(t).show();
+    }
+  </script>
+</body>
+</html>
