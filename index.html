@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Book Shelf</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1a3a5f;
+            --accent-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --sky-blue: #7dd3fc;
+            --gold: #f59e0b;
+            --coral: #f87171;
+            --emerald: #34d399;
+            --violet: #8b5cf6;
+            --rose: #f43f5e;
+            --dark: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; background: var(--dark); color: #fff; }
+        h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
+
+        /* NAVBAR */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        .navbar.scrolled { padding: 10px 0; box-shadow: 0 4px 30px rgba(59, 130, 246, 0.2); }
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand .brand-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--violet));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.75) !important;
+            font-weight: 500;
+            margin: 0 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover { color: var(--sky-blue) !important; }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -2px; left: 50%;
+            transform: translateX(-50%); width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--violet));
+            border-radius: 2px; transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 80%; }
+        .nav-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--violet));
+            color: #fff !important; border: none; padding: 8px 24px !important;
+            border-radius: 50px; font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5); }
+
+        /* HERO */
+        .hero-section {
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative; overflow: hidden;
+            background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 40%, #1a2744 70%, #0f172a 100%);
+        }
+        .hero-section::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+            border-radius: 50%; animation: pulse 8s ease-in-out infinite;
+        }
+        .hero-section::after {
+            content: ''; position: absolute; bottom: -30%; left: -10%;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+            border-radius: 50%; animation: pulse 10s ease-in-out infinite reverse;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
+
+        .floating-books { position: absolute; width: 100%; height: 100%; pointer-events: none; overflow: hidden; }
+        .floating-book {
+            position: absolute; font-size: 2rem; opacity: 0.08;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.08; } 90% { opacity: 0.08; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .hero-content { position: relative; z-index: 2; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 8px 20px; border-radius: 50px;
+            font-size: 0.85rem; color: var(--sky-blue);
+            margin-bottom: 25px; animation: fadeInUp 0.8s ease forwards;
+        }
+        .hero-badge .dot {
+            width: 8px; height: 8px; background: var(--emerald);
+            border-radius: 50%; animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .hero-title {
+            font-size: 4.5rem; font-weight: 800; line-height: 1.1;
+            margin-bottom: 15px; animation: fadeInUp 0.8s ease 0.2s forwards; opacity: 0;
+        }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent-blue), var(--sky-blue), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-title .accent { color: var(--gold); -webkit-text-fill-color: var(--gold); }
+
+        .hero-subtitle {
+            font-size: 1.15rem; color: rgba(255,255,255,0.65);
+            line-height: 1.8; max-width: 540px; margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.4s forwards; opacity: 0;
+        }
+
+        .hero-buttons {
+            display: flex; gap: 15px; flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s forwards; opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            color: #fff; border: none; padding: 14px 35px;
+            border-radius: 50px; font-weight: 600; font-size: 1rem;
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: all 0.4s ease; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            text-decoration: none; position: relative; overflow: hidden;
+        }
+        .btn-primary-custom::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-primary-custom:hover::before { left: 100%; }
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6); color: #fff;
+        }
+
+        .btn-secondary-custom {
+            background: transparent; color: #fff;
+            border: 2px solid rgba(255,255,255,0.25);
+            padding: 12px 35px; border-radius: 50px;
+            font-weight: 600; font-size: 1rem;
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: all 0.4s ease; text-decoration: none;
+        }
+        .btn-secondary-custom:hover {
+            background: rgba(255,255,255,0.1); border-color: var(--sky-blue);
+            color: var(--sky-blue); transform: translateY(-3px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--dark); border: none; padding: 14px 35px;
+            border-radius: 50px; font-weight: 700; font-size: 1rem;
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+            text-decoration: none;
+        }
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.6); color: var(--dark);
+        }
+
+        .hero-visual {
+            position: relative; z-index: 2;
+            animation: fadeInUp 1s ease 0.4s forwards; opacity: 0;
+        }
+        .book-stack { position: relative; width: 380px; height: 500px; margin: 0 auto; }
+        .book-3d {
+            position: absolute; width: 200px; height: 290px;
+            border-radius: 8px 16px 16px 8px;
+            box-shadow: -5px 5px 20px rgba(0,0,0,0.4), inset 3px 0 0 rgba(255,255,255,0.1);
+            transition: all 0.5s ease;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px; text-align: center;
+        }
+        .book-3d:nth-child(1) { background: linear-gradient(135deg, #3b82f6, #1d4ed8); top: 0; left: 0; transform: rotate(-12deg); z-index: 1; }
+        .book-3d:nth-child(2) { background: linear-gradient(135deg, #f59e0b, #d97706); top: 20px; left: 90px; transform: rotate(-5deg); z-index: 2; }
+        .book-3d:nth-child(3) { background: linear-gradient(135deg, #8b5cf6, #6d28d9); top: 40px; left: 160px; transform: rotate(5deg); z-index: 3; }
+        .book-3d:nth-child(4) { background: linear-gradient(135deg, #34d399, #059669); top: 80px; left: 120px; transform: rotate(10deg); z-index: 4; }
+        .book-3d:nth-child(5) { background: linear-gradient(135deg, #f87171, #dc2626); top: 130px; left: 50px; transform: rotate(-8deg); z-index: 5; }
+        .book-3d .book-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .book-3d .book-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; line-height: 1.3; margin-bottom: 5px; }
+        .book-3d .book-author { font-size: 0.7rem; opacity: 0.8; font-family: 'Poppins', sans-serif; }
+        .book-stack:hover .book-3d:nth-child(1) { transform: rotate(-18deg) translateX(-20px); }
+        .book-stack:hover .book-3d:nth-child(2) { transform: rotate(-8deg) translateY(-10px); }
+        .book-stack:hover .book-3d:nth-child(3) { transform: rotate(12deg) translateX(20px); }
+        .book-stack:hover .book-3d:nth-child(4) { transform: rotate(18deg) translateX(10px) translateY(10px); }
+        .book-stack:hover .book-3d:nth-child(5) { transform: rotate(-15deg) translateY(15px); }
+
+        .float-element { position: absolute; border-radius: 50%; z-index: 1; }
+        .float-element.el-1 {
+            width: 300px; height: 300px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+            top: 10%; right: 5%; animation: float 6s ease-in-out infinite;
+        }
+        .float-element.el-2 {
+            width: 200px; height: 200px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(248,113,113,0.06));
+            bottom: 15%; left: 5%; animation: float 8s ease-in-out infinite reverse;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+
+        .stats-bar {
+            display: flex; gap: 40px; margin-top: 50px;
+            animation: fadeInUp 0.8s ease 0.8s forwards; opacity: 0;
+        }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--sky-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* FEATURES */
+        .features-section {
+            padding: 100px 0; background: linear-gradient(180deg, var(--dark), #0c1a33);
+            position: relative;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-tag {
+            display: inline-block; background: rgba(59, 130, 246, 0.12);
+            color: var(--accent-blue); padding: 6px 20px; border-radius: 50px;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 15px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .section-title { font-size: 3rem; font-weight: 800; margin-bottom: 15px; }
+        .section-desc { color: rgba(255,255,255,0.55); max-width: 600px; margin: 0 auto; font-size: 1.05rem; }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px; padding: 40px 30px; text-align: center;
+            transition: all 0.4s ease; position: relative; overflow: hidden; height: 100%;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 20px 20px 0 0; transition: height 0.4s ease;
+        }
+        .feature-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent-blue), var(--sky-blue)); }
+        .feature-card:nth-child(2)::before { background: linear-gradient(90deg, var(--gold), #fbbf24); }
+        .feature-card:nth-child(3)::before { background: linear-gradient(90deg, var(--violet), #a78bfa); }
+        .feature-card:nth-child(4)::before { background: linear-gradient(90deg, var(--emerald), #6ee7b7); }
+        .feature-card:nth-child(5)::before { background: linear-gradient(90deg, var(--coral), #fca5a5); }
+        .feature-card:nth-child(6)::before { background: linear-gradient(90deg, var(--rose), #fb7185); }
+        .feature-card:hover {
+            transform: translateY(-10px); background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .feature-card:hover::before { height: 4px; }
+        .feature-icon {
+            width: 70px; height: 70px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin: 0 auto 20px; transition: all 0.4s ease;
+        }
+        .feature-card:nth-child(1) .feature-icon { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .feature-card:nth-child(2) .feature-icon { background: rgba(245,158,11,0.15); color: var(--gold); }
+        .feature-card:nth-child(3) .feature-icon { background: rgba(139,92,246,0.15); color: var(--violet); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(52,211,153,0.15); color: var(--emerald); }
+        .feature-card:nth-child(5) .feature-icon { background: rgba(248,113,113,0.15); color: var(--coral); }
+        .feature-card:nth-child(6) .feature-icon { background: rgba(244,63,94,0.15); color: var(--rose); }
+        .feature-card:hover .feature-icon { transform: scale(1.1) rotate(5deg); }
+        .feature-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+        .feature-desc { color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1.7; }
+
+        /* CTA */
+        .cta-section { padding: 100px 0; background: linear-gradient(180deg, #0c1a33, var(--dark)); position: relative; }
+        .cta-card {
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12));
+            border: 1px solid rgba(59,130,246,0.2); border-radius: 30px;
+            padding: 60px; position: relative; overflow: hidden;
+        }
+        .cta-card::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(59,130,246,0.15), transparent);
+            border-radius: 50%;
+        }
+        .cta-card::after {
+            content: ''; position: absolute; bottom: -30%; left: -10%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(139,92,246,0.1), transparent);
+            border-radius: 50%;
+        }
+        .cta-title { font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; position: relative; z-index: 1; }
+        .cta-desc { color: rgba(255,255,255,0.6); font-size: 1.1rem; margin-bottom: 35px; position: relative; z-index: 1; }
+        .cta-buttons { display: flex; gap: 15px; flex-wrap: wrap; position: relative; z-index: 1; }
+
+        .btn-newsletter {
+            background: linear-gradient(135deg, var(--emerald), #059669);
+            color: #fff; border: none; padding: 14px 35px; border-radius: 50px;
+            font-weight: 600; font-size: 1rem; display: inline-flex;
+            align-items: center; gap: 10px; transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(52, 211, 153, 0.4);
+            text-decoration: none; position: relative; overflow: hidden;
+        }
+        .btn-newsletter::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-newsletter:hover::before { left: 100%; }
+        .btn-newsletter:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.6); color: #fff;
+        }
+
+        /* NEWSLETTER */
+        .newsletter-section {
+            padding: 80px 0; background: linear-gradient(135deg, var(--primary-blue), #1e3a5f);
+            position: relative; overflow: hidden;
+        }
+        .newsletter-section::before {
+            content: ''; position: absolute; top: -50%; left: -20%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(59,130,246,0.2), transparent);
+            border-radius: 50%;
+        }
+        .newsletter-form { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
+        .newsletter-input-group { display: flex; gap: 10px; margin-top: 30px; }
+        .newsletter-input {
+            flex: 1; padding: 16px 25px; border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08); color: #fff;
+            font-size: 1rem; font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .newsletter-input::placeholder { color: rgba(255,255,255,0.4); }
+        .newsletter-input:focus {
+            outline: none; border-color: var(--accent-blue);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 20px rgba(59,130,246,0.2);
+        }
+        .btn-subscribe {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--dark); border: none; padding: 16px 35px;
+            border-radius: 50px; font-weight: 700; font-size: 1rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: all 0.4s ease; white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+        }
+        .btn-subscribe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245,158,11,0.6); color: var(--dark);
+        }
+
+        /* FOOTER */
+        .footer { padding: 60px 0 30px; background: #060d18; border-top: 1px solid rgba(255,255,255,0.05); }
+        .footer-brand {
+            font-family: 'Playfair Display', serif; font-size: 1.6rem;
+            font-weight: 800; color: #fff; display: flex;
+            align-items: center; gap: 10px; margin-bottom: 15px;
+        }
+        .footer-desc { color: rgba(255,255,255,0.4); font-size: 0.9rem; line-height: 1.7; max-width: 300px; }
+        .footer-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: #fff; }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a {
+            color: rgba(255,255,255,0.4); text-decoration: none;
+            font-size: 0.9rem; transition: all 0.3s ease;
+        }
+        .footer-links a:hover { color: var(--sky-blue); padding-left: 5px; }
+        .social-links { display: flex; gap: 12px; }
+        .social-link {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);
+            font-size: 1.1rem; transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .social-link:hover {
+            background: var(--accent-blue); color: #fff;
+            transform: translateY(-3px); border-color: var(--accent-blue);
+        }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 25px; margin-top: 40px; text-align: center;
+            color: rgba(255,255,255,0.3); font-size: 0.85rem;
+        }
+
+        /* MODAL */
+        .modal-content {
+            background: linear-gradient(135deg, #1a2744, #0f172a);
+            border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; color: #fff;
+        }
+        .modal-header { border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .modal-footer { border-top: 1px solid rgba(255,255,255,0.08); }
+        .btn-close { filter: invert(1); }
+        .form-control {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 12px 18px; border-radius: 12px;
+        }
+        .form-control:focus {
+            background: rgba(255,255,255,0.08); border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(59,130,246,0.2); color: #fff;
+        }
+        .form-control::placeholder { color: rgba(255,255,255,0.35); }
+        .form-label { color: rgba(255,255,255,0.7); font-weight: 500; }
+
+        /* SCROLL ANIMATIONS */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* SCROLL TO TOP */
+        .scroll-top {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--violet));
+            border: none; border-radius: 15px; color: #fff;
+            font-size: 1.2rem; display: flex; align-items: center;
+            justify-content: center; cursor: pointer;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4); z-index: 999;
+        }
+        .scroll-top.visible { opacity: 1; visibility: visible; }
+        .scroll-top:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(59,130,246,0.6); }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .hero-title { font-size: 3rem; }
+            .book-stack { width: 300px; height: 400px; margin-top: 50px; }
+            .book-3d { width: 150px; height: 220px; }
+            .stats-bar { justify-content: center; }
+            .cta-card { padding: 40px 25px; }
+            .cta-title { font-size: 2rem; }
+        }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.4rem; }
+            .section-title { font-size: 2.2rem; }
+            .hero-buttons { justify-content: center; }
+            .newsletter-input-group { flex-direction: column; }
+            .btn-subscribe { justify-content: center; }
+            .cta-buttons { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <span class="brand-icon"><i class="bi bi-book-half"></i></span>
+                The Book Shelf
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center gap-2">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="membership.html">Membership</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#newsletter">Newsletter</a></li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-btn" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">
+                            <i class="bi bi-cart3 me-1"></i> Order Now
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero-section" id="home">
+        <div class="floating-books" id="floatingBooks"></div>
+        <div class="float-element el-1"></div>
+        <div class="float-element el-2"></div>
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6 hero-content">
+                    <div class="hero-badge"><span class="dot"></span> Now Open — Discover Your Next Adventure</div>
+                    <h1 class="hero-title">
+                        Welcome to<br><span class="highlight">The Book</span><br><span class="accent">Shelf</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Step into a world where stories come alive. <strong style="color:#fff;">The Book Shelf</strong> 
+                        is your gateway to thousands of captivating reads — from timeless classics to the latest 
+                        bestsellers. Whether you're a passionate reader or just beginning your journey, we have 
+                        the perfect book waiting for you on our shelves.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#orderModal">
+                            <i class="bi bi-cart-plus"></i> Order a Book
+                        </a>
+                        <a href="membership.html" class="btn-gold"><i class="bi bi-star-fill"></i> Get Membership</a>
+                        <a href="#newsletter" class="btn-secondary-custom"><i class="bi bi-envelope-heart"></i> Newsletter</a>
+                    </div>
+                    <div class="stats-bar">
+                        <div class="stat-item"><div class="stat-number" id="counter1">50K+</div><div class="stat-label">Books</div></div>
+                        <div class="stat-item"><div class="stat-number" id="counter2">12K+</div><div class="stat-label">Members</div></div>
+                        <div class="stat-item"><div class="stat-number" id="counter3">200+</div><div class="stat-label">Authors</div></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 hero-visual d-none d-lg-block">
+                    <div class="book-stack">
+                        <div class="book-3d"><span class="book-icon">🚀</span><div class="book-title">The Great Adventure</div><div class="book-author">by J. Smith</div></div>
+                        <div class="book-3d"><span class="book-icon">🔮</span><div class="book-title">Mystic Realms</div><div class="book-author">by A. Johnson</div></div>
+                        <div class="book-3d"><span class="book-icon">🌍</span><div class="book-title">World Explorer</div><div class="book-author">by R. Davis</div></div>
+                        <div class="book-3d"><span class="book-icon">💡</span><div class="book-title">Bright Minds</div><div class="book-author">by L. Chen</div></div>
+                        <div class="book-3d"><span class="book-icon">❤️</span><div class="book-title">Love & Letters</div><div class="book-author">by M. Williams</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">✨ Why Choose Us</span>
+                <h2 class="section-title">What Makes Us <span style="color: var(--accent-blue);">Special</span></h2>
+                <p class="section-desc">We're more than just a bookstore — we're a community of readers, dreamers, and storytellers.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-collection"></i></div><h3 class="feature-title">Vast Collection</h3><p class="feature-desc">Over 50,000 books across every genre — fiction, non-fiction, sci-fi, romance, and more.</p></div></div>
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-truck"></i></div><h3 class="feature-title">Fast Delivery</h3><p class="feature-desc">Free shipping on orders over $25. Get your books delivered within 2-3 business days.</p></div></div>
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-shield-check"></i></div><h3 class="feature-title">Authentic Books</h3><p class="feature-desc">Every book is sourced directly from publishers — 100% genuine, guaranteed.</p></div></div>
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-people"></i></div><h3 class="feature-title">Community Events</h3><p class="feature-desc">Join book clubs, author meetups, and reading challenges with fellow book lovers.</p></div></div>
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-percent"></i></div><h3 class="feature-title">Exclusive Discounts</h3><p class="feature-desc">Members enjoy up to 40% off on bestsellers and new releases every month.</p></div></div>
+                <div class="col-md-6 col-lg-4 reveal"><div class="feature-card"><div class="feature-icon"><i class="bi bi-headset"></i></div><h3 class="feature-title">24/7 Support</h3><p class="feature-desc">Our friendly team is always ready to help you find your next favorite read.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-card text-center reveal">
+                <h2 class="cta-title">Ready to Start Your <span style="color: var(--accent-blue);">Reading Journey</span>?</h2>
+                <p class="cta-desc">Browse our collection, order your favorite books, or subscribe to our newsletter for weekly recommendations.</p>
+                <div class="cta-buttons justify-content-center">
+                    <a href="#" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#orderModal"><i class="bi bi-bag-check"></i> Order a Book Now</a>
+                    <a href="membership.html" class="btn-gold"><i class="bi bi-crown"></i> Become a Member</a>
+                    <a href="#newsletter" class="btn-newsletter"><i class="bi bi-envelope"></i> Subscribe Newsletter</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="newsletter-section" id="newsletter">
+        <div class="container">
+            <div class="text-center reveal">
+                <span class="section-tag" style="background: rgba(255,255,255,0.1); color: var(--sky-blue); border-color: rgba(255,255,255,0.2);">📬 Stay Updated</span>
+                <h2 class="section-title">Get Weekly <span style="color: var(--sky-blue);">Book Picks</span></h2>
+                <p class="section-desc" style="color: rgba(255,255,255,0.6);">Subscribe to our newsletter and receive handpicked book recommendations, exclusive deals, and author interviews directly in your inbox.</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <div class="newsletter-input-group">
+                        <input type="email" class="newsletter-input" placeholder="Enter your email address" required>
+                        <button type="submit" class="btn-subscribe"><i class="bi bi-send"></i> Subscribe</button>
+                    </div>
+                </form>
+                <p style="color: rgba(255,255,255,0.35); font-size: 0.8rem; margin-top: 15px;"><i class="bi bi-shield-lock"></i> We respect your privacy. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand"><i class="bi bi-book-half" style="color: var(--accent-blue);"></i> The Book Shelf</div>
+                    <p class="footer-desc">Your trusted companion for discovering incredible stories. We believe every book has the power to change a life.</p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Quick Links</h4><ul class="footer-links"><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="membership.html">Membership</a></li><li><a href="#newsletter">Newsletter</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Categories</h4><ul class="footer-links"><li><a href="#">Fiction</a></li><li><a href="#">Non-Fiction</a></li><li><a href="#">Science Fiction</a></li><li><a href="#">Romance</a></li><li><a href="#">Biography</a></li></ul></div>
+                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Contact Us</h4><ul class="footer-links"><li><a href="#"><i class="bi bi-geo-alt me-2"></i>123 Literary Lane, Book City</a></li><li><a href="#"><i class="bi bi-envelope me-2"></i>hello@thebookshelf.com</a></li><li><a href="#"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</a></li><li><a href="#"><i class="bi bi-clock me-2"></i>Mon - Sat: 9AM - 9PM</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2026 The Book Shelf. All rights reserved. Made with <i class="bi bi-heart-fill" style="color: var(--rose);"></i> for book lovers.</p></div>
+        </div>
+    </footer>
+
+    <!-- ORDER MODAL -->
+    <div class="modal fade" id="orderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cart-plus me-2" style="color: var(--accent-blue);"></i>Order a Book</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <div class="mb-3"><label class="form-label">Book Title</label><input type="text" class="form-control" placeholder="Enter book title or ISBN" required></div>
+                    <div class="mb-3"><label class="form-label">Your Name</label><input type="text" class="form-control" placeholder="Full name" required></div>
+                    <div class="mb-3"><label class="form-label">Email Address</label><input type="email" class="form-control" placeholder="your@email.com" required></div>
+                    <div class="mb-3"><label class="form-label">Delivery Address</label><textarea class="form-control" rows="2" placeholder="Enter your delivery address" required></textarea></div>
+                    <button type="submit" class="btn-primary-custom w-100 justify-content-center"><i class="bi bi-bag-check"></i> Place Order</button>
+                </form>
+            </div>
+        </div></div>
+    </div>
+
+    <!-- SCROLL TO TOP -->
+    <button class="scroll-top" id="scrollTop"><i class="bi bi-arrow-up"></i></button>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Floating Books
+        const floatingBooksContainer = document.getElementById('floatingBooks');
+        const bookEmojis = ['📖', '📚', '📕', '📗', '📘', '📙', '📓', '📔'];
+        function createFloatingBook() {
+            const book = document.createElement('div');
+            book.classList.add('floating-book');
+            book.textContent = bookEmojis[Math.floor(Math.random() * bookEmojis.length)];
+            book.style.left = Math.random() * 100 + '%';
+            book.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+            book.style.animationDuration = (Math.random() * 15 + 15) + 's';
+            book.style.animationDelay = Math.random() * 5 + 's';
+            floatingBooksContainer.appendChild(book);
+            setTimeout(() => book.remove(), 30000);
+        }
+        for (let i = 0; i < 12; i++) setTimeout(createFloatingBook, i * 2000);
+        setInterval(createFloatingBook, 3000);
+
+        // Navbar scroll
+        const navbar = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        // Scroll reveal
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Scroll to top
+        const scrollTopBtn = document.getElementById('scrollTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) scrollTopBtn.classList.add('visible');
+            else scrollTopBtn.classList.remove('visible');
+        });
+        scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const navbarCollapse = document.querySelector('.navbar-collapse');
+                    if (navbarCollapse.classList.contains('show')) new bootstrap.Collapse(navbarCollapse).hide();
+                }
+            });
+        });
+
+        // Newsletter form
+        document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            const btn = this.querySelector('.btn-subscribe');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Subscribed!';
+            btn.style.background = 'linear-gradient(135deg, var(--emerald), #059669)';
+            setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; this.reset(); }, 3000);
+            alert(`🎉 Welcome to The Book Shelf newsletter!\n\nWe'll send book recommendations to: ${email}`);
+        });
+
+        // Order form
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
+            modal.hide();
+            setTimeout(() => { alert('📚 Order placed successfully!\n\nYou will receive a confirmation email shortly. Thank you for choosing The Book Shelf!'); this.reset(); }, 500);
+        });
+
+        // Counter animation
+        function animateCounter(element, target, suffix = '') {
+            let current = 0; const increment = target / 60;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) { current = target; clearInterval(timer); }
+                element.textContent = Math.floor(current).toLocaleString() + suffix;
+            }, 30);
+        }
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(document.getElementById('counter1'), 50, 'K+');
+                    animateCounter(document.getElementById('counter2'), 12, 'K+');
+                    animateCounter(document.getElementById('counter3'), 200, '+');
+                    heroObserver.disconnect();
+                }
+            });
+        });
+        heroObserver.observe(document.querySelector('.hero-section'));
+    </script>
+</body>
+</html>
