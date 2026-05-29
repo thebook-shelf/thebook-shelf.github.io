@@ -12,55 +12,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1a3a5f;
-            --accent-blue: #3b82f6;
-            --light-blue: #dbeafe;
-            --sky-blue: #7dd3fc;
-            --gold: #f59e0b;
-            --coral: #f87171;
-            --emerald: #34d399;
-            --violet: #8b5cf6;
-            --rose: #f43f5e;
-            --dark: #0f172a;
+            --primary-blue: #1a3a5f; --accent-blue: #3b82f6; --light-blue: #dbeafe;
+            --sky-blue: #7dd3fc; --gold: #f59e0b; --coral: #f87171; --emerald: #34d399;
+            --violet: #8b5cf6; --rose: #f43f5e; --dark: #0f172a;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; background: var(--dark); color: #fff; }
         h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
 
         /* NAVBAR */
         .navbar {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
-            transition: all 0.4s ease;
-            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+            padding: 15px 0; border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+            transition: all 0.4s ease; z-index: 1000;
         }
         .navbar.scrolled { padding: 10px 0; box-shadow: 0 4px 30px rgba(59, 130, 246, 0.2); }
         .navbar-brand {
-            font-family: 'Playfair Display', serif;
-            font-weight: 800;
-            font-size: 1.8rem;
-            color: #fff !important;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.8rem;
+            color: #fff !important; display: flex; align-items: center; gap: 10px;
         }
         .navbar-brand .brand-icon {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--violet));
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--accent-blue), var(--violet));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
         }
         .nav-link {
-            color: rgba(255,255,255,0.75) !important;
-            font-weight: 500;
-            margin: 0 8px;
-            position: relative;
-            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.75) !important; font-weight: 500; margin: 0 8px;
+            position: relative; transition: all 0.3s ease;
         }
         .nav-link:hover { color: var(--sky-blue) !important; }
         .nav-link::after {
@@ -74,8 +52,7 @@
             background: linear-gradient(135deg, var(--accent-blue), var(--violet));
             color: #fff !important; border: none; padding: 8px 24px !important;
             border-radius: 50px; font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
         .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5); }
 
@@ -113,11 +90,9 @@
         .hero-content { position: relative; z-index: 2; }
         .hero-badge {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 8px 20px; border-radius: 50px;
-            font-size: 0.85rem; color: var(--sky-blue);
-            margin-bottom: 25px; animation: fadeInUp 0.8s ease forwards;
+            background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 8px 20px; border-radius: 50px; font-size: 0.85rem;
+            color: var(--sky-blue); margin-bottom: 25px; animation: fadeInUp 0.8s ease forwards;
         }
         .hero-badge .dot {
             width: 8px; height: 8px; background: var(--emerald);
@@ -492,7 +467,7 @@
                     <li class="nav-item"><a class="nav-link" href="membership.html">Membership</a></li>
                     <li class="nav-item"><a class="nav-link" href="#newsletter">Newsletter</a></li>
                     <li class="nav-item ms-2">
-                        <a class="nav-link btn-btn" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">
+                        <a class="nav-link btn-btn" href="order.html">
                             <i class="bi bi-cart3 me-1"></i> Order Now
                         </a>
                     </li>
@@ -520,9 +495,7 @@
                         the perfect book waiting for you on our shelves.
                     </p>
                     <div class="hero-buttons">
-                        <a href="#" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#orderModal">
-                            <i class="bi bi-cart-plus"></i> Order a Book
-                        </a>
+                        <a href="order.html" class="btn-primary-custom"><i class="bi bi-cart-plus"></i> Order a Book</a>
                         <a href="membership.html" class="btn-gold"><i class="bi bi-star-fill"></i> Get Membership</a>
                         <a href="#newsletter" class="btn-secondary-custom"><i class="bi bi-envelope-heart"></i> Newsletter</a>
                     </div>
@@ -571,7 +544,7 @@
                 <h2 class="cta-title">Ready to Start Your <span style="color: var(--accent-blue);">Reading Journey</span>?</h2>
                 <p class="cta-desc">Browse our collection, order your favorite books, or subscribe to our newsletter for weekly recommendations.</p>
                 <div class="cta-buttons justify-content-center">
-                    <a href="#" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#orderModal"><i class="bi bi-bag-check"></i> Order a Book Now</a>
+                    <a href="order.html" class="btn-primary-custom"><i class="bi bi-bag-check"></i> Order a Book Now</a>
                     <a href="membership.html" class="btn-gold"><i class="bi bi-crown"></i> Become a Member</a>
                     <a href="#newsletter" class="btn-newsletter"><i class="bi bi-envelope"></i> Subscribe Newsletter</a>
                 </div>
@@ -611,29 +584,13 @@
                         <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
                     </div>
                 </div>
-                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Quick Links</h4><ul class="footer-links"><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="membership.html">Membership</a></li><li><a href="#newsletter">Newsletter</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Quick Links</h4><ul class="footer-links"><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="membership.html">Membership</a></li><li><a href="order.html">Order Books</a></li><li><a href="#newsletter">Newsletter</a></li></ul></div>
                 <div class="col-lg-2 col-md-4"><h4 class="footer-title">Categories</h4><ul class="footer-links"><li><a href="#">Fiction</a></li><li><a href="#">Non-Fiction</a></li><li><a href="#">Science Fiction</a></li><li><a href="#">Romance</a></li><li><a href="#">Biography</a></li></ul></div>
                 <div class="col-lg-4 col-md-4"><h4 class="footer-title">Contact Us</h4><ul class="footer-links"><li><a href="#"><i class="bi bi-geo-alt me-2"></i>123 Literary Lane, Book City</a></li><li><a href="#"><i class="bi bi-envelope me-2"></i>hello@thebookshelf.com</a></li><li><a href="#"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</a></li><li><a href="#"><i class="bi bi-clock me-2"></i>Mon - Sat: 9AM - 9PM</a></li></ul></div>
             </div>
             <div class="footer-bottom"><p>&copy; 2026 The Book Shelf. All rights reserved. Made with <i class="bi bi-heart-fill" style="color: var(--rose);"></i> for book lovers.</p></div>
         </div>
     </footer>
-
-    <!-- ORDER MODAL -->
-    <div class="modal fade" id="orderModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cart-plus me-2" style="color: var(--accent-blue);"></i>Order a Book</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <form id="orderForm">
-                    <div class="mb-3"><label class="form-label">Book Title</label><input type="text" class="form-control" placeholder="Enter book title or ISBN" required></div>
-                    <div class="mb-3"><label class="form-label">Your Name</label><input type="text" class="form-control" placeholder="Full name" required></div>
-                    <div class="mb-3"><label class="form-label">Email Address</label><input type="email" class="form-control" placeholder="your@email.com" required></div>
-                    <div class="mb-3"><label class="form-label">Delivery Address</label><textarea class="form-control" rows="2" placeholder="Enter your delivery address" required></textarea></div>
-                    <button type="submit" class="btn-primary-custom w-100 justify-content-center"><i class="bi bi-bag-check"></i> Place Order</button>
-                </form>
-            </div>
-        </div></div>
-    </div>
 
     <!-- SCROLL TO TOP -->
     <button class="scroll-top" id="scrollTop"><i class="bi bi-arrow-up"></i></button>
@@ -703,14 +660,6 @@
             btn.style.background = 'linear-gradient(135deg, var(--emerald), #059669)';
             setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; this.reset(); }, 3000);
             alert(`🎉 Welcome to The Book Shelf newsletter!\n\nWe'll send book recommendations to: ${email}`);
-        });
-
-        // Order form
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
-            modal.hide();
-            setTimeout(() => { alert('📚 Order placed successfully!\n\nYou will receive a confirmation email shortly. Thank you for choosing The Book Shelf!'); this.reset(); }, 500);
         });
 
         // Counter animation
