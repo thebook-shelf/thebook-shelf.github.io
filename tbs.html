@@ -13,8 +13,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // ⚠️ REPLACE WITH YOUR EMAILJS PUBLIC KEY
-            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // ⚠️ REPLACE WITH YOUR KEY
         })();
     </script>
     
@@ -173,7 +172,7 @@
         import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-             apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
+            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
   authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
   projectId: "the-book-shelf-8b4d5",
   storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
@@ -256,7 +255,7 @@
             window.scrollTo(0, 0);
         };
 
-        // --- Views (Simplified for brevity, all previous logic intact) ---
+        // --- Views ---
         function renderHome(container) {
             container.innerHTML = `
                 <section class="relative bg-charcoal-900 text-cream-50 py-20 md:py-32 overflow-hidden">
@@ -293,8 +292,15 @@
                         <div id="featuredBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
                     </div>
                 </section>
+                <section class="bg-cream-100 py-16 border-t border-cream-200">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Explore All Books</h2>
+                        <div id="allBooksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+                    </div>
+                </section>
             `;
             window.fetchBooks(true);
+            window.fetchAllBooksForHome();
         }
 
         function renderShop(container, categoryFilter = 'All') {
@@ -564,13 +570,106 @@
                 <div class="flex gap-4 mb-6 border-b border-cream-200 overflow-x-auto">
                     <button onclick="window.showAdminTab('orders')" id="tab-orders" class="px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap">Manage Orders</button>
                     <button onclick="window.showAdminTab('books')" id="tab-books" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Manage Books</button>
-                    <button onclick="window.showAdminTab('newsletter')" id="tab-newsletter" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Send Newsletter</button>
                 </div>
                 <div id="adminContent" class="bg-white p-6 rounded-xl shadow-sm border border-cream-200"><p class="text-center text-gray-500">Loading data...</p></div>
             </div>`;
             window.loadAdminStats();
             window.showAdminTab('orders');
         }
+
+        // --- NEW: Print Receipt Function ---
+        window.printReceipt = function(order) {
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            const date = new Date(order.createdAt).toLocaleString();
+            const itemsHtml = order.items.map(item => `
+                <tr>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.title}</td>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price}</td>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price * item.qty}</td>
+                </tr>
+            `).join('');
+
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Receipt - ${order.orderId}</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; padding: 20px; max-width: 600px; margin: 0 auto; color: #333; }
+                        .header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 10px; margin-bottom: 15px; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .header p { margin: 4px 0; font-size: 14px; }
+                        .details { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+                        .details p { margin: 4px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
+                        th { text-align: left; border-bottom: 2px solid #333; padding: 8px 4px; }
+                        .totals { text-align: right; font-size: 14px; }
+                        .totals p { margin: 4px 0; }
+                        .total-final { font-size: 18px; font-weight: bold; border-top: 2px dashed #333; padding-top: 8px; margin-top: 8px; }
+                        .footer { text-align: center; margin-top: 30px; border-top: 2px dashed #333; padding-top: 10px; font-size: 14px; }
+                        .no-print { text-align: center; margin-top: 30px; }
+                        .btn { padding: 10px 20px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; margin: 0 5px; }
+                        .btn-print { background: #333; color: white; }
+                        .btn-close { background: #eee; color: #333; }
+                        @media print {
+                            body { padding: 0; }
+                            .no-print { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>The Book Shelf</h1>
+                        <p>123 Literary Lane, Kathmandu, Nepal</p>
+                        <p>Phone: +977 9800000000 | support@thebookshelf.com</p>
+                    </div>
+                    <div class="details">
+                        <p><strong>Order ID:</strong> ${order.orderId}</p>
+                        <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p><strong>Customer:</strong> ${order.userName}</p>
+                        <p><strong>Email:</strong> ${order.userEmail}</p>
+                        <p><strong>Address:</strong> ${order.deliveryAddress}</p>
+                        <p><strong>Payment:</strong> ${order.paymentMethod} | <strong>Status:</strong> ${order.status}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="text-align: center;">Qty</th>
+                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                    <div class="totals">
+                        <p>Subtotal: Rs. ${order.subtotal}</p>
+                        ${order.discount > 0 ? `<p>Discount: - Rs. ${order.discount}</p>` : ''}
+                        <p>Shipping: Rs. ${order.shippingCost}</p>
+                        <p class="total-final">Total: Rs. ${order.totalAmount}</p>
+                    </div>
+                    <div class="footer">
+                        <p>Thank you for shopping with The Book Shelf!</p>
+                        <p>Happy Reading!</p>
+                    </div>
+                    <div class="no-print">
+                        <button class="btn btn-print" onclick="window.print()">🖨️ Print Receipt</button>
+                        <button class="btn btn-close" onclick="window.close()">Close</button>
+                    </div>
+                </body>
+                </html>
+            `;
+            printWindow.document.write(html);
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+            }, 500);
+        };
 
         // --- Firebase Logic & Actions ---
         window.fetchBooks = async function(isFeatured, category = 'All') {
@@ -610,6 +709,39 @@
             } catch (error) { console.error("Error fetching books:", error); }
         };
 
+        window.fetchAllBooksForHome = async function() {
+            try {
+                const q = query(collection(db, "books"), limit(8));
+                const querySnapshot = await getDocs(q);
+                const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
+                const targetEl = document.getElementById('allBooksGrid');
+                if (!targetEl) return;
+                if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books available.</p>`; return; }
+                targetEl.innerHTML = books.map(book => {
+                    const isOutOfStock = book.stock <= 0;
+                    const discountPercent = getDiscountPercent(book.price, book.discountPrice);
+                    return `<div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
+                        <div class="relative h-64 overflow-hidden bg-gray-100">
+                            <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
+                            ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
+                            <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
+                            <p class="text-sm text-gray-500 mb-3">${book.author}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-charcoal-900">Rs. ${book.discountPrice || book.price}</span>
+                                <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
+                                    <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (error) { console.error("Error fetching all books for home:", error); }
+        };
+
         window.applyShopFilters = function() { window.router('shop', document.getElementById('filterCategory').value); };
         window.showBookDetails = function(bookId) { const book = window.currentBooks.find(b => b.id === bookId); if (book) renderBookDetails(document.getElementById('app'), book); };
         
@@ -639,7 +771,6 @@
             window.saveCart(); window.router('cart');
         };
 
-        // --- NEW: Checkout with AUTOMATIC EMAIL ---
         window.handleCheckout = async function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -659,70 +790,37 @@
             const orderId = 'ORD-' + Date.now();
 
             const orderData = {
-                orderId: orderId,
-                trackingCode: trackingCode,
-                userId: isGuest ? 'guest' : window.state.user.uid,
-                userEmail: userEmail,
-                userName: userName,
-                items: window.state.cart,
-                totalAmount: subtotal - discount + finalShipping,
-                subtotal: subtotal,
-                shippingCost: finalShipping,
-                discount: discount,
-                paymentMethod: formData.get('payment'),
-                deliveryAddress: formData.get('address'),
-                status: 'Pending',
-                createdAt: new Date().toISOString()
+                orderId: orderId, trackingCode: trackingCode, userId: isGuest ? 'guest' : window.state.user.uid,
+                userEmail: userEmail, userName: userName, items: window.state.cart,
+                totalAmount: subtotal - discount + finalShipping, subtotal: subtotal, shippingCost: finalShipping, discount: discount,
+                paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', createdAt: new Date().toISOString()
             };
 
             if (orderData.paymentMethod === 'eSewa' || orderData.paymentMethod === 'Khalti') alert('Redirecting to ' + orderData.paymentMethod + '... (Mock Integration)');
 
             try {
-                // 1. Save order to Firestore
                 await addDoc(collection(db, "orders"), orderData);
                 
-                // 2. Format items for email
                 const itemsList = orderData.items.map(i => `• ${i.title} (Qty: ${i.qty}) - Rs. ${i.price}`).join('\n');
-
-                // 3. Send Automatic Order Confirmation Email
                 try {
-                    // ⚠️ REPLACE WITH YOUR ORDER TEMPLATE ID
                     const orderTemplateId = "YOUR_ORDER_TEMPLATE_ID"; 
                     const serviceId = "YOUR_EMAILJS_SERVICE_ID";
-
                     if (orderTemplateId !== "YOUR_ORDER_TEMPLATE_ID") {
                         await emailjs.send(serviceId, orderTemplateId, {
-                            to_email: userEmail,
-                            customer_name: userName,
-                            order_id: orderId,
-                            tracking_code: trackingCode,
-                            total_amount: orderData.totalAmount,
-                            items_list: itemsList,
-                            payment_method: orderData.paymentMethod
+                            to_email: userEmail, customer_name: userName, order_id: orderId, tracking_code: trackingCode,
+                            total_amount: orderData.totalAmount, items_list: itemsList, payment_method: orderData.paymentMethod
                         });
-                        console.log("Order confirmation email sent successfully to:", userEmail);
-                    } else {
-                        console.warn("EmailJS Order Template ID not configured. Email skipped.");
                     }
-                } catch (emailError) {
-                    console.error("Failed to send order email:", emailError);
-                    // We don't block the order success if the email fails, we just log it.
-                }
+                } catch (emailError) { console.error("Failed to send order email:", emailError); }
 
-                // 4. Clear cart and show success
-                window.state.cart = [];
-                window.saveCart();
-                
+                window.state.cart = []; window.saveCart();
                 const trackMsg = isGuest 
                     ? `<br><br><strong>✅ A confirmation email has been sent to ${userEmail}</strong><br><br><strong>Save this for tracking:</strong><br>Order ID: ${orderId}<br>Tracking Code: ${trackingCode}` 
                     : `<br><br>✅ A confirmation email has been sent to ${userEmail}.<br>You can also track this order in your Profile.`;
                 
                 alert(`Order Placed Successfully! ${discount > 0 ? `You saved Rs. ${discount}!` : ''}${trackMsg}`);
                 window.router('home');
-            } catch (error) { 
-                console.error("Error placing order:", error); 
-                alert("Failed to place order."); 
-            }
+            } catch (error) { console.error("Error placing order:", error); alert("Failed to place order."); }
         };
 
         window.handleTrackOrder = async function(e) {
@@ -738,11 +836,7 @@
             try {
                 const q = query(collection(db, "orders"), where("orderId", "==", orderId));
                 const snapshot = await getDocs(q);
-                
-                if (snapshot.empty) {
-                    resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Order not found. Please check your Order ID.</div>`;
-                    return;
-                }
+                if (snapshot.empty) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Order not found. Please check your Order ID.</div>`; return; }
 
                 let order = null;
                 snapshot.forEach(doc => {
@@ -750,13 +844,11 @@
                     if (data.userEmail && data.userEmail.toLowerCase() === email) order = { id: doc.id, ...data };
                 });
 
-                if (!order) {
-                    resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email does not match this Order ID. Please check your details.</div>`;
-                    return;
-                }
+                if (!order) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email does not match this Order ID. Please check your details.</div>`; return; }
 
                 const date = new Date(order.createdAt).toLocaleDateString();
                 const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
+                const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
                 
                 resultDiv.innerHTML = `
                     <div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
@@ -771,17 +863,25 @@
                             <p><strong>Delivery to:</strong> ${order.deliveryAddress}</p>
                             <p><strong>Payment:</strong> ${order.paymentMethod}</p>
                         </div>
+                        <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2">
+                            <i class="bi bi-printer"></i> Print Receipt
+                        </button>
                     </div>`;
-            } catch (error) {
-                console.error("Tracking error:", error);
-                resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error searching for order. Please try again.</div>`;
-            }
+            } catch (error) { console.error("Tracking error:", error); resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error searching for order.</div>`; }
         };
 
         window.handleLogin = async function(e) {
             e.preventDefault();
-            try { await signInWithEmailAndPassword(auth, new FormData(e.target).get('email'), new FormData(e.target).get('password')); alert('Login Successful!'); } 
-            catch (error) { alert("Login failed: " + error.message); }
+            const formData = new FormData(e.target);
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, formData.get('email'), formData.get('password'));
+                const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+                const role = userDoc.exists() ? userDoc.data().role : 'user';
+                alert('Login Successful!');
+                window.router(role === 'admin' ? 'admin' : 'profile');
+            } catch (error) { 
+                alert("Login failed: " + error.message); 
+            }
         };
 
         window.handleRegister = async function(e) {
@@ -852,12 +952,23 @@
                 orders.forEach(order => {
                     const date = new Date(order.createdAt).toLocaleDateString();
                     const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
+                    const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
                     html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition">
                         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                             <div><p class="text-sm text-gray-500">Order ID: <span class="font-mono font-semibold text-charcoal-900">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">Placed on: ${date}</p></div>
-                            <div class="flex items-center gap-4"><span class="px-3 py-1 rounded-full text-sm font-bold ${statusColors[order.status] || 'bg-gray-100'}">${order.status}</span><span class="text-xl font-bold text-charcoal-900">Rs. ${order.totalAmount} ${order.discount > 0 ? `<span class="text-green-600 font-semibold text-sm">(Saved Rs. ${order.discount})</span>` : ''}</span></div>
+                            <div class="flex items-center gap-4">
+                                <span class="px-3 py-1 rounded-full text-sm font-bold ${statusColors[order.status] || 'bg-gray-100'}">${order.status}</span>
+                                <span class="text-xl font-bold text-charcoal-900">Rs. ${order.totalAmount} ${order.discount > 0 ? `<span class="text-green-600 font-semibold text-sm">(Saved Rs. ${order.discount})</span>` : ''}</span>
+                            </div>
                         </div>
-                        <div class="border-t border-cream-100 pt-4"><p class="text-sm text-gray-600 mb-2"><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p class="text-sm text-gray-600"><strong>Delivery to:</strong> ${order.deliveryAddress}</p><p class="text-sm text-gray-600"><strong>Payment:</strong> ${order.paymentMethod}</p></div>
+                        <div class="border-t border-cream-100 pt-4">
+                            <p class="text-sm text-gray-600 mb-2"><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
+                            <p class="text-sm text-gray-600"><strong>Delivery to:</strong> ${order.deliveryAddress}</p>
+                            <p class="text-sm text-gray-600"><strong>Payment:</strong> ${order.paymentMethod}</p>
+                            <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="mt-3 text-sm text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1">
+                                <i class="bi bi-printer"></i> Print Receipt
+                            </button>
+                        </div>
                     </div>`;
                 });
                 container.innerHTML = html;
@@ -877,7 +988,6 @@
         window.showAdminTab = async function(tab) {
             document.getElementById('tab-orders').className = tab === 'orders' ? "px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap" : "px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap";
             document.getElementById('tab-books').className = tab === 'books' ? "px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap" : "px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap";
-            document.getElementById('tab-newsletter').className = tab === 'newsletter' ? "px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap" : "px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap";
             
             const contentDiv = document.getElementById('adminContent');
             contentDiv.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';
@@ -885,23 +995,30 @@
             if (tab === 'orders') {
                 const snapshot = await getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc")));
                 let html = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left border-collapse">
-                    <thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3">Action</th></tr></thead><tbody>`;
+                    <thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
                 snapshot.forEach(docSnap => {
                     const order = docSnap.data();
+                    const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
                     html += `<tr class="border-b border-cream-100 hover:bg-cream-50">
                         <td class="p-3 text-sm font-mono">${(order.orderId || docSnap.id).substring(0,12)}...<br><span class="text-xs text-gray-400">${new Date(order.createdAt).toLocaleDateString()}</span></td>
                         <td class="p-3 text-sm">${order.userName || 'Guest'}<br><span class="text-xs text-gray-400">${order.userEmail || 'No email'}</span></td>
                         <td class="p-3 text-sm font-bold">Rs. ${order.totalAmount}</td>
                         <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${order.status}</span></td>
-                        <td class="p-3"><select onchange="window.updateOrderStatus('${docSnap.id}', this.value)" class="text-sm border rounded p-1 bg-white">
-                            ${['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
-                        </select></td></tr>`;
+                        <td class="p-3 text-center">
+                            <select onchange="window.updateOrderStatus('${docSnap.id}', this.value)" class="text-sm border rounded p-1 bg-white mb-2 block w-full">
+                                ${['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
+                            <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold flex items-center gap-1 justify-center w-full">
+                                <i class="bi bi-printer"></i> Print
+                            </button>
+                        </td>
+                    </tr>`;
                 });
                 contentDiv.innerHTML = html + `</tbody></table></div>`;
             } else if (tab === 'books') {
                 const booksSnapshot = await getDocs(collection(db, "books"));
                 const booksList = []; booksSnapshot.forEach(doc => booksList.push({ id: doc.id, ...doc.data() }));
-                let html = `<div class="flex justify-between items-center mb-4"><h3 class="font-serif text-xl font-bold">Existing Books</h3><button onclick="window.resetBookForm()" class="bg-wood-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-wood-700 transition">+ Add New Book</button></div>
+                let html = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3>
                     <div class="overflow-x-auto mb-8 max-h-96 overflow-y-auto"><table class="w-full text-left border-collapse">
                     <thead class="sticky top-0 bg-cream-100 text-sm text-gray-600"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>
                     ${booksList.map(b => `<tr class="border-b border-cream-100 hover:bg-cream-50">
@@ -930,79 +1047,8 @@
                         <button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button></div>
                     </form>`;
                 contentDiv.innerHTML = html;
-            } else if (tab === 'newsletter') {
-                const subsSnapshot = await getDocs(collection(db, "newsletter"));
-                const subscribers = []; subsSnapshot.forEach(doc => subscribers.push(doc.data().email));
-                contentDiv.innerHTML = `
-                    <h3 class="font-serif text-xl font-bold mb-2">Send Newsletter</h3>
-                    <p class="text-sm text-gray-500 mb-6">You have <span class="font-bold text-wood-600">${subscribers.length}</span> subscribed users.</p>
-                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 text-sm text-blue-800">
-                        <strong>⚠️ Troubleshooting:</strong> Ensure you have replaced <code>YOUR_EMAILJS_PUBLIC_KEY</code>, <code>YOUR_EMAILJS_SERVICE_ID</code>, and <code>YOUR_EMAILJS_TEMPLATE_ID</code> in the code.
-                    </div>
-                    <form onsubmit="window.sendBulkNewsletter(event, ${JSON.stringify(subscribers)})" class="space-y-4">
-                        <div><label class="block text-sm font-medium mb-1">Email Subject</label><input type="text" name="subject" required placeholder="e.g., New Arrivals & 20% Off This Week!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
-                        <div><label class="block text-sm font-medium mb-1">Message</label><textarea name="message" required rows="6" placeholder="Write your newsletter content here..." class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea></div>
-                        <div class="flex gap-4">
-                            <button type="button" onclick="window.testNewsletterEmail()" class="px-6 py-3 border border-wood-600 text-wood-600 font-bold rounded-lg hover:bg-wood-50 transition"><i class="bi bi-envelope"></i> Test Send to Me</button>
-                            <button type="submit" id="sendNewsletterBtn" class="flex-1 bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2"><i class="bi bi-send"></i> Send to All Subscribers</button>
-                        </div>
-                    </form>
-                    <div id="newsletterStatus" class="mt-4 hidden p-4 rounded-lg"></div>
-                `;
             }
         };
-
-        window.testNewsletterEmail = async function() {
-            if (!window.state.user || !window.state.user.email) { alert("Please log in as admin to test the email."); return; }
-            await sendSingleEmail(window.state.user.email, "Test Email from The Book Shelf", "This is a test email to verify your EmailJS configuration is working correctly.", true);
-        };
-
-        window.sendBulkNewsletter = async function(e, subscribers) {
-            e.preventDefault();
-            if (subscribers.length === 0) { alert("No subscribers found in the database yet."); return; }
-            if (!confirm(`Are you sure you want to send this email to ${subscribers.length} subscribers?`)) return;
-
-            const subject = e.target.subject.value;
-            const message = e.target.message.value;
-            const btn = document.getElementById('sendNewsletterBtn');
-            const statusDiv = document.getElementById('newsletterStatus');
-            
-            btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Sending...'; btn.disabled = true;
-            statusDiv.classList.remove('hidden');
-            statusDiv.className = "mt-4 p-4 rounded-lg bg-blue-50 text-blue-700 border border-blue-200";
-            statusDiv.innerText = `Starting to send to ${subscribers.length} users. Please wait...`;
-
-            let successCount = 0, failCount = 0;
-            for (const email of subscribers) {
-                const success = await sendSingleEmail(email, subject, message, false);
-                if (success) successCount++; else failCount++;
-            }
-
-            btn.innerHTML = '<i class="bi bi-send"></i> Send to All Subscribers'; btn.disabled = false;
-            statusDiv.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200";
-            statusDiv.innerHTML = `<strong>Done!</strong> Successfully sent to ${successCount} users. Failed: ${failCount}. <br><small>Check the browser console (F12) for details on any failures.</small>`;
-            e.target.reset();
-        };
-
-        async function sendSingleEmail(toEmail, subject, message, isTest) {
-            const serviceID = "YOUR_EMAILJS_SERVICE_ID"; 
-            const templateID = "YOUR_EMAILJS_TEMPLATE_ID"; // Newsletter template
-
-            if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
-                console.error("EMAILJS ERROR: Keys not configured!");
-                if (isTest) alert("ERROR: EmailJS keys are not configured in the code.");
-                return false;
-            }
-
-            try {
-                await emailjs.send(serviceID, templateID, { to_email: toEmail, subject: subject, message: message });
-                console.log("Successfully sent to:", toEmail);
-                return true;
-            } catch (err) {
-                console.error("Failed to send to", toEmail, err);
-                return false;
-            }
-        }
 
         window.resetBookForm = function() {
             window.state.editingBookId = null;
