@@ -12,9 +12,7 @@
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
-        (function() {
-            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // ⚠️ REPLACE WITH YOUR KEY
-        })();
+        (function() { emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); })();
     </script>
     
     <script>
@@ -148,12 +146,10 @@
                         <label class="block text-sm font-semibold text-charcoal-800 mb-3">Select Payment Method</label>
                         <div class="space-y-3">
                             <label class="flex items-center p-3 border border-cream-200 rounded-xl cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
-                                <input type="radio" name="paymentMethod" value="eSewa" checked class="w-4 h-4 text-wood-600">
-                                <span class="ml-3 font-semibold">eSewa</span><i class="bi bi-wallet2 ml-auto text-gray-400"></i>
+                                <input type="radio" name="paymentMethod" value="eSewa" checked class="w-4 h-4 text-wood-600"><span class="ml-3 font-semibold">eSewa</span><i class="bi bi-wallet2 ml-auto text-gray-400"></i>
                             </label>
                             <label class="flex items-center p-3 border border-cream-200 rounded-xl cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
-                                <input type="radio" name="paymentMethod" value="Khalti" class="w-4 h-4 text-wood-600">
-                                <span class="ml-3 font-semibold">Khalti</span><i class="bi bi-phone ml-auto text-gray-400"></i>
+                                <input type="radio" name="paymentMethod" value="Khalti" class="w-4 h-4 text-wood-600"><span class="ml-3 font-semibold">Khalti</span><i class="bi bi-phone ml-auto text-gray-400"></i>
                             </label>
                         </div>
                     </div>
@@ -172,25 +168,53 @@
         import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
-  authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
-  projectId: "the-book-shelf-8b4d5",
-  storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
-  messagingSenderId: "978399325740",
-  appId: "1:978399325740:web:b3d7cdc9ff1fe810b72b89"
+            apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT_ID.firebaseapp.com", projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com", messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', editingBookId: null };
+        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
         window.currentBooks = [];
 
-        function getDiscountPercent(price, discountPrice) {
-            if (!discountPrice || discountPrice >= price || price <= 0) return 0;
-            return Math.round(((price - discountPrice) / price) * 100);
-        }
+        window.getDiscountPercent = function(price, discountPrice) {
+            const p = Number(price) || 0;
+            const dp = Number(discountPrice) || 0;
+            if (dp <= 0 || dp >= p || p <= 0) return 0;
+            return Math.round(((p - dp) / p) * 100);
+        };
+
+        window.generateBookCardHTML = function(book) {
+            const isOutOfStock = Number(book.stock) <= 0;
+            const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
+            const displayPrice = book.discountPrice || book.price;
+            const originalPrice = book.discountPrice ? book.price : null;
+
+            return `
+            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
+                <div class="relative h-64 overflow-hidden bg-gray-100">
+                    <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
+                    ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
+                </div>
+                <div class="p-4">
+                    <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
+                    <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
+                    <p class="text-sm text-gray-500 mb-3">${book.author}</p>
+                    <div class="flex flex-col items-start">
+                        ${originalPrice ? `<span class="text-xs text-gray-400 line-through">Rs. ${originalPrice}</span>` : ''}
+                        <span class="font-bold text-charcoal-900">Rs. ${displayPrice}</span>
+                    </div>
+                    <div class="mt-3 flex justify-end">
+                        <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
+                            <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -238,13 +262,11 @@
             window.state.currentView = view;
             const appDiv = document.getElementById('app');
             appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
-            
             setTimeout(() => {
                 if (view === 'home') renderHome(appDiv);
                 else if (view === 'shop') renderShop(appDiv, param);
                 else if (view === 'book') renderBookDetails(appDiv, param);
-                else if (view === 'cart') renderCart(appDiv);
-                else if (view === 'checkout') renderCheckout(appDiv);
+                else if (view === 'cart') renderCart(appDiv); // Combined Cart & Checkout
                 else if (view === 'login') renderLogin(appDiv);
                 else if (view === 'register') renderRegister(appDiv);
                 else if (view === 'profile') renderProfile(appDiv);
@@ -255,7 +277,6 @@
             window.scrollTo(0, 0);
         };
 
-        // --- Views ---
         function renderHome(container) {
             container.innerHTML = `
                 <section class="relative bg-charcoal-900 text-cream-50 py-20 md:py-32 overflow-hidden">
@@ -330,7 +351,11 @@
 
         function renderBookDetails(container, book) {
             if (!book) return window.router('shop');
-            const isOutOfStock = book.stock <= 0;
+            const isOutOfStock = Number(book.stock) <= 0;
+            const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
+            const displayPrice = book.discountPrice || book.price;
+            const originalPrice = book.discountPrice ? book.price : null;
+
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
                     <button onclick="window.router('shop')" class="mb-4 text-wood-600 hover:underline"><i class="bi bi-arrow-left"></i> Back to Shop</button>
@@ -348,9 +373,12 @@
                                     <div class="flex text-gold-500 text-lg">${'★'.repeat(Math.floor(book.rating))}${'☆'.repeat(5 - Math.floor(book.rating))}</div>
                                     <span class="ml-2 text-gray-500">(${book.rating} Rating)</span>
                                 </div>
-                                <div class="text-3xl font-bold text-charcoal-900 mb-6">
-                                    Rs. ${book.discountPrice || book.price} 
-                                    ${book.discountPrice ? `<span class="text-lg text-gray-400 line-through ml-2">Rs. ${book.price}</span>` : ''}
+                                <div class="mb-6">
+                                    <div class="flex items-baseline gap-3">
+                                        ${originalPrice ? `<span class="text-xl text-gray-400 line-through">Rs. ${originalPrice}</span>` : ''}
+                                        <span class="text-4xl font-bold text-charcoal-900">Rs. ${displayPrice}</span>
+                                    </div>
+                                    ${discountPercent > 0 ? `<span class="inline-block mt-2 bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">You save ${discountPercent}%!</span>` : ''}
                                 </div>
                                 <p class="text-gray-600 mb-6 leading-relaxed">${book.description}</p>
                                 <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-8">
@@ -371,89 +399,142 @@
                 </div>`;
         }
 
+        // ✅ COMBINED CART & CHECKOUT VIEW
         function renderCart(container) {
-            const total = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            container.innerHTML = `
-                <div class="max-w-4xl mx-auto px-4 py-8 fade-in">
-                    <h2 class="font-serif text-3xl font-bold mb-8">Shopping Cart</h2>
-                    ${window.state.cart.length === 0 ? '<p class="text-center text-gray-500 py-10">Your cart is empty.</p>' : `
-                        <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden mb-6">
-                            ${window.state.cart.map((item, idx) => `
-                                <div class="flex items-center p-4 border-b border-cream-100 last:border-0">
-                                    <img src="${item.coverUrl}" class="w-16 h-24 object-cover rounded shadow-sm mr-4">
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-charcoal-900">${item.title}</h4>
-                                        <p class="text-sm text-gray-500">${item.author}</p>
-                                        <p class="text-wood-600 font-bold mt-1">Rs. ${item.price}</p>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button onclick="window.updateQty(${idx}, -1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">-</button>
-                                        <span class="font-medium w-4 text-center">${item.qty}</span>
-                                        <button onclick="window.updateQty(${idx}, 1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">+</button>
-                                    </div>
-                                    <button onclick="window.removeFromCart(${idx})" class="ml-6 text-red-500 hover:text-red-700"><i class="bi bi-trash"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="bg-cream-100 p-6 rounded-xl">
-                            <div class="flex justify-between mb-2"><span>Subtotal</span><span class="font-semibold">Rs. ${total}</span></div>
-                            <div class="flex justify-between mb-4"><span>Shipping</span><span class="font-semibold">Rs. 100</span></div>
-                            <div class="flex justify-between text-xl font-bold text-charcoal-900 border-t border-wood-500/20 pt-4">
-                                <span>Total</span><span>Rs. ${total + 100}</span>
-                            </div>
-                            <button onclick="window.router('checkout')" class="w-full bg-gold-500 text-charcoal-900 font-bold py-3 rounded-xl mt-6 hover:bg-gold-600 transition">Proceed to Checkout</button>
-                        </div>
-                    `}
-                </div>`;
-        }
-
-        function renderCheckout(container) {
             const isLoggedIn = !!window.state.user;
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            if (window.state.cart.length === 0) {
+                container.innerHTML = `
+                    <div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center">
+                        <i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i>
+                        <h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2>
+                        <button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button>
+                        <p class="text-gray-500">Have an account? <a href="#" onclick="window.router('login')" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p>
+                    </div>`;
+                return;
+            }
+
+            let membershipDiscount = 0;
+            let finalShipping = 100;
+            if (isLoggedIn) {
+                if (window.state.user.membershipTier === 'premium') { 
+                    membershipDiscount = Math.round(subtotal * 0.10); 
+                    if (subtotal >= 1000) finalShipping = 0; 
+                } else if (window.state.user.membershipTier === 'vip') { 
+                    membershipDiscount = Math.round(subtotal * 0.20); 
+                    finalShipping = 0; 
+                }
+            }
+            
+            const couponDiscount = window.state.appliedDiscount.amount;
+            const total = subtotal - membershipDiscount - couponDiscount + finalShipping;
+
             container.innerHTML = `
-                <div class="max-w-3xl mx-auto px-4 py-8 fade-in">
-                    <h2 class="font-serif text-3xl font-bold mb-8">Checkout</h2>
-                    ${!isLoggedIn ? '<div class="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg mb-6 text-sm"><i class="bi bi-info-circle"></i> You are checking out as a guest. An order confirmation email with your tracking code will be sent to the email provided below.</div>' : ''}
-                    <form onsubmit="window.handleCheckout(event)" class="bg-white p-8 rounded-xl shadow-sm border border-cream-200">
-                        <div class="grid md:grid-cols-2 gap-6 mb-6">
-                            <div><label class="block text-sm font-medium mb-2">Full Name</label><input type="text" name="name" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium mb-2">Phone Number</label><input type="tel" name="phone" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2">Email Address <span class="text-red-500">*</span> <span class="text-xs text-gray-500">(Required for order confirmation & tracking)</span></label>
-                            <input type="email" name="email" required value="${isLoggedIn ? window.state.user.email : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2">Delivery Address</label>
-                            <textarea name="address" required rows="3" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2">Payment Method</label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label class="border p-4 rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50">
-                                    <input type="radio" name="payment" value="COD" checked class="mr-2"> Cash on Delivery
-                                </label>
-                                <label class="border p-4 rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50">
-                                    <input type="radio" name="payment" value="eSewa" class="mr-2"> eSewa
-                                </label>
-                                <label class="border p-4 rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50">
-                                    <input type="radio" name="payment" value="Khalti" class="mr-2"> Khalti
-                                </label>
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <button onclick="window.router('shop')" class="mb-6 text-wood-600 hover:underline font-medium flex items-center gap-1"><i class="bi bi-arrow-left"></i> Continue Shopping</button>
+                    <h2 class="font-serif text-3xl font-bold mb-8">Shopping Cart & Checkout</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Left Column: Cart Items & Discount -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden">
+                                ${window.state.cart.map((item, idx) => `
+                                    <div class="flex items-center p-4 border-b border-cream-100 last:border-0">
+                                        <img src="${item.coverUrl}" class="w-16 h-24 object-cover rounded shadow-sm mr-4">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-charcoal-900">${item.title}</h4>
+                                            <p class="text-sm text-gray-500">${item.author}</p>
+                                            <p class="text-wood-600 font-bold mt-1">Rs. ${item.price}</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="window.updateQty(${idx}, -1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">-</button>
+                                            <span class="font-medium w-4 text-center">${item.qty}</span>
+                                            <button onclick="window.updateQty(${idx}, 1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">+</button>
+                                        </div>
+                                        <button onclick="window.removeFromCart(${idx})" class="ml-6 text-red-500 hover:text-red-700"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Discount Code Section -->
+                            <div class="bg-cream-100 p-6 rounded-xl border border-cream-200">
+                                <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
+                                <div class="flex gap-2">
+                                    <input type="text" id="discountCodeInput" value="${window.state.appliedDiscount.code}" placeholder="e.g., SAVE10, FLAT50" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
+                                    <button type="button" onclick="window.applyDiscountCode()" class="bg-charcoal-800 text-white font-semibold px-6 rounded-lg hover:bg-charcoal-900 transition">Apply</button>
+                                </div>
+                                <p id="discountMessage" class="text-sm mt-2 h-5 font-medium">
+                                    ${window.state.appliedDiscount.code ? `<span class="text-green-600">✅ Code applied! You save Rs. ${window.state.appliedDiscount.amount}</span>` : ''}
+                                </p>
                             </div>
                         </div>
-                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-4 rounded-xl hover:bg-wood-700 transition">Place Order</button>
-                    </form>
-                </div>`;
+
+                        <!-- Right Column: Order Summary & Checkout Form -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 sticky top-24">
+                                <h3 class="font-serif text-xl font-bold mb-4">Order Summary</h3>
+                                <div class="space-y-3 text-sm mb-6 border-b border-cream-200 pb-6">
+                                    <div class="flex justify-between"><span>Subtotal</span><span>Rs. ${subtotal}</span></div>
+                                    ${membershipDiscount > 0 ? `<div class="flex justify-between text-green-600"><span>Membership Discount</span><span>- Rs. ${membershipDiscount}</span></div>` : ''}
+                                    ${couponDiscount > 0 ? `<div class="flex justify-between text-green-600"><span>Coupon Discount</span><span>- Rs. ${couponDiscount}</span></div>` : ''}
+                                    <div class="flex justify-between"><span>Shipping</span><span>${finalShipping === 0 ? 'Free' : 'Rs. ' + finalShipping}</span></div>
+                                    <div class="flex justify-between text-xl font-bold text-charcoal-900 pt-3 border-t border-cream-200">
+                                        <span>Total</span><span>Rs. ${total}</span>
+                                    </div>
+                                </div>
+
+                                <h3 class="font-serif text-xl font-bold mb-4">Checkout Details</h3>
+                                <form onsubmit="window.handleCheckout(event)" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Full Name</label>
+                                        <input type="text" name="name" required value="${isLoggedIn ? (window.state.user.name || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Phone Number</label>
+                                        <input type="tel" name="phone" required value="${isLoggedIn ? (window.state.user.phone || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Email Address <span class="text-red-500">*</span></label>
+                                        <input type="email" name="email" required value="${isLoggedIn ? window.state.user.email : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Delivery Address</label>
+                                        <textarea name="address" required rows="3" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Payment Method</label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
+                                                <input type="radio" name="payment" value="COD" checked class="mr-2"> Cash on Delivery
+                                            </label>
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
+                                                <input type="radio" name="payment" value="eSewa" class="mr-2"> eSewa
+                                            </label>
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
+                                                <input type="radio" name="payment" value="Khalti" class="mr-2"> Khalti
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full bg-gold-500 text-charcoal-900 font-bold py-3 rounded-xl mt-4 hover:bg-gold-600 transition">Place Order</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderLogin(container) {
             container.innerHTML = `<div class="max-w-md mx-auto px-4 py-16 fade-in">
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-cream-200 text-center">
-                    <h2 class="font-serif text-3xl font-bold mb-6">Welcome Back</h2>
+                    <h2 class="font-serif text-3xl font-bold mb-6">Login</h2>
                     <form onsubmit="window.handleLogin(event)" class="space-y-4">
                         <input type="email" name="email" placeholder="Email Address" required class="w-full p-3 border rounded-lg bg-cream-50">
                         <input type="password" name="password" placeholder="Password" required class="w-full p-3 border rounded-lg bg-cream-50">
                         <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Login</button>
                     </form>
+                    <p class="mt-3 text-sm"><a href="#" onclick="alert('Please contact support@thebookshelf.com to reset your password.')" class="text-wood-600 hover:underline">Forgot your password?</a></p>
                     <p class="mt-6 text-sm text-gray-500">Don't have an account? <a href="#" onclick="window.router('register')" class="text-wood-600 hover:underline font-semibold">Create an account here</a></p>
                 </div>
             </div>`;
@@ -577,101 +658,24 @@
             window.showAdminTab('orders');
         }
 
-        // --- NEW: Print Receipt Function ---
         window.printReceipt = function(order) {
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             const date = new Date(order.createdAt).toLocaleString();
             const itemsHtml = order.items.map(item => `
-                <tr>
-                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.title}</td>
-                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
-                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price}</td>
-                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price * item.qty}</td>
-                </tr>
+                <tr><td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.title}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price * item.qty}</td></tr>
             `).join('');
 
-            const html = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Receipt - ${order.orderId}</title>
-                    <style>
-                        body { font-family: 'Courier New', Courier, monospace; padding: 20px; max-width: 600px; margin: 0 auto; color: #333; }
-                        .header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 10px; margin-bottom: 15px; }
-                        .header h1 { margin: 0; font-size: 24px; }
-                        .header p { margin: 4px 0; font-size: 14px; }
-                        .details { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
-                        .details p { margin: 4px 0; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
-                        th { text-align: left; border-bottom: 2px solid #333; padding: 8px 4px; }
-                        .totals { text-align: right; font-size: 14px; }
-                        .totals p { margin: 4px 0; }
-                        .total-final { font-size: 18px; font-weight: bold; border-top: 2px dashed #333; padding-top: 8px; margin-top: 8px; }
-                        .footer { text-align: center; margin-top: 30px; border-top: 2px dashed #333; padding-top: 10px; font-size: 14px; }
-                        .no-print { text-align: center; margin-top: 30px; }
-                        .btn { padding: 10px 20px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; margin: 0 5px; }
-                        .btn-print { background: #333; color: white; }
-                        .btn-close { background: #eee; color: #333; }
-                        @media print {
-                            body { padding: 0; }
-                            .no-print { display: none !important; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>The Book Shelf</h1>
-                        <p>123 Literary Lane, Kathmandu, Nepal</p>
-                        <p>Phone: +977 9800000000 | support@thebookshelf.com</p>
-                    </div>
-                    <div class="details">
-                        <p><strong>Order ID:</strong> ${order.orderId}</p>
-                        <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
-                        <p><strong>Date:</strong> ${date}</p>
-                        <p><strong>Customer:</strong> ${order.userName}</p>
-                        <p><strong>Email:</strong> ${order.userEmail}</p>
-                        <p><strong>Address:</strong> ${order.deliveryAddress}</p>
-                        <p><strong>Payment:</strong> ${order.paymentMethod} | <strong>Status:</strong> ${order.status}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th style="text-align: center;">Qty</th>
-                                <th style="text-align: right;">Price</th>
-                                <th style="text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-                    <div class="totals">
-                        <p>Subtotal: Rs. ${order.subtotal}</p>
-                        ${order.discount > 0 ? `<p>Discount: - Rs. ${order.discount}</p>` : ''}
-                        <p>Shipping: Rs. ${order.shippingCost}</p>
-                        <p class="total-final">Total: Rs. ${order.totalAmount}</p>
-                    </div>
-                    <div class="footer">
-                        <p>Thank you for shopping with The Book Shelf!</p>
-                        <p>Happy Reading!</p>
-                    </div>
-                    <div class="no-print">
-                        <button class="btn btn-print" onclick="window.print()">🖨️ Print Receipt</button>
-                        <button class="btn btn-close" onclick="window.close()">Close</button>
-                    </div>
-                </body>
-                </html>
-            `;
-            printWindow.document.write(html);
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Receipt - ${order.orderId}</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:600px;margin:0 auto;color:#333}.header{text-align:center;border-bottom:2px dashed #333;padding-bottom:10px;margin-bottom:15px}.header h1{margin:0;font-size:24px}.header p{margin:4px 0;font-size:14px}.details{margin-bottom:15px;font-size:14px;line-height:1.6}.details p{margin:4px 0}table{width:100%;border-collapse:collapse;margin-bottom:15px;font-size:14px}th{text-align:left;border-bottom:2px solid #333;padding:8px 4px}.totals{text-align:right;font-size:14px}.totals p{margin:4px 0}.total-final{font-size:18px;font-weight:bold;border-top:2px dashed #333;padding-top:8px;margin-top:8px}.footer{text-align:center;margin-top:30px;border-top:2px dashed #333;padding-top:10px;font-size:14px}.no-print{text-align:center;margin-top:30px}.btn{padding:10px 20px;font-size:14px;cursor:pointer;border:none;border-radius:4px;margin:0 5px}.btn-print{background:#333;color:white}.btn-close{background:#eee;color:#333}@media print{body{padding:0}.no-print{display:none!important}}</style></head><body>
+                <div class="header"><h1>The Book Shelf</h1><p>123 Literary Lane, Kathmandu, Nepal</p><p>Phone: +977 9800000000</p></div>
+                <div class="details"><p><strong>Order ID:</strong> ${order.orderId}</p><p><strong>Date:</strong> ${date}</p><p><strong>Customer:</strong> ${order.userName}</p><p><strong>Address:</strong> ${order.deliveryAddress}</p><p><strong>Payment:</strong> ${order.paymentMethod}</p></div>
+                <table><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+                <div class="totals"><p>Subtotal: Rs. ${order.subtotal}</p>${order.discount > 0 ? `<p>Membership Discount: -Rs. ${order.discount}</p>` : ''}${order.appliedDiscount > 0 ? `<p>Coupon Discount: -Rs. ${order.appliedDiscount}</p>` : ''}<p>Shipping: Rs. ${order.shippingCost}</p><p class="total-final">Total: Rs. ${order.totalAmount}</p></div>
+                <div class="footer"><p>Thank you for shopping with The Book Shelf!</p><p>Happy Reading!</p></div>
+                <div class="no-print"><button class="btn btn-print" onclick="window.print()">🖨️ Print Receipt</button><button class="btn btn-close" onclick="window.close()">Close</button></div></body></html>`);
             printWindow.document.close();
-            setTimeout(() => {
-                printWindow.focus();
-                printWindow.print();
-            }, 500);
+            setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
         };
 
-        // --- Firebase Logic & Actions ---
         window.fetchBooks = async function(isFeatured, category = 'All') {
             try {
                 let q = collection(db, "books");
@@ -680,32 +684,10 @@
                 const querySnapshot = await getDocs(q);
                 const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
                 window.currentBooks = books; window.state.books = books;
-                const targetId = isFeatured ? 'featuredBooks' : 'shopBooks';
-                const targetEl = document.getElementById(targetId);
+                const targetEl = document.getElementById(isFeatured ? 'featuredBooks' : 'shopBooks');
                 if (!targetEl) return;
                 if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books found.</p>`; return; }
-                targetEl.innerHTML = books.map(book => {
-                    const isOutOfStock = book.stock <= 0;
-                    const discountPercent = getDiscountPercent(book.price, book.discountPrice);
-                    return `<div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
-                        <div class="relative h-64 overflow-hidden bg-gray-100">
-                            <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                            ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
-                            ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
-                        </div>
-                        <div class="p-4">
-                            <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
-                            <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
-                            <p class="text-sm text-gray-500 mb-3">${book.author}</p>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-charcoal-900">Rs. ${book.discountPrice || book.price}</span>
-                                <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
-                                    <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
+                targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
             } catch (error) { console.error("Error fetching books:", error); }
         };
 
@@ -717,28 +699,7 @@
                 const targetEl = document.getElementById('allBooksGrid');
                 if (!targetEl) return;
                 if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books available.</p>`; return; }
-                targetEl.innerHTML = books.map(book => {
-                    const isOutOfStock = book.stock <= 0;
-                    const discountPercent = getDiscountPercent(book.price, book.discountPrice);
-                    return `<div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
-                        <div class="relative h-64 overflow-hidden bg-gray-100">
-                            <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                            ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
-                            ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
-                        </div>
-                        <div class="p-4">
-                            <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
-                            <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
-                            <p class="text-sm text-gray-500 mb-3">${book.author}</p>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-charcoal-900">Rs. ${book.discountPrice || book.price}</span>
-                                <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
-                                    <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
+                targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
             } catch (error) { console.error("Error fetching all books for home:", error); }
         };
 
@@ -747,7 +708,7 @@
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
-            if (!book || book.stock <= 0) { alert('Sorry, this book is currently out of stock!'); return; }
+            if (!book || Number(book.stock) <= 0) { alert('Sorry, this book is currently out of stock!'); return; }
             const existing = window.state.cart.find(item => item.id === bookId);
             if (existing) existing.qty++;
             else window.state.cart.push({ ...book, qty: 1, price: book.discountPrice || book.price });
@@ -771,6 +732,21 @@
             window.saveCart(); window.router('cart');
         };
 
+        // ✅ Apply Discount Code & Re-render Cart to update totals
+        window.applyDiscountCode = function() {
+            const code = document.getElementById('discountCodeInput').value.trim().toUpperCase();
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const codes = { 'SAVE10': { type: 'percent', value: 10 }, 'FLAT50': { type: 'fixed', value: 50 }, 'BOOKSHELF': { type: 'percent', value: 15 } };
+            
+            if (codes[code]) {
+                const amount = codes[code].type === 'percent' ? Math.round(subtotal * (codes[code].value / 100)) : codes[code].value;
+                window.state.appliedDiscount = { code, amount };
+            } else {
+                window.state.appliedDiscount = { code: '', amount: 0 };
+            }
+            window.router('cart'); // Re-render to show updated totals and message
+        };
+
         window.handleCheckout = async function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -778,21 +754,23 @@
             const userEmail = formData.get('email');
             const userName = formData.get('name');
             
-            let discount = 0, finalShipping = 100;
+            let membershipDiscount = 0, finalShipping = 100;
             const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
             if (!isGuest) {
-                if (window.state.user.membershipTier === 'premium') { discount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
-                else if (window.state.user.membershipTier === 'vip') { discount = Math.round(subtotal * 0.20); finalShipping = 0; }
+                if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
+                else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
             }
 
+            const couponDiscount = window.state.appliedDiscount.amount;
             const trackingCode = 'TRK-' + Math.random().toString(36).substr(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4);
             const orderId = 'ORD-' + Date.now();
 
             const orderData = {
                 orderId: orderId, trackingCode: trackingCode, userId: isGuest ? 'guest' : window.state.user.uid,
                 userEmail: userEmail, userName: userName, items: window.state.cart,
-                totalAmount: subtotal - discount + finalShipping, subtotal: subtotal, shippingCost: finalShipping, discount: discount,
+                subtotal: subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
+                totalAmount: subtotal - membershipDiscount - couponDiscount + finalShipping,
                 paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', createdAt: new Date().toISOString()
             };
 
@@ -806,19 +784,13 @@
                     const orderTemplateId = "YOUR_ORDER_TEMPLATE_ID"; 
                     const serviceId = "YOUR_EMAILJS_SERVICE_ID";
                     if (orderTemplateId !== "YOUR_ORDER_TEMPLATE_ID") {
-                        await emailjs.send(serviceId, orderTemplateId, {
-                            to_email: userEmail, customer_name: userName, order_id: orderId, tracking_code: trackingCode,
-                            total_amount: orderData.totalAmount, items_list: itemsList, payment_method: orderData.paymentMethod
-                        });
+                        await emailjs.send(serviceId, orderTemplateId, { to_email: userEmail, customer_name: userName, order_id: orderId, tracking_code: trackingCode, total_amount: orderData.totalAmount, items_list: itemsList, payment_method: orderData.paymentMethod });
                     }
-                } catch (emailError) { console.error("Failed to send order email:", emailError); }
+                } catch (err) { console.error("Failed to send order email:", err); }
 
-                window.state.cart = []; window.saveCart();
-                const trackMsg = isGuest 
-                    ? `<br><br><strong>✅ A confirmation email has been sent to ${userEmail}</strong><br><br><strong>Save this for tracking:</strong><br>Order ID: ${orderId}<br>Tracking Code: ${trackingCode}` 
-                    : `<br><br>✅ A confirmation email has been sent to ${userEmail}.<br>You can also track this order in your Profile.`;
-                
-                alert(`Order Placed Successfully! ${discount > 0 ? `You saved Rs. ${discount}!` : ''}${trackMsg}`);
+                window.state.cart = []; window.state.appliedDiscount = { code: '', amount: 0 }; window.saveCart();
+                const trackMsg = isGuest ? `<br><br><strong>✅ Confirmation sent to ${userEmail}</strong><br>Order ID: ${orderId}<br>Code: ${trackingCode}` : `<br><br>✅ Confirmation sent to ${userEmail}. Track in Profile.`;
+                alert(`Order Placed Successfully! ${membershipDiscount > 0 ? `Membership saved: Rs.${membershipDiscount} ` : ''}${couponDiscount > 0 ? `Coupon saved: Rs.${couponDiscount} ` : ''}${trackMsg}`);
                 window.router('home');
             } catch (error) { console.error("Error placing order:", error); alert("Failed to place order."); }
         };
@@ -829,334 +801,159 @@
             const orderId = formData.get('orderId').trim();
             const email = formData.get('email').trim().toLowerCase();
             const resultDiv = document.getElementById('trackResult');
-            
             resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = '<p class="text-center text-gray-500"><i class="bi bi-arrow-repeat animate-spin"></i> Searching for your order...</p>';
-
+            resultDiv.innerHTML = '<p class="text-center text-gray-500"><i class="bi bi-arrow-repeat animate-spin"></i> Searching...</p>';
             try {
                 const q = query(collection(db, "orders"), where("orderId", "==", orderId));
                 const snapshot = await getDocs(q);
-                if (snapshot.empty) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Order not found. Please check your Order ID.</div>`; return; }
-
+                if (snapshot.empty) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Order not found.</div>`; return; }
                 let order = null;
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userEmail && data.userEmail.toLowerCase() === email) order = { id: doc.id, ...data };
-                });
-
-                if (!order) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email does not match this Order ID. Please check your details.</div>`; return; }
-
+                snapshot.forEach(doc => { const d = doc.data(); if (d.userEmail && d.userEmail.toLowerCase() === email) order = { id: doc.id, ...d }; });
+                if (!order) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email mismatch.</div>`; return; }
                 const date = new Date(order.createdAt).toLocaleDateString();
                 const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
-                const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
-                
+                const orderStr = JSON.stringify(order).replace(/"/g, '&quot;');
                 resultDiv.innerHTML = `
                     <div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
-                        <div class="flex justify-between items-start mb-4">
-                            <div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div>
-                            <span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status] || 'bg-gray-100'}">${order.status}</span>
-                        </div>
+                        <div class="flex justify-between items-start mb-4"><div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div><span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span></div>
                         <div class="border-t border-green-200 pt-4 space-y-2 text-sm">
-                            <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
-                            <p><strong>Total Amount:</strong> Rs. ${order.totalAmount} ${order.discount > 0 ? `<span class="text-green-600">(Saved Rs. ${order.discount})</span>` : ''}</p>
-                            <p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
-                            <p><strong>Delivery to:</strong> ${order.deliveryAddress}</p>
-                            <p><strong>Payment:</strong> ${order.paymentMethod}</p>
+                            <p><strong>Code:</strong> ${order.trackingCode}</p><p><strong>Total:</strong> Rs. ${order.totalAmount}</p><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p>
                         </div>
-                        <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2">
-                            <i class="bi bi-printer"></i> Print Receipt
-                        </button>
+                        <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button>
                     </div>`;
-            } catch (error) { console.error("Tracking error:", error); resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error searching for order.</div>`; }
+            } catch (err) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error.</div>`; }
         };
 
         window.handleLogin = async function(e) {
             e.preventDefault();
-            const formData = new FormData(e.target);
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, formData.get('email'), formData.get('password'));
-                const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-                const role = userDoc.exists() ? userDoc.data().role : 'user';
+                const cred = await signInWithEmailAndPassword(auth, new FormData(e.target).get('email'), new FormData(e.target).get('password'));
+                const docSnap = await getDoc(doc(db, "users", cred.user.uid));
+                const role = docSnap.exists() ? docSnap.data().role : 'user';
                 alert('Login Successful!');
                 window.router(role === 'admin' ? 'admin' : 'profile');
-            } catch (error) { 
-                alert("Login failed: " + error.message); 
-            }
+            } catch (err) { alert("Login failed: " + err.message); }
         };
 
         window.handleRegister = async function(e) {
-            e.preventDefault();
-            const fd = new FormData(e.target);
+            e.preventDefault(); const fd = new FormData(e.target);
             try {
                 const uc = await createUserWithEmailAndPassword(auth, fd.get('email'), fd.get('password'));
                 await setDoc(doc(db, "users", uc.user.uid), { name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), role: "user", membershipTier: "free", createdAt: new Date().toISOString() });
-                alert("Account created successfully! Please log in."); window.router('login');
-            } catch (error) { alert("Registration failed: " + error.message); }
+                alert("Account created! Please login."); window.router('login');
+            } catch (err) { alert("Registration failed: " + err.message); }
         };
 
         window.handleNewsletter = async function(e) {
             e.preventDefault();
-            try {
-                await addDoc(collection(db, "newsletter"), { email: e.target.email.value, createdAt: new Date().toISOString() });
-                alert("Thank you for subscribing to our newsletter!"); e.target.reset();
-            } catch (error) { alert("Failed to subscribe. Please try again."); }
+            try { await addDoc(collection(db, "newsletter"), { email: e.target.email.value, createdAt: new Date().toISOString() }); alert("Subscribed!"); e.target.reset(); } 
+            catch (err) { alert("Failed."); }
         };
 
         window.openMembershipPayment = function(tier, name, price) {
-            if (!window.state.user) { alert("Please log in to upgrade your membership."); return window.router('login'); }
+            if (!window.state.user) return window.router('login');
             document.getElementById('modalPlanName').innerText = name;
             document.getElementById('modalPlanPrice').innerHTML = `Rs. ${price} <span class="text-sm font-normal text-gray-500">/ year</span>`;
-            document.getElementById('modalPlanTier').value = tier;
-            document.getElementById('modalPlanAmount').value = price;
+            document.getElementById('modalPlanTier').value = tier; document.getElementById('modalPlanAmount').value = price;
             document.getElementById('membershipPaymentModal').classList.remove('hidden');
         };
         window.closeMembershipPayment = function() { document.getElementById('membershipPaymentModal').classList.add('hidden'); };
         
         window.processMembershipPayment = async function(e) {
-            e.preventDefault();
-            const tier = document.getElementById('modalPlanTier').value;
-            const amount = document.getElementById('modalPlanAmount').value;
-            const method = e.target.paymentMethod.value;
-            const btn = document.getElementById('payMembershipBtn');
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...'; btn.disabled = true;
-
+            e.preventDefault(); const tier = document.getElementById('modalPlanTier').value; const amount = document.getElementById('modalPlanAmount').value; const method = e.target.paymentMethod.value;
+            const btn = document.getElementById('payMembershipBtn'); btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...'; btn.disabled = true;
             setTimeout(async () => {
-                try {
-                    await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier, membershipUpgradedAt: new Date().toISOString() });
-                    window.state.user.membershipTier = tier;
-                    alert(`Payment of Rs. ${amount} via ${method} successful!`);
-                    window.closeMembershipPayment(); window.router('profile');
-                } catch (error) { alert("Failed to process payment."); } 
-                finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
-            }, 2000);
+                try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier, membershipUpgradedAt: new Date().toISOString() }); window.state.user.membershipTier = tier; alert(`Payment successful!`); window.closeMembershipPayment(); window.router('profile'); } 
+                catch (err) { alert("Failed."); } finally { btn.innerHTML = '<span>Pay Now & Activate</span><i class="bi bi-arrow-right"></i>'; btn.disabled = false; }
+            }, 1500);
         };
 
         window.handleJoinMembership = async function(tier) {
             if (!window.state.user) return window.router('login');
-            try {
-                await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier });
-                window.state.user.membershipTier = tier;
-                alert(`You are now on the Free Reader plan.`); window.router('profile');
-            } catch (error) { alert("Failed to update membership."); }
+            try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier }); window.state.user.membershipTier = tier; alert(`Updated to Free Reader.`); window.router('profile'); } 
+            catch (err) { alert("Failed."); }
         };
 
         window.loadUserOrders = async function() {
             try {
                 const snapshot = await getDocs(query(collection(db, "orders"), where("userId", "==", window.state.user.uid)));
                 const container = document.getElementById('userOrdersList');
-                if (snapshot.empty) { container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-gray-500 border border-cream-200">You haven't placed any orders yet. <button onclick="window.router('shop')" class="text-wood-600 font-semibold hover:underline ml-1">Start Shopping</button></div>`; return; }
-                let html = '';
-                const orders = []; snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-                orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                orders.forEach(order => {
+                if (snapshot.empty) { container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-gray-500 border border-cream-200">No orders yet. <button onclick="window.router('shop')" class="text-wood-600 hover:underline">Start Shopping</button></div>`; return; }
+                const orders = []; snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() })); orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                container.innerHTML = orders.map(order => {
                     const date = new Date(order.createdAt).toLocaleDateString();
-                    const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
-                    const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
-                    html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition">
-                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
-                            <div><p class="text-sm text-gray-500">Order ID: <span class="font-mono font-semibold text-charcoal-900">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">Placed on: ${date}</p></div>
-                            <div class="flex items-center gap-4">
-                                <span class="px-3 py-1 rounded-full text-sm font-bold ${statusColors[order.status] || 'bg-gray-100'}">${order.status}</span>
-                                <span class="text-xl font-bold text-charcoal-900">Rs. ${order.totalAmount} ${order.discount > 0 ? `<span class="text-green-600 font-semibold text-sm">(Saved Rs. ${order.discount})</span>` : ''}</span>
-                            </div>
-                        </div>
-                        <div class="border-t border-cream-100 pt-4">
-                            <p class="text-sm text-gray-600 mb-2"><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
-                            <p class="text-sm text-gray-600"><strong>Delivery to:</strong> ${order.deliveryAddress}</p>
-                            <p class="text-sm text-gray-600"><strong>Payment:</strong> ${order.paymentMethod}</p>
-                            <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="mt-3 text-sm text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1">
-                                <i class="bi bi-printer"></i> Print Receipt
-                            </button>
-                        </div>
-                    </div>`;
-                });
-                container.innerHTML = html;
-            } catch (error) { console.error("Error loading orders:", error); }
+                    const colors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
+                    const str = JSON.stringify(order).replace(/"/g, '&quot;');
+                    return `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition"><div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4"><div><p class="text-sm text-gray-500">Order: <span class="font-mono font-bold">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">${date}</p></div><div class="flex items-center gap-4"><span class="px-3 py-1 rounded-full text-sm font-bold ${colors[order.status]}">${order.status}</span><span class="text-xl font-bold">Rs. ${order.totalAmount}</span></div></div><div class="border-t border-cream-100 pt-4 text-sm"><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${str}" class="mt-3 text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1"><i class="bi bi-printer"></i> Print Receipt</button></div></div>`;
+                }).join('');
+            } catch (err) { console.error(err); }
         };
 
         window.loadAdminStats = async function() {
             try {
-                const snapshot = await getDocs(collection(db, "orders"));
-                let totalOrders = 0, pendingOrders = 0, totalRevenue = 0;
-                snapshot.forEach((doc) => { const data = doc.data(); totalOrders++; if (data.status === 'Pending') pendingOrders++; totalRevenue += (data.totalAmount || 0); });
-                const el1 = document.getElementById('adminTotalOrders'), el2 = document.getElementById('adminPendingOrders'), el3 = document.getElementById('adminRevenue');
-                if(el1) el1.innerText = totalOrders; if(el2) el2.innerText = pendingOrders; if(el3) el3.innerText = 'Rs. ' + totalRevenue;
-            } catch (error) { console.error("Error loading stats:", error); }
+                const snap = await getDocs(collection(db, "orders"));
+                let tot = 0, pend = 0, rev = 0;
+                snap.forEach(d => { const o = d.data(); tot++; if(o.status==='Pending') pend++; rev += (o.totalAmount||0); });
+                document.getElementById('adminTotalOrders').innerText = tot; document.getElementById('adminPendingOrders').innerText = pend; document.getElementById('adminRevenue').innerText = 'Rs. '+rev;
+            } catch (err) { console.error(err); }
         };
 
         window.showAdminTab = async function(tab) {
-            document.getElementById('tab-orders').className = tab === 'orders' ? "px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap" : "px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap";
-            document.getElementById('tab-books').className = tab === 'books' ? "px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap" : "px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap";
-            
-            const contentDiv = document.getElementById('adminContent');
-            contentDiv.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';
-
-            if (tab === 'orders') {
-                const snapshot = await getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc")));
-                let html = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left border-collapse">
-                    <thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
-                snapshot.forEach(docSnap => {
-                    const order = docSnap.data();
-                    const orderDataStr = JSON.stringify(order).replace(/"/g, '&quot;');
-                    html += `<tr class="border-b border-cream-100 hover:bg-cream-50">
-                        <td class="p-3 text-sm font-mono">${(order.orderId || docSnap.id).substring(0,12)}...<br><span class="text-xs text-gray-400">${new Date(order.createdAt).toLocaleDateString()}</span></td>
-                        <td class="p-3 text-sm">${order.userName || 'Guest'}<br><span class="text-xs text-gray-400">${order.userEmail || 'No email'}</span></td>
-                        <td class="p-3 text-sm font-bold">Rs. ${order.totalAmount}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${order.status}</span></td>
-                        <td class="p-3 text-center">
-                            <select onchange="window.updateOrderStatus('${docSnap.id}', this.value)" class="text-sm border rounded p-1 bg-white mb-2 block w-full">
-                                ${['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
-                            </select>
-                            <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderDataStr}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold flex items-center gap-1 justify-center w-full">
-                                <i class="bi bi-printer"></i> Print
-                            </button>
-                        </td>
-                    </tr>`;
+            document.getElementById('tab-orders').className = tab==='orders'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            document.getElementById('tab-books').className = tab==='books'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            const div = document.getElementById('adminContent'); div.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';
+            if (tab==='orders') {
+                const snap = await getDocs(query(collection(db, "orders"), orderBy("createdAt","desc")));
+                let h = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
+                snap.forEach(d => {
+                    const o = d.data(); const s = JSON.stringify(o).replace(/"/g, '&quot;');
+                    h += `<tr class="border-b"><td class="p-3 text-sm font-mono">${(o.orderId||d.id).substring(0,12)}<br><span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleDateString()}</span></td><td class="p-3 text-sm">${o.userName||'Guest'}<br><span class="text-xs text-gray-400">${o.userEmail||''}</span></td><td class="p-3 font-bold">Rs. ${o.totalAmount}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${o.status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}">${o.status}</span></td><td class="p-3 text-center"><select onchange="window.updateOrderStatus('${d.id}',this.value)" class="text-sm border rounded p-1 mb-2 block w-full">${['Pending','Confirmed','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-o')))" data-o="${s}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold"><i class="bi bi-printer"></i> Print</button></td></tr>`;
                 });
-                contentDiv.innerHTML = html + `</tbody></table></div>`;
-            } else if (tab === 'books') {
-                const booksSnapshot = await getDocs(collection(db, "books"));
-                const booksList = []; booksSnapshot.forEach(doc => booksList.push({ id: doc.id, ...doc.data() }));
-                let html = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3>
-                    <div class="overflow-x-auto mb-8 max-h-96 overflow-y-auto"><table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 bg-cream-100 text-sm text-gray-600"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>
-                    ${booksList.map(b => `<tr class="border-b border-cream-100 hover:bg-cream-50">
-                        <td class="p-3 text-sm font-semibold">${b.title}</td><td class="p-3 text-sm">${b.category}</td><td class="p-3 text-sm">Rs. ${b.discountPrice || b.price}</td>
-                        <td class="p-3 text-sm ${b.stock <= 0 ? 'text-red-600 font-bold' : ''}">${b.stock <= 0 ? 'Out of Stock' : b.stock}</td>
-                        <td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
-                        <button onclick="window.deleteBook('${b.id}')" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button></td></tr>`).join('')}
-                    </tbody></table></div>
-                    <hr class="border-cream-200 my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3>
-                    <form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4">
-                        <input type="text" name="customDocId" id="customDocId" placeholder="Document ID (Optional)" class="p-2 border rounded bg-cream-50 md:col-span-2 border-dashed border-wood-500">
-                        <input type="text" name="title" id="bookTitle" placeholder="Book Title" required class="p-2 border rounded bg-cream-50">
-                        <input type="text" name="author" id="bookAuthor" placeholder="Author Name" required class="p-2 border rounded bg-cream-50">
-                        <select name="category" id="bookCategory" class="p-2 border rounded bg-cream-50"><option value="Fiction">Fiction</option><option value="Nepali Books">Nepali Books</option><option value="Business">Business</option></select>
-                        <input type="number" name="price" id="bookPrice" placeholder="Price (Rs)" required class="p-2 border rounded bg-cream-50">
-                        <input type="number" name="discountPrice" id="bookDiscount" placeholder="Discount Price (Rs)" class="p-2 border rounded bg-cream-50">
-                        <input type="number" name="stock" id="bookStock" placeholder="Stock Quantity" required class="p-2 border rounded bg-cream-50">
-                        <input type="text" name="isbn" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded bg-cream-50">
-                        <input type="number" name="pages" id="bookPages" placeholder="Pages" class="p-2 border rounded bg-cream-50">
-                        <input type="text" name="language" id="bookLang" placeholder="Language" class="p-2 border rounded bg-cream-50">
-                        <input type="text" name="publisher" id="bookPub" placeholder="Publisher" class="p-2 border rounded bg-cream-50">
-                        <input type="number" name="rating" id="bookRating" placeholder="Rating (1-5)" min="1" max="5" step="0.1" value="5.0" class="p-2 border rounded bg-cream-50">
-                        <input type="text" name="coverUrl" id="bookCover" placeholder="Cover Image URL" class="p-2 border rounded bg-cream-50">
-                        <textarea name="description" id="bookDesc" placeholder="Book Description" required class="p-2 border rounded bg-cream-50 md:col-span-2" rows="3"></textarea>
-                        <div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Add Book to Store</button>
-                        <button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button></div>
-                    </form>`;
-                contentDiv.innerHTML = html;
+                div.innerHTML = h + '</tbody></table></div>';
+            } else if (tab==='books') {
+                const snap = await getDocs(collection(db,"books")); const bl=[]; snap.forEach(d=>bl.push({id:d.id,...d.data()}));
+                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${b.stock<=0?'text-red-600':'',b.stock<=0?'Out of Stock':b.stock}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3><form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4"><input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed"><input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded"><input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded"><select id="bookCategory" class="p-2 border rounded"><option>Fiction</option><option>Nepali Books</option><option>Business</option></select><input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded"><input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded"><input type="number" id="bookStock" placeholder="Stock" required class="p-2 border rounded"><input type="text" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded"><input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded"><input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded"><input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded"><input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded"><input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded"><textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea><div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add</button><button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button></div></form>`;
             }
         };
 
         window.resetBookForm = function() {
-            window.state.editingBookId = null;
-            document.getElementById('bookForm').reset();
-            document.getElementById('customDocId').disabled = false;
-            document.getElementById('formTitle').innerText = "Add New Book";
-            document.getElementById('bookSubmitBtn').innerText = "Add Book to Store";
-            document.getElementById('bookCancelBtn').classList.add('hidden');
+            window.state.editingBookId = null; document.getElementById('bookForm').reset(); document.getElementById('customDocId').disabled = false;
+            document.getElementById('formTitle').innerText = "Add New Book"; document.getElementById('bookSubmitBtn').innerText = "Add Book"; document.getElementById('bookCancelBtn').classList.add('hidden');
         };
-
-        window.editBook = function(bookId) {
-            const book = window.currentBooks.find(b => b.id === bookId) || window.state.books.find(b => b.id === bookId);
-            if (!book) return;
-            window.state.editingBookId = bookId;
-            document.getElementById('customDocId').value = bookId; document.getElementById('customDocId').disabled = true;
-            document.getElementById('bookTitle').value = book.title || '';
-            document.getElementById('bookAuthor').value = book.author || '';
-            document.getElementById('bookCategory').value = book.category || 'Fiction';
-            document.getElementById('bookPrice').value = book.price || '';
-            document.getElementById('bookDiscount').value = book.discountPrice || '';
-            document.getElementById('bookStock').value = book.stock || '';
-            document.getElementById('bookIsbn').value = book.isbn || '';
-            document.getElementById('bookPages').value = book.pages || '';
-            document.getElementById('bookLang').value = book.language || '';
-            document.getElementById('bookPub').value = book.publisher || '';
-            document.getElementById('bookRating').value = book.rating || 5.0;
-            document.getElementById('bookCover').value = book.coverUrl || '';
-            document.getElementById('bookDesc').value = book.description || '';
-            document.getElementById('formTitle').innerText = "Edit Book";
-            document.getElementById('bookSubmitBtn').innerText = "Update Book";
-            document.getElementById('bookCancelBtn').classList.remove('hidden');
-            document.getElementById('bookForm').scrollIntoView({ behavior: 'smooth' });
+        window.editBook = function(id) {
+            const b = window.currentBooks.find(x=>x.id===id) || window.state.books.find(x=>x.id===id); if(!b) return;
+            window.state.editingBookId = id; document.getElementById('customDocId').value=id; document.getElementById('customDocId').disabled=true;
+            document.getElementById('bookTitle').value=b.title||''; document.getElementById('bookAuthor').value=b.author||''; document.getElementById('bookCategory').value=b.category||'Fiction';
+            document.getElementById('bookPrice').value=b.price||''; document.getElementById('bookDiscount').value=b.discountPrice||''; document.getElementById('bookStock').value=b.stock||'';
+            document.getElementById('bookIsbn').value=b.isbn||''; document.getElementById('bookPages').value=b.pages||''; document.getElementById('bookLang').value=b.language||'';
+            document.getElementById('bookPub').value=b.publisher||''; document.getElementById('bookRating').value=b.rating||5; document.getElementById('bookCover').value=b.coverUrl||'';
+            document.getElementById('bookDesc').value=b.description||''; document.getElementById('formTitle').innerText="Edit Book"; document.getElementById('bookSubmitBtn').innerText="Update"; document.getElementById('bookCancelBtn').classList.remove('hidden');
+            document.getElementById('bookForm').scrollIntoView({behavior:'smooth'});
         };
-
-        window.deleteBook = async function(bookId) {
-            if (!confirm("Are you sure you want to delete this book? This action cannot be undone.")) return;
-            try { await deleteDoc(doc(db, "books", bookId)); alert("Book deleted successfully!"); window.showAdminTab('books'); } 
-            catch (error) { console.error("Error deleting book:", error); alert("Failed to delete book."); }
+        window.deleteBook = async function(id) {
+            if(!confirm("Delete book?")) return;
+            try { await deleteDoc(doc(db,"books",id)); alert("Deleted!"); window.showAdminTab('books'); } catch(e){alert("Failed.");}
         };
-
         window.saveBook = async function(e) {
-            e.preventDefault();
-            const fd = new FormData(e.target);
-            const bookData = {
-                title: fd.get('title'), author: fd.get('author'), category: fd.get('category'),
-                price: Number(fd.get('price')), stock: Number(fd.get('stock')),
-                coverUrl: fd.get('coverUrl') || 'https://via.placeholder.com/300x450?text=No+Cover',
-                description: fd.get('description'), rating: Number(fd.get('rating')) || 5.0,
-                isbn: fd.get('isbn') || '', pages: Number(fd.get('pages')) || 0,
-                language: fd.get('language') || 'English', publisher: fd.get('publisher') || 'Unknown',
-                discountPrice: Number(fd.get('discountPrice')) || null, updatedAt: new Date().toISOString()
-            };
+            e.preventDefault(); const d={title:document.getElementById('bookTitle').value,author:document.getElementById('bookAuthor').value,category:document.getElementById('bookCategory').value,price:Number(document.getElementById('bookPrice').value),stock:Number(document.getElementById('bookStock').value),coverUrl:document.getElementById('bookCover').value||'https://via.placeholder.com/300x450',description:document.getElementById('bookDesc').value,rating:Number(document.getElementById('bookRating').value)||5,isbn:document.getElementById('bookIsbn').value||'',pages:Number(document.getElementById('bookPages').value)||0,language:document.getElementById('bookLang').value||'English',publisher:document.getElementById('bookPub').value||'Unknown',discountPrice:Number(document.getElementById('bookDiscount').value)||null,updatedAt:new Date().toISOString()};
             try {
-                if (window.state.editingBookId) {
-                    await updateDoc(doc(db, "books", window.state.editingBookId), bookData);
-                    alert("Book updated successfully!");
-                } else {
-                    const customId = fd.get('customDocId').trim();
-                    if (customId) await setDoc(doc(db, "books", customId), { ...bookData, createdAt: new Date().toISOString() });
-                    else await addDoc(collection(db, "books"), { ...bookData, createdAt: new Date().toISOString() });
-                    alert("Book added successfully!");
-                }
+                if(window.state.editingBookId){await updateDoc(doc(db,"books",window.state.editingBookId),d);alert("Updated!");}
+                else{const cid=document.getElementById('customDocId').value.trim(); cid?await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()}):await addDoc(collection(db,"books"),{...d,createdAt:new Date()});alert("Added!");}
                 window.resetBookForm(); window.showAdminTab('books');
-            } catch (error) { alert("Failed to save book: " + error.message); }
+            } catch(err){alert("Save failed: "+err.message);}
+        };
+        window.updateOrderStatus = async function(id,s){
+            try{await updateDoc(doc(db,"orders",id),{status:s});window.loadAdminStats();window.showAdminTab('orders');}catch(e){alert("Failed.");}
+        };
+        window.handleSearch = function(q) {
+            if(!q){if(window.state.currentView==='shop')window.fetchBooks(false,'All');return;}
+            if(window.state.currentView!=='shop'){window.router('shop');setTimeout(()=>window.handleSearch(q),400);return;}
+            const l=q.toLowerCase(); const f=window.state.books.filter(b=>(b.title&&b.title.toLowerCase().includes(l))||(b.author&&b.author.toLowerCase().includes(l))||(b.isbn&&b.isbn.toLowerCase().includes(l)));
+            const el=document.getElementById('shopBooks');
+            if(el){if(f.length===0)el.innerHTML=`<p class="col-span-full text-center text-gray-500 py-8">No matches.</p>`;else el.innerHTML=f.map(window.generateBookCardHTML).join('');}
         };
 
-        window.updateOrderStatus = async function(orderId, newStatus) {
-            try { await updateDoc(doc(db, "orders", orderId), { status: newStatus }); window.loadAdminStats(); window.showAdminTab('orders'); } 
-            catch (error) { console.error("Error updating order:", error); alert("Failed to update order."); }
-        };
-
-        window.handleSearch = function(query) {
-            if (!query) { if(window.state.currentView === 'shop') window.fetchBooks(false, 'All'); return; }
-            if (window.state.currentView !== 'shop') { window.router('shop'); setTimeout(() => window.handleSearch(query), 400); return; }
-            const lowerQuery = query.toLowerCase();
-            const filtered = window.state.books.filter(b => (b.title && b.title.toLowerCase().includes(lowerQuery)) || (b.author && b.author.toLowerCase().includes(lowerQuery)) || (b.isbn && b.isbn.toLowerCase().includes(lowerQuery)));
-            const targetEl = document.getElementById('shopBooks');
-            if (targetEl) {
-                if (filtered.length === 0) targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books match your search.</p>`;
-                else {
-                    targetEl.innerHTML = filtered.map(book => {
-                        const isOutOfStock = book.stock <= 0;
-                        const discountPercent = getDiscountPercent(book.price, book.discountPrice);
-                        return `<div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
-                            <div class="relative h-64 overflow-hidden bg-gray-100">
-                                <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
-                                ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
-                            </div>
-                            <div class="p-4">
-                                <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
-                                <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
-                                <p class="text-sm text-gray-500 mb-3">${book.author}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-charcoal-900">Rs. ${book.discountPrice || book.price}</span>
-                                    <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
-                                        <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-            }
-        };
-
-        window.saveCart();
-        window.router('home');
+        window.saveCart(); window.router('home');
     </script>
 </body>
 </html>
