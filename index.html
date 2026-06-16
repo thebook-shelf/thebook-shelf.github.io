@@ -183,10 +183,14 @@
         };
 
         window.generateBookCardHTML = function(book) {
-            const isOutOfStock = Number(book.stock) <= 0;
+            // ✅ FIXED: Robust stock checking to prevent false "Out of Stock"
+            const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
+            const isOutOfStock = stock <= 0;
+            
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
+            
             return `
             <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.router('book', '${book.id}')">
                 <div class="relative h-64 overflow-hidden bg-gray-100">
@@ -236,7 +240,21 @@
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
 
+        // ✅ NEW: Smart Login Redirect
+        window.handleLoginRedirect = function() {
+            if (window.state.user) {
+                window.router(window.state.user.role === 'admin' ? 'admin' : 'profile');
+            } else {
+                window.router('login');
+            }
+        };
+
         window.router = async function(view, param = null) {
+            // ✅ If already logged in, redirect 'login' requests to the appropriate dashboard
+            if (view === 'login' && window.state.user) {
+                view = window.state.user.role === 'admin' ? 'admin' : 'profile';
+            }
+
             const newHash = view + (param ? '/' + param : '');
             if (window.state.currentView === view && window.state.currentParam === param && window.location.hash === '#' + newHash) return;
             
@@ -335,7 +353,6 @@
             window.fetchAllBooksForHome();
         }
 
-        // ✅ UPDATED: Light-themed Subscribe Page matching Membership style
         function renderSubscribePage(container) {
             container.innerHTML = `
                 <div class="bg-cream-50 py-20 md:py-32 min-h-[80vh] flex items-center">
@@ -351,14 +368,12 @@
                         
                         <div class="bg-white border-2 border-gold-500 rounded-2xl p-8 md:p-12 max-w-xl mx-auto shadow-lg relative">
                             <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gold-500 text-charcoal-900 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide">Free Subscription</span>
-                            
                             <h3 class="font-serif text-2xl text-charcoal-900 mb-4 mt-2">Get Weekly Book Picks</h3>
                             <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-600 mb-8">
                                 <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> Weekly updates</span>
                                 <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> Exclusive Coupons</span>
                                 <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> New Arrivals</span>
                             </div>
-                            
                             <form onsubmit="window.handleNewsletter(event)" class="flex flex-col gap-4">
                                 <input type="email" name="email" placeholder="Enter your email address" required class="w-full p-4 rounded-lg bg-cream-50 border border-wood-500/30 text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 text-lg placeholder-gray-400">
                                 <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold px-6 py-4 rounded-lg transition text-lg shadow-md hover:shadow-lg">Join Now</button>
@@ -394,10 +409,15 @@
 
         function renderBookDetails(container, book) {
             if (!book) return window.router('shop');
-            const isOutOfStock = Number(book.stock) <= 0;
+            
+            // ✅ FIXED: Robust stock checking
+            const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
+            const isOutOfStock = stock <= 0;
+            
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
+            
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
                     <button onclick="window.router('shop')" class="mb-4 text-wood-600 hover:underline"><i class="bi bi-arrow-left"></i> Back to Shop</button>
@@ -428,7 +448,9 @@
                                     <div><strong>Pages:</strong> ${book.pages || 'N/A'}</div>
                                     <div><strong>ISBN:</strong> ${book.isbn || 'N/A'}</div>
                                     <div><strong>Language:</strong> ${book.language || 'N/A'}</div>
-                                    <div class="col-span-2"><strong>Stock:</strong> <span class="${isOutOfStock ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">${isOutOfStock ? 'Out of Stock' : book.stock + ' Available'}</span></div>
+                                    <div><strong>Format:</strong> ${book.format || 'Paperback'}</div>
+                                    <!-- ✅ UPDATED: Shows "Available" or "Out of Stock" instead of numbers -->
+                                    <div class="col-span-2"><strong>Stock:</strong> <span class="${isOutOfStock ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">${isOutOfStock ? 'Out of Stock' : 'Available'}</span></div>
                                 </div>
                                 <div class="flex gap-4">
                                     <button onclick="window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="flex-1 bg-gray-300 text-gray-500 py-3 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-2"' : 'class="flex-1 bg-wood-600 text-white py-3 rounded-xl font-semibold hover:bg-wood-700 transition flex items-center justify-center gap-2"'}>
@@ -445,7 +467,7 @@
             const isLoggedIn = !!window.state.user;
             const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             if (window.state.cart.length === 0) {
-                container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center"><i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2><button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button><p class="text-gray-500">Have an account? <a href="javascript:void(0)" onclick="window.router('login')" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p></div>`;
+                container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center"><i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2><button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button><p class="text-gray-500">Have an account? <a href="javascript:void(0)" onclick="window.handleLoginRedirect()" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p></div>`;
                 return;
             }
             let membershipDiscount = 0, finalShipping = 100;
@@ -652,7 +674,32 @@
                 div.innerHTML = h + '</tbody></table></div>';
             } else if (tab === 'books') {
                 const snap = await getDocs(collection(db,"books")); const bl=[]; snap.forEach(d=>bl.push({id:d.id,...d.data()}));
-                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${b.stock<=0?'text-red-600 font-bold':''}">${b.stock<=0?'Out of Stock':b.stock}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3><form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4"><input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed"><input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded"><input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded"><select id="bookCategory" class="p-2 border rounded">${window.CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select><input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded"><input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded"><input type="number" id="bookStock" placeholder="Stock" required class="p-2 border rounded"><input type="text" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded"><input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded"><input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded"><input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded"><input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded"><input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded"><textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea><div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add</button><button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button></div></form>`;
+                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${Number(b.stock)<=0?'text-red-600 font-bold':''}">${Number(b.stock)<=0?'Out of Stock':(b.stock || 'Available')}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3>
+                <form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4">
+                    <input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed">
+                    <input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded">
+                    <input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded">
+                    <select id="bookCategory" class="p-2 border rounded">${window.CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
+                    <!-- ✅ NEW: Format Dropdown -->
+                    <select id="bookFormat" class="p-2 border rounded">
+                        <option value="Paperback">Paperback</option>
+                        <option value="Hardcover">Hardcover</option>
+                    </select>
+                    <input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded">
+                    <input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded">
+                    <input type="number" id="bookStock" placeholder="Stock Quantity" required class="p-2 border rounded">
+                    <input type="text" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded">
+                    <input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded">
+                    <input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded">
+                    <input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded">
+                    <input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded">
+                    <input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded">
+                    <textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add Book</button>
+                        <button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button>
+                    </div>
+                </form>`;
             } else if (tab === 'newsletter') {
                 const subsSnap = await getDocs(collection(db, "newsletter"));
                 const count = subsSnap.size;
@@ -784,7 +831,12 @@
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
-            if (!book || Number(book.stock) <= 0) { alert('Sorry, this book is currently out of stock!'); return; }
+            // ✅ FIXED: Robust stock checking to prevent false "Out of Stock" alerts
+            const stock = book?.stock !== undefined && book?.stock !== null ? Number(book.stock) : 999;
+            if (!book || isNaN(stock) || stock <= 0) { 
+                alert('Sorry, this book is currently out of stock!'); 
+                return; 
+            }
             const existing = window.state.cart.find(item => item.id === bookId);
             if (existing) existing.qty++;
             else window.state.cart.push({ ...book, qty: 1, price: book.discountPrice || book.price });
@@ -973,31 +1025,61 @@
             window.state.editingBookId = null; document.getElementById('bookForm').reset(); document.getElementById('customDocId').disabled = false;
             document.getElementById('formTitle').innerText = "Add New Book"; document.getElementById('bookSubmitBtn').innerText = "Add Book"; document.getElementById('bookCancelBtn').classList.add('hidden');
         };
+        
         window.editBook = function(id) {
             const b = window.currentBooks.find(x=>x.id===id) || window.state.books.find(x=>x.id===id); if(!b) return;
             window.state.editingBookId = id; document.getElementById('customDocId').value=id; document.getElementById('customDocId').disabled=true;
             document.getElementById('bookTitle').value=b.title||''; document.getElementById('bookAuthor').value=b.author||''; document.getElementById('bookCategory').value=b.category||'Fiction';
+            document.getElementById('bookFormat').value=b.format||'Paperback'; // ✅ NEW: Populate format
             document.getElementById('bookPrice').value=b.price||''; document.getElementById('bookDiscount').value=b.discountPrice||''; document.getElementById('bookStock').value=b.stock||'';
             document.getElementById('bookIsbn').value=b.isbn||''; document.getElementById('bookPages').value=b.pages||''; document.getElementById('bookLang').value=b.language||'';
             document.getElementById('bookPub').value=b.publisher||''; document.getElementById('bookRating').value=b.rating||5; document.getElementById('bookCover').value=b.coverUrl||'';
             document.getElementById('bookDesc').value=b.description||''; document.getElementById('formTitle').innerText="Edit Book"; document.getElementById('bookSubmitBtn').innerText="Update"; document.getElementById('bookCancelBtn').classList.remove('hidden');
             document.getElementById('bookForm').scrollIntoView({behavior:'smooth'});
         };
+        
         window.deleteBook = async function(id) {
             if(!confirm("Delete book?")) return;
             try { await deleteDoc(doc(db,"books",id)); alert("Deleted!"); window.showAdminTab('books'); } catch(e){alert("Failed.");}
         };
+        
         window.saveBook = async function(e) {
-            e.preventDefault(); const d={title:document.getElementById('bookTitle').value,author:document.getElementById('bookAuthor').value,category:document.getElementById('bookCategory').value,price:Number(document.getElementById('bookPrice').value),stock:Number(document.getElementById('bookStock').value),coverUrl:document.getElementById('bookCover').value||'https://via.placeholder.com/300x450',description:document.getElementById('bookDesc').value,rating:Number(document.getElementById('bookRating').value)||5,isbn:document.getElementById('bookIsbn').value||'',pages:Number(document.getElementById('bookPages').value)||0,language:document.getElementById('bookLang').value||'English',publisher:document.getElementById('bookPub').value||'Unknown',discountPrice:Number(document.getElementById('bookDiscount').value)||null,updatedAt:new Date().toISOString()};
+            e.preventDefault(); 
+            const d = {
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                category: document.getElementById('bookCategory').value,
+                format: document.getElementById('bookFormat').value, // ✅ NEW: Save format
+                price: Number(document.getElementById('bookPrice').value),
+                stock: Number(document.getElementById('bookStock').value),
+                coverUrl: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x450',
+                description: document.getElementById('bookDesc').value,
+                rating: Number(document.getElementById('bookRating').value) || 5,
+                isbn: document.getElementById('bookIsbn').value || '',
+                pages: Number(document.getElementById('bookPages').value) || 0,
+                language: document.getElementById('bookLang').value || 'English',
+                publisher: document.getElementById('bookPub').value || 'Unknown',
+                discountPrice: Number(document.getElementById('bookDiscount').value) || null,
+                updatedAt: new Date().toISOString()
+            };
             try {
-                if(window.state.editingBookId){await updateDoc(doc(db,"books",window.state.editingBookId),d);alert("Updated!");}
-                else{const cid=document.getElementById('customDocId').value.trim(); cid?await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()}):await addDoc(collection(db,"books"),{...d,createdAt:new Date()});alert("Added!");}
+                if(window.state.editingBookId){
+                    await updateDoc(doc(db,"books",window.state.editingBookId),d);
+                    alert("Updated!");
+                } else {
+                    const cid=document.getElementById('customDocId').value.trim(); 
+                    if(cid) await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()});
+                    else await addDoc(collection(db,"books"),{...d,createdAt:new Date()});
+                    alert("Added!");
+                }
                 window.resetBookForm(); window.showAdminTab('books');
             } catch(err){alert("Save failed: "+err.message);}
         };
+        
         window.updateOrderStatus = async function(id,s){
             try{await updateDoc(doc(db,"orders",id),{status:s});window.loadAdminStats();window.showAdminTab('orders');}catch(e){alert("Failed.");}
         };
+        
         window.handleSearch = function(q) {
             if(!q){if(window.state.currentView==='shop')window.fetchBooks(false,'All');return;}
             if(window.state.currentView!=='shop'){window.router('shop');setTimeout(()=>window.handleSearch(q),400);return;}
