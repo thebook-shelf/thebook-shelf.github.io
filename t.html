@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Book Shelf | Premium Online Bookstore</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() { emailjs.init("Os-_6NjnXHyQhrkW9"); })();
+    </script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wood: { 500: '#8B5A2B', 600: '#6D4520', 700: '#5A3A1A' },
+                        cream: { 50: '#FAF7F2', 100: '#F5EFE6', 200: '#E8DFD0' },
+                        charcoal: { 800: '#2D2D2D', 900: '#1A1A1A' },
+                        gold: { 400: '#E5C158', 500: '#D4AF37', 600: '#B5952F' }
+                    },
+                    fontFamily: { serif: ['Playfair Display', 'serif'], sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .book-shadow { box-shadow: 0 10px 25px -5px rgba(139, 90, 43, 0.15), 0 8px 10px -6px rgba(139, 90, 43, 0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-cream-50 text-charcoal-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-cream-50/95 backdrop-blur-md border-b border-wood-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center cursor-pointer" onclick="window.router('home')">
+                    <i class="bi bi-book-half text-wood-600 text-3xl mr-2"></i>
+                    <span class="font-serif text-2xl font-bold text-charcoal-900">The Book Shelf</span>
+                </div>
+                <div class="hidden md:flex flex-1 mx-10">
+                    <div class="relative w-full max-w-lg">
+                        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." 
+                            class="w-full pl-10 pr-4 py-2 rounded-full border border-wood-500/30 bg-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 transition" onkeyup="window.handleSearch(this.value)">
+                        <i class="bi bi-search absolute left-3 top-3 text-wood-600"></i>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Track Order</button>
+                    <button onclick="window.router('membership')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block">Membership</button>
+                    <button onclick="window.router('cart')" class="relative text-charcoal-800 hover:text-wood-600 transition">
+                        <i class="bi bi-cart3 text-2xl"></i>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-gold-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </button>
+                    <button id="authBtn" onclick="window.router('profile')" class="text-charcoal-800 hover:text-wood-600 transition">
+                        <i class="bi bi-person-circle text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app" class="flex-grow pb-20 md:pb-0"></main>
+
+    <!-- Footer -->
+    <footer class="bg-charcoal-900 text-cream-100 pt-16 pb-8 border-t-4 border-gold-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center mb-4"><i class="bi bi-book-half text-gold-500 text-3xl mr-2"></i><span class="font-serif text-2xl font-bold text-cream-50">The Book Shelf</span></div>
+                    <p class="text-cream-200/80 text-sm leading-relaxed mb-6">Your gateway to thousands of captivating reads. We bring the cozy bookstore experience to your doorstep.</p>
+                </div>
+                <div>
+                    <h4 class="font-serif text-lg font-bold text-gold-400 mb-4">Quick Links</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" onclick="window.router('home')" class="hover:text-gold-400 transition">Home</a></li>
+                        <li><a href="#" onclick="window.router('shop')" class="hover:text-gold-400 transition">Shop All Books</a></li>
+                        <li><a href="#" onclick="window.router('track')" class="hover:text-gold-400 transition">Track Your Order</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-serif text-lg font-bold text-gold-400 mb-4">Contact Us</h4>
+                    <ul class="space-y-3 text-sm text-cream-200/80">
+                        <li class="flex items-center gap-3"><i class="bi bi-geo-alt text-gold-500"></i> 123 Literary Lane, Kathmandu</li>
+                        <li class="flex items-center gap-3"><i class="bi bi-telephone text-gold-500"></i> +977 9800000000</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-serif text-lg font-bold text-gold-400 mb-4">Stay Updated</h4>
+                    <form onsubmit="window.handleNewsletter(event)" class="flex flex-col gap-3">
+                        <input type="email" name="email" placeholder="Your email address" required class="w-full p-3 rounded-lg bg-charcoal-800 border border-wood-600 text-cream-50 focus:outline-none focus:border-gold-500 text-sm">
+                        <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-2.5 rounded-lg transition text-sm">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-wood-600/30 pt-8 text-center text-sm text-cream-200/60">
+                <p>&copy; 2024 The Book Shelf. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-cream-50 border-t border-wood-500/20 flex justify-around py-3 z-50 shadow-lg">
+        <button onclick="window.router('home')" class="flex flex-col items-center text-wood-600"><i class="bi bi-house-door text-xl"></i><span class="text-xs mt-1">Home</span></button>
+        <button onclick="window.router('shop')" class="flex flex-col items-center text-charcoal-800"><i class="bi bi-grid text-xl"></i><span class="text-xs mt-1">Shop</span></button>
+        <button onclick="window.router('cart')" class="flex flex-col items-center text-charcoal-800"><i class="bi bi-cart text-xl"></i><span class="text-xs mt-1">Cart</span></button>
+        <button id="mobileAuthBtn" onclick="window.router('profile')" class="flex flex-col items-center text-charcoal-800"><i class="bi bi-person text-xl"></i><span class="text-xs mt-1">Account</span></button>
+    </div>
+
+    <!-- Membership Modal -->
+    <div id="membershipPaymentModal" class="fixed inset-0 z-[60] hidden bg-charcoal-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in border border-cream-200">
+            <div class="bg-wood-600 p-4 flex justify-between items-center">
+                <h3 class="text-white font-serif text-xl font-bold">Complete Upgrade</h3>
+                <button onclick="window.closeMembershipPayment()" class="text-white/80 hover:text-white"><i class="bi bi-x-lg text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="bg-cream-50 p-4 rounded-xl mb-6 border border-cream-200 text-center">
+                    <p class="text-sm text-gray-500 mb-1 uppercase tracking-wide">Upgrading to</p>
+                    <p class="text-2xl font-serif font-bold text-charcoal-900" id="modalPlanName">Bookworm Premium</p>
+                    <p class="text-3xl font-bold text-wood-600 mt-2" id="modalPlanPrice">Rs. 500 <span class="text-sm font-normal text-gray-500">/ year</span></p>
+                </div>
+                <form onsubmit="window.processMembershipPayment(event)" class="space-y-5">
+                    <input type="hidden" id="modalPlanTier" name="tier"><input type="hidden" id="modalPlanAmount" name="amount">
+                    <div>
+                        <label class="block text-sm font-semibold text-charcoal-800 mb-3">Select Payment Method</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-cream-200 rounded-xl cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
+                                <input type="radio" name="paymentMethod" value="eSewa" checked class="w-4 h-4 text-wood-600"><span class="ml-3 font-semibold">eSewa</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-cream-200 rounded-xl cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition">
+                                <input type="radio" name="paymentMethod" value="Khalti" class="w-4 h-4 text-wood-600"><span class="ml-3 font-semibold">Khalti</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" id="payMembershipBtn" class="w-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3.5 rounded-xl transition">Pay Now & Activate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
+  authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
+  projectId: "the-book-shelf-8b4d5",
+  storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
+  messagingSenderId: "978399325740",
+  appId: "1:978399325740:web:b3d7cdc9ff1fe810b72b89"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
+        window.currentBooks = [];
+
+        window.getDiscountPercent = function(price, discountPrice) {
+            const p = Number(price) || 0; const dp = Number(discountPrice) || 0;
+            if (dp <= 0 || dp >= p || p <= 0) return 0;
+            return Math.round(((p - dp) / p) * 100);
+        };
+
+        window.generateBookCardHTML = function(book) {
+            const isOutOfStock = Number(book.stock) <= 0;
+            const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
+            const displayPrice = book.discountPrice || book.price;
+            const originalPrice = book.discountPrice ? book.price : null;
+            return `
+            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
+                <div class="relative h-64 overflow-hidden bg-gray-100">
+                    <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
+                    ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
+                </div>
+                <div class="p-4">
+                    <p class="text-xs text-wood-600 font-semibold uppercase mb-1">${book.category || 'Book'}</p>
+                    <h3 class="font-serif font-bold text-lg text-charcoal-900 mb-1 truncate">${book.title}</h3>
+                    <p class="text-sm text-gray-500 mb-3">${book.author}</p>
+                    <div class="flex flex-col items-start">
+                        ${originalPrice ? `<span class="text-xs text-gray-400 line-through">Rs. ${originalPrice}</span>` : ''}
+                        <span class="font-bold text-charcoal-900">Rs. ${displayPrice}</span>
+                    </div>
+                    <div class="mt-3 flex justify-end">
+                        <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
+                            <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                window.state.user = { uid: user.uid, email: user.email, ...(userDoc.exists() ? userDoc.data() : {}) };
+                updateAuthUI(true);
+            } else {
+                window.state.user = null;
+                updateAuthUI(false);
+            }
+        });
+
+        function updateAuthUI(isLoggedIn) {
+            const btn = document.getElementById('authBtn');
+            if (isLoggedIn) {
+                const isAdmin = window.state.user?.role === 'admin';
+                btn.innerHTML = `<i class="bi ${isAdmin ? 'bi-shield-lock' : 'bi-person-circle'} text-2xl"></i>`;
+                btn.setAttribute('onclick', isAdmin ? "window.router('admin')" : "window.router('profile')");
+            } else {
+                btn.innerHTML = `<i class="bi bi-person-circle text-2xl"></i>`;
+                btn.setAttribute('onclick', "window.router('login')");
+            }
+        }
+
+        window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
+
+        window.router = function(view, param = null) {
+            window.state.currentView = view;
+            // ✅ NEW: Update the URL hash so the link can be shared/copied
+    window.location.hash = view; 
+            const appDiv = document.getElementById('app');
+            appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
+            setTimeout(() => {
+                if (view === 'home') renderHome(appDiv);
+                else if (view === 'shop') renderShop(appDiv, param);
+                else if (view === 'book') renderBookDetails(appDiv, param);
+                else if (view === 'cart') renderCart(appDiv);
+                else if (view === 'login') renderLogin(appDiv);
+                else if (view === 'register') renderRegister(appDiv);
+                else if (view === 'profile') renderProfile(appDiv);
+                else if (view === 'track') renderTrackOrder(appDiv);
+                else if (view === 'membership') renderMembership(appDiv);
+                else if (view === 'admin') renderAdmin(appDiv);
+            }, 300);
+            window.scrollTo(0, 0);
+        };
+
+        function renderHome(container) {
+            container.innerHTML = `
+                <section class="relative bg-charcoal-900 text-cream-50 py-20 md:py-32 overflow-hidden">
+                    <div class="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center"></div>
+                    <div class="relative max-w-7xl mx-auto px-4 text-center">
+                        <h1 class="font-serif text-4xl md:text-6xl font-bold mb-6 text-gold-400">Discover Your Next Great Read</h1>
+                        <p class="text-lg md:text-xl text-cream-200 mb-8 max-w-2xl mx-auto">Explore thousands of books across fiction, education, business, self-development, and more.</p>
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                            <button onclick="window.router('shop')" class="bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-semibold py-3 px-8 rounded-full transition transform hover:scale-105">Browse Books</button>
+                            <button onclick="window.router('membership')" class="border-2 border-cream-500 hover:bg-cream-500 hover:text-charcoal-900 text-cream-500 font-semibold py-3 px-8 rounded-full transition">Get Membership</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="bg-cream-100 py-20">
+                    <div class="max-w-4xl mx-auto px-4 text-center">
+                        <span class="text-wood-600 font-semibold tracking-widest uppercase text-sm">Our Story</span>
+                        <h2 class="font-serif text-4xl md:text-5xl font-bold text-charcoal-900 mt-4 mb-6">Welcome to <br><span class="text-wood-600">The Book Shelf</span></h2>
+                        <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">Step into a world where stories come alive. The Book Shelf is your gateway to thousands of captivating reads — from timeless classics to the latest bestsellers.</p>
+                    </div>
+                </section>
+                <section class="max-w-7xl mx-auto px-4 py-16">
+                    <h2 class="font-serif text-3xl font-bold text-center mb-10 text-charcoal-900">Popular Categories</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        ${['Fiction', 'Non-fiction', 'Self Improvement', 'Business', 'Nepali Books'].map(cat => `
+                            <div onclick="window.router('shop', '${cat}')" class="bg-white hover:bg-wood-500 hover:text-white text-charcoal-800 p-6 rounded-xl text-center cursor-pointer transition shadow-sm hover:shadow-md border border-cream-200">
+                                <i class="bi bi-book text-3xl mb-2 block"></i><span class="font-semibold">${cat}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+                <section class="bg-cream-50 py-16">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Best Selling Books</h2>
+                        <div id="featuredBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+                    </div>
+                </section>
+                <section class="bg-cream-100 py-16 border-t border-cream-200">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Explore All Books</h2>
+                        <div id="allBooksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+                    </div>
+                </section>
+            `;
+            window.fetchBooks(true);
+            window.fetchAllBooksForHome();
+        }
+
+        function renderShop(container, categoryFilter = 'All') {
+            container.innerHTML = `<div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <aside class="w-full md:w-64 flex-shrink-0">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 sticky top-24">
+                            <h3 class="font-serif text-xl font-bold mb-4">Filters</h3>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Category</label>
+                                <select id="filterCategory" class="w-full p-2 border rounded-lg bg-cream-50">
+                                    <option value="All">All Categories</option>
+                                    <option value="Fiction">Fiction</option>
+                                    <option value="Nepali Books">Nepali Books</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Self Improvement">Self Improvement</option>
+                                </select>
+                            </div>
+                            <button onclick="window.applyShopFilters()" class="w-full bg-wood-600 text-white py-2 rounded-lg hover:bg-wood-700 transition">Apply</button>
+                        </div>
+                    </aside>
+                    <div class="flex-1"><div id="shopBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div></div>
+                </div>
+            </div>`;
+            window.fetchBooks(false, categoryFilter);
+        }
+
+        function renderBookDetails(container, book) {
+            if (!book) return window.router('shop');
+            const isOutOfStock = Number(book.stock) <= 0;
+            const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
+            const displayPrice = book.discountPrice || book.price;
+            const originalPrice = book.discountPrice ? book.price : null;
+            container.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <button onclick="window.router('shop')" class="mb-4 text-wood-600 hover:underline"><i class="bi bi-arrow-left"></i> Back to Shop</button>
+                    <div class="bg-white rounded-2xl shadow-lg border border-cream-200 overflow-hidden">
+                        <div class="grid md:grid-cols-2 gap-8 p-8">
+                            <div class="flex justify-center relative">
+                                <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="book-shadow rounded-lg max-h-[500px] object-cover" alt="${book.title}">
+                                ${isOutOfStock ? '<span class="absolute top-4 right-4 bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg">OUT OF STOCK</span>' : ''}
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <span class="text-gold-600 font-semibold text-sm uppercase tracking-wide mb-2">${book.category}</span>
+                                <h1 class="font-serif text-4xl font-bold text-charcoal-900 mb-2">${book.title}</h1>
+                                <p class="text-lg text-wood-600 mb-4">by ${book.author}</p>
+                                <div class="flex items-center mb-6">
+                                    <div class="flex text-gold-500 text-lg">${'★'.repeat(Math.floor(book.rating))}${'☆'.repeat(5 - Math.floor(book.rating))}</div>
+                                    <span class="ml-2 text-gray-500">(${book.rating} Rating)</span>
+                                </div>
+                                <div class="mb-6">
+                                    <div class="flex items-baseline gap-3">
+                                        ${originalPrice ? `<span class="text-xl text-gray-400 line-through">Rs. ${originalPrice}</span>` : ''}
+                                        <span class="text-4xl font-bold text-charcoal-900">Rs. ${displayPrice}</span>
+                                    </div>
+                                    ${discountPercent > 0 ? `<span class="inline-block mt-2 bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">You save ${discountPercent}%!</span>` : ''}
+                                </div>
+                                <p class="text-gray-600 mb-6 leading-relaxed">${book.description}</p>
+                                <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-8">
+                                    <div><strong>Publisher:</strong> ${book.publisher || 'N/A'}</div>
+                                    <div><strong>Pages:</strong> ${book.pages || 'N/A'}</div>
+                                    <div><strong>ISBN:</strong> ${book.isbn || 'N/A'}</div>
+                                    <div><strong>Language:</strong> ${book.language || 'N/A'}</div>
+                                    <div class="col-span-2"><strong>Stock:</strong> <span class="${isOutOfStock ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">${isOutOfStock ? 'Out of Stock' : book.stock + ' Available'}</span></div>
+                                </div>
+                                <div class="flex gap-4">
+                                    <button onclick="window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="flex-1 bg-gray-300 text-gray-500 py-3 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-2"' : 'class="flex-1 bg-wood-600 text-white py-3 rounded-xl font-semibold hover:bg-wood-700 transition flex items-center justify-center gap-2"'}>
+                                        <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i> ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderCart(container) {
+            const isLoggedIn = !!window.state.user;
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            if (window.state.cart.length === 0) {
+                container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center"><i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2><button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button><p class="text-gray-500">Have an account? <a href="#" onclick="window.router('login')" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p></div>`;
+                return;
+            }
+            let membershipDiscount = 0, finalShipping = 100;
+            if (isLoggedIn) {
+                if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
+                else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
+            }
+            const couponDiscount = window.state.appliedDiscount.amount;
+            const total = subtotal - membershipDiscount - couponDiscount + finalShipping;
+
+            container.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <button onclick="window.router('shop')" class="mb-6 text-wood-600 hover:underline font-medium flex items-center gap-1"><i class="bi bi-arrow-left"></i> Continue Shopping</button>
+                    <h2 class="font-serif text-3xl font-bold mb-8">Shopping Cart & Checkout</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden">
+                                ${window.state.cart.map((item, idx) => `
+                                    <div class="flex items-center p-4 border-b border-cream-100 last:border-0">
+                                        <img src="${item.coverUrl}" class="w-16 h-24 object-cover rounded shadow-sm mr-4">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-charcoal-900">${item.title}</h4>
+                                            <p class="text-sm text-gray-500">${item.author}</p>
+                                            <p class="text-wood-600 font-bold mt-1">Rs. ${item.price}</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="window.updateQty(${idx}, -1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">-</button>
+                                            <span class="font-medium w-4 text-center">${item.qty}</span>
+                                            <button onclick="window.updateQty(${idx}, 1)" class="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center">+</button>
+                                        </div>
+                                        <button onclick="window.removeFromCart(${idx})" class="ml-6 text-red-500 hover:text-red-700"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="bg-cream-100 p-6 rounded-xl border border-cream-200">
+                                <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
+                                <div class="flex gap-2">
+                                    <input type="text" id="discountCodeInput" value="${window.state.appliedDiscount.code}" placeholder="e.g., SAVE10, FLAT50" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
+                                    <button type="button" onclick="window.applyDiscountCode()" class="bg-charcoal-800 text-white font-semibold px-6 rounded-lg hover:bg-charcoal-900 transition">Apply</button>
+                                </div>
+                                <p id="discountMessage" class="text-sm mt-2 h-5 font-medium">${window.state.appliedDiscount.code ? `<span class="text-green-600">✅ Code applied! You save Rs. ${window.state.appliedDiscount.amount}</span>` : ''}</p>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 sticky top-24">
+                                <h3 class="font-serif text-xl font-bold mb-4">Order Summary</h3>
+                                <div class="space-y-3 text-sm mb-6 border-b border-cream-200 pb-6">
+                                    <div class="flex justify-between"><span>Subtotal</span><span>Rs. ${subtotal}</span></div>
+                                    ${membershipDiscount > 0 ? `<div class="flex justify-between text-green-600"><span>Membership Discount</span><span>- Rs. ${membershipDiscount}</span></div>` : ''}
+                                    ${couponDiscount > 0 ? `<div class="flex justify-between text-green-600"><span>Coupon Discount</span><span>- Rs. ${couponDiscount}</span></div>` : ''}
+                                    <div class="flex justify-between"><span>Shipping</span><span>${finalShipping === 0 ? 'Free' : 'Rs. ' + finalShipping}</span></div>
+                                    <div class="flex justify-between text-xl font-bold text-charcoal-900 pt-3 border-t border-cream-200"><span>Total</span><span>Rs. ${total}</span></div>
+                                </div>
+                                <h3 class="font-serif text-xl font-bold mb-4">Checkout Details</h3>
+                                <form onsubmit="window.handleCheckout(event)" class="space-y-4">
+                                    <div><label class="block text-sm font-medium mb-1">Full Name</label><input type="text" name="name" required value="${isLoggedIn ? (window.state.user.name || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                                    <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required value="${isLoggedIn ? (window.state.user.phone || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                                    <div><label class="block text-sm font-medium mb-1">Email Address <span class="text-red-500">*</span></label><input type="email" name="email" required value="${isLoggedIn ? window.state.user.email : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                                    <div><label class="block text-sm font-medium mb-1">Delivery Address</label><textarea name="address" required rows="3" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea></div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Payment Method</label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="COD" checked class="mr-2"> Cash on Delivery</label>
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="eSewa" class="mr-2"> eSewa</label>
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="Khalti" class="mr-2"> Khalti</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full bg-gold-500 text-charcoal-900 font-bold py-3 rounded-xl mt-4 hover:bg-gold-600 transition">Place Order</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderLogin(container) {
+            container.innerHTML = `<div class="max-w-md mx-auto px-4 py-16 fade-in">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-cream-200 text-center">
+                    <h2 class="font-serif text-3xl font-bold mb-6">Login</h2>
+                    <form onsubmit="window.handleLogin(event)" class="space-y-4">
+                        <input type="email" name="email" placeholder="Email Address" required class="w-full p-3 border rounded-lg bg-cream-50">
+                        <input type="password" name="password" placeholder="Password" required class="w-full p-3 border rounded-lg bg-cream-50">
+                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Login</button>
+                    </form>
+                    <p class="mt-3 text-sm"><a href="#" onclick="alert('Please contact support@thebookshelf.com to reset your password.')" class="text-wood-600 hover:underline">Forgot your password?</a></p>
+                    <p class="mt-6 text-sm text-gray-500">Don't have an account? <a href="#" onclick="window.router('register')" class="text-wood-600 hover:underline font-semibold">Create an account here</a></p>
+                </div>
+            </div>`;
+        }
+
+        function renderRegister(container) {
+            container.innerHTML = `<div class="max-w-md mx-auto px-4 py-16 fade-in">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-cream-200">
+                    <h2 class="font-serif text-3xl font-bold mb-2 text-center">Create Account</h2>
+                    <p class="text-gray-500 text-center mb-6">Join The Book Shelf today</p>
+                    <form onsubmit="window.handleRegister(event)" class="space-y-4">
+                        <input type="text" name="name" placeholder="Full Name" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                        <input type="email" name="email" placeholder="Email Address" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                        <input type="tel" name="phone" placeholder="Phone Number" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                        <input type="password" name="password" placeholder="Password (min 6 characters)" required minlength="6" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Register</button>
+                    </form>
+                    <p class="mt-6 text-sm text-center text-gray-500">Already have an account? <a href="#" onclick="window.router('login')" class="text-wood-600 hover:underline font-semibold">Login here</a></p>
+                </div>
+            </div>`;
+        }
+
+        function renderTrackOrder(container) {
+            container.innerHTML = `<div class="max-w-2xl mx-auto px-4 py-16 fade-in">
+                <div class="text-center mb-8"><i class="bi bi-truck text-wood-600 text-5xl mb-4"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900">Track Your Order</h2><p class="text-gray-600 mt-2">Enter the Order ID and the email address you used during checkout.</p></div>
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-cream-200">
+                    <form onsubmit="window.handleTrackOrder(event)" class="space-y-4">
+                        <div><label class="block text-sm font-medium mb-1">Order ID</label><input type="text" name="orderId" required placeholder="e.g., ORD-1715000000" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none uppercase"></div>
+                        <div><label class="block text-sm font-medium mb-1">Email Address</label><input type="email" name="email" required placeholder="Email used for checkout" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Track Order</button>
+                    </form>
+                    <div id="trackResult" class="mt-6 hidden"></div>
+                </div>
+            </div>`;
+        }
+
+        function renderMembership(container) {
+            const isLoggedIn = !!window.state.user;
+            const currentTier = window.state.user?.membershipTier || 'free';
+            container.innerHTML = `<div class="max-w-6xl mx-auto px-4 py-16 fade-in">
+                <div class="text-center mb-12"><span class="text-gold-600 font-semibold tracking-widest uppercase text-sm">Exclusive Benefits</span><h2 class="font-serif text-4xl md:text-5xl font-bold text-charcoal-900 mt-4 mb-6">Become a Member</h2><p class="text-lg text-gray-600 max-w-2xl mx-auto">Unlock premium perks, exclusive discounts, and early access to new releases.</p></div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-cream-200 flex flex-col ${currentTier === 'free' ? 'ring-2 ring-wood-500' : ''}">
+                        <h3 class="font-serif text-2xl font-bold text-charcoal-900">Free Reader</h3>
+                        <p class="text-3xl font-bold text-wood-600 mt-4 mb-6">Rs. 0 <span class="text-sm font-normal text-gray-500">/ forever</span></p>
+                        <ul class="space-y-3 mb-8 flex-1"><li class="flex items-center gap-2 text-gray-600"><i class="bi bi-check-circle-fill text-green-500"></i> Browse all books</li><li class="flex items-center gap-2 text-gray-600"><i class="bi bi-check-circle-fill text-green-500"></i> Standard shipping rates</li></ul>
+                        <button ${currentTier === 'free' ? 'disabled class="w-full bg-gray-200 text-gray-500 font-bold py-3 rounded-xl cursor-not-allowed"' : 'onclick="window.handleJoinMembership(\'free\')" class="w-full border-2 border-wood-600 text-wood-600 font-bold py-3 rounded-xl hover:bg-wood-50 transition"'}>${currentTier === 'free' ? 'Current Plan' : 'Downgrade'}</button>
+                    </div>
+                    <div class="bg-charcoal-900 text-cream-50 p-8 rounded-2xl shadow-lg border border-gold-500 relative flex flex-col transform md:-translate-y-4 ${currentTier === 'premium' ? 'ring-2 ring-gold-500' : ''}">
+                        <span class="absolute top-0 right-0 bg-gold-500 text-charcoal-900 text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">MOST POPULAR</span>
+                        <h3 class="font-serif text-2xl font-bold text-gold-400">Bookworm Premium</h3>
+                        <p class="text-3xl font-bold text-white mt-4 mb-6">Rs. 500 <span class="text-sm font-normal text-gray-400">/ year</span></p>
+                        <ul class="space-y-3 mb-8 flex-1"><li class="flex items-center gap-2"><i class="bi bi-check-circle-fill text-gold-500"></i> <strong>10% OFF</strong> all books</li><li class="flex items-center gap-2"><i class="bi bi-check-circle-fill text-gold-500"></i> Free shipping on orders > Rs. 1000</li></ul>
+                        <button onclick="window.openMembershipPayment('premium', 'Bookworm Premium', '500')" class="w-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 rounded-xl transition">${currentTier === 'premium' ? 'Current Plan' : 'Upgrade to Premium'}</button>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-cream-200 flex flex-col ${currentTier === 'vip' ? 'ring-2 ring-wood-500' : ''}">
+                        <h3 class="font-serif text-2xl font-bold text-charcoal-900">Literary Legend</h3>
+                        <p class="text-3xl font-bold text-wood-600 mt-4 mb-6">Rs. 1500 <span class="text-sm font-normal text-gray-500">/ year</span></p>
+                        <ul class="space-y-3 mb-8 flex-1"><li class="flex items-center gap-2 text-gray-600"><i class="bi bi-check-circle-fill text-green-500"></i> <strong>20% OFF</strong> all books</li><li class="flex items-center gap-2 text-gray-600"><i class="bi bi-check-circle-fill text-green-500"></i> <strong>Always</strong> free shipping</li></ul>
+                        <button onclick="window.openMembershipPayment('vip', 'Literary Legend', '1500')" class="w-full border-2 border-wood-600 text-wood-600 font-bold py-3 rounded-xl hover:bg-wood-50 transition">${currentTier === 'vip' ? 'Current Plan' : 'Upgrade to Legend'}</button>
+                    </div>
+                </div>
+                ${!isLoggedIn ? `<div class="mt-12 text-center bg-cream-100 p-6 rounded-xl border border-cream-200"><p class="text-gray-600 mb-4">You must be logged in to activate a membership.</p><button onclick="window.router('login')" class="bg-wood-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-wood-700 transition">Login or Register</button></div>` : ''}
+            </div>`;
+        }
+
+        function renderProfile(container) {
+            if (!window.state.user) return window.router('login');
+            const tierDisplay = window.state.user.membershipTier === 'vip' ? 'Literary Legend 👑' : window.state.user.membershipTier === 'premium' ? 'Bookworm Premium ⭐' : 'Free Reader';
+            container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 mb-8 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div><h2 class="font-serif text-2xl font-bold text-charcoal-900">Hello, ${window.state.user.name || 'User'}</h2><p class="text-gray-500">${window.state.user.email}</p><span class="inline-block mt-2 px-3 py-1 bg-gold-100 text-gold-700 text-sm font-bold rounded-full">${tierDisplay}</span></div>
+                    <button onclick="window.handleLogout()" class="text-red-500 hover:text-red-700 font-semibold flex items-center gap-2 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 transition self-start md:self-auto"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </div>
+                <h3 class="font-serif text-2xl font-bold mb-6">My Orders & Tracking</h3>
+                <div id="userOrdersList" class="space-y-4"><p class="text-center text-gray-500 py-8">Loading your orders...</p></div>
+            </div>`;
+            window.loadUserOrders();
+        }
+
+        function renderAdmin(container) {
+            if (!window.state.user || window.state.user.role !== 'admin') { alert("Access Denied: Admins only."); return window.router('login'); }
+            container.innerHTML = `<div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="font-serif text-3xl font-bold">Admin Dashboard</h2>
+                    <button onclick="window.handleLogout()" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 border border-red-200"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gold-500"><h3 class="text-gray-500 text-sm">Total Orders</h3><p class="text-3xl font-bold" id="adminTotalOrders">Loading...</p></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-wood-500"><h3 class="text-gray-500 text-sm">Pending Orders</h3><p class="text-3xl font-bold" id="adminPendingOrders">Loading...</p></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500"><h3 class="text-gray-500 text-sm">Total Revenue</h3><p class="text-3xl font-bold" id="adminRevenue">Loading...</p></div>
+                </div>
+                <div class="flex gap-4 mb-6 border-b border-cream-200 overflow-x-auto">
+                    <button onclick="window.showAdminTab('orders')" id="tab-orders" class="px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap">Manage Orders</button>
+                    <button onclick="window.showAdminTab('books')" id="tab-books" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Manage Books</button>
+                    <button onclick="window.showAdminTab('newsletter')" id="tab-newsletter" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Send Newsletter</button>
+                </div>
+                <div id="adminContent" class="bg-white p-6 rounded-xl shadow-sm border border-cream-200"><p class="text-center text-gray-500">Loading data...</p></div>
+            </div>`;
+            window.loadAdminStats();
+            window.showAdminTab('orders');
+        }
+
+        // ✅ NEW: Professional Newsletter Builder Logic
+        window.showAdminTab = async function(tab) {
+            document.getElementById('tab-orders').className = tab==='orders'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            document.getElementById('tab-books').className = tab==='books'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            document.getElementById('tab-newsletter').className = tab==='newsletter'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            
+            const div = document.getElementById('adminContent'); 
+            div.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';
+            
+            if (tab === 'orders') {
+                const snap = await getDocs(query(collection(db, "orders"), orderBy("createdAt","desc")));
+                let h = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
+                snap.forEach(d => {
+                    const o = d.data(); const s = JSON.stringify(o).replace(/"/g, '&quot;');
+                    h += `<tr class="border-b"><td class="p-3 text-sm font-mono">${(o.orderId||d.id).substring(0,12)}<br><span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleDateString()}</span></td><td class="p-3 text-sm">${o.userName||'Guest'}<br><span class="text-xs text-gray-400">${o.userEmail||''}</span></td><td class="p-3 font-bold">Rs. ${o.totalAmount}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${o.status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}">${o.status}</span></td><td class="p-3 text-center"><select onchange="window.updateOrderStatus('${d.id}',this.value)" class="text-sm border rounded p-1 mb-2 block w-full">${['Pending','Confirmed','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-o')))" data-o="${s}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold"><i class="bi bi-printer"></i> Print</button></td></tr>`;
+                });
+                div.innerHTML = h + '</tbody></table></div>';
+            } else if (tab === 'books') {
+                const snap = await getDocs(collection(db,"books")); const bl=[]; snap.forEach(d=>bl.push({id:d.id,...d.data()}));
+                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${b.stock<=0?'text-red-600 font-bold':''}">${b.stock<=0?'Out of Stock':b.stock}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3><form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4"><input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed"><input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded"><input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded"><select id="bookCategory" class="p-2 border rounded"><option>Fiction</option><option>Nepali Books</option><option>Business</option></select><input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded"><input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded"><input type="number" id="bookStock" placeholder="Stock" required class="p-2 border rounded"><input type="text" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded"><input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded"><input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded"><input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded"><input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded"><input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded"><textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea><div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add</button><button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button></div></form>`;
+            } else if (tab === 'newsletter') {
+                // ✅ PROFESSIONAL NEWSLETTER BUILDER UI
+                const subsSnap = await getDocs(collection(db, "newsletter"));
+                const count = subsSnap.size;
+                div.innerHTML = `
+                    <div class="max-w-3xl mx-auto">
+                        <h3 class="font-serif text-2xl font-bold mb-2">Newsletter Builder</h3>
+                        <p class="text-gray-500 mb-6">You have <span class="font-bold text-wood-600">${count}</span> active subscribers. Fill out the details below to send a beautifully formatted HTML newsletter.</p>
+                        
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 text-sm text-blue-800">
+                            <strong>💡 Tip:</strong> Ensure you have created the HTML template in your EmailJS dashboard with the variables: <code>{{headline}}</code>, <code>{{message}}</code>, and <code>{{shop_link}}</code>.
+                        </div>
+
+                        <form onsubmit="window.sendFormattedNewsletter(event, ${count})" class="space-y-5">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Email Subject Line</label>
+                                <input type="text" name="subject" required placeholder="e.g., 📚 New Arrivals & Exclusive 20% Off Inside!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Hero Headline (Large Text)</label>
+                                <input type="text" name="headline" required placeholder="e.g., Summer Reading Sale is Here!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none font-serif text-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Main Message</label>
+                                <textarea name="message" required rows="6" placeholder="Write your newsletter content here. You can mention new books, sales, or reading tips..." class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none leading-relaxed"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Button Link (Shop URL)</label>
+                                <input type="url" name="shop_link" value="${window.location.origin}" placeholder="https://yourwebsite.com/shop" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                            </div>
+                            
+                            <div class="flex gap-4 pt-4">
+                                <button type="button" onclick="window.testNewsletterEmail()" class="px-6 py-3 border border-wood-600 text-wood-600 font-bold rounded-lg hover:bg-wood-50 transition flex items-center gap-2">
+                                    <i class="bi bi-envelope"></i> Test to My Email
+                                </button>
+                                <button type="submit" id="sendNewsletterBtn" class="flex-1 bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2">
+                                    <i class="bi bi-send"></i> Send to All ${count} Subscribers
+                                </button>
+                            </div>
+                        </form>
+                        <div id="newsletterStatus" class="mt-6 hidden p-4 rounded-lg"></div are>
+                    </div>
+                `;
+            }
+        };
+
+        // ✅ NEW: Formatted Newsletter Sending Logic
+        window.testNewsletterEmail = async function() {
+            if (!window.state.user || !window.state.user.email) { alert("Please log in as admin to test."); return; }
+            const formData = new FormData(document.querySelector('form')); // Grabs current form data if filled
+            await sendSingleFormattedEmail(window.state.user.email, formData.get('subject') || 'Test Newsletter', formData.get('headline') || 'Test Headline', formData.get('message') || 'This is a test message.', formData.get('shop_link') || window.location.origin, true);
+        };
+
+        window.sendFormattedNewsletter = async function(e, subscriberCount) {
+            e.preventDefault();
+            if (subscriberCount === 0) { alert("No subscribers found yet."); return; }
+            if (!confirm(`Send this newsletter to ${subscriberCount} subscribers? This action cannot be undone.`)) return;
+
+            const formData = new FormData(e.target);
+            const subject = formData.get('subject');
+            const headline = formData.get('headline');
+            const message = formData.get('message');
+            const shopLink = formData.get('shop_link');
+            
+            const btn = document.getElementById('sendNewsletterBtn');
+            const statusDiv = document.getElementById('newsletterStatus');
+            
+            btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Sending...'; btn.disabled = true;
+            statusDiv.classList.remove('hidden');
+            statusDiv.className = "mt-6 p-4 rounded-lg bg-blue-50 text-blue-700 border border-blue-200";
+            statusDiv.innerText = `Starting to send to ${subscriberCount} users. Please keep this tab open...`;
+
+            let successCount = 0, failCount = 0;
+            const subsSnap = await getDocs(collection(db, "newsletter"));
+            
+            for (const doc of subsSnap.docs) {
+                const email = doc.data().email;
+                // Extract name from email for personalization (e.g., "user" from "user@gmail.com")
+                const subscriberName = email.split('@')[0]; 
+                const success = await sendSingleFormattedEmail(email, subject, headline, message, shopLink, false, subscriberName);
+                if (success) successCount++; else failCount++;
+            }
+
+            btn.innerHTML = `<i class="bi bi-send"></i> Send to All ${subscriberCount} Subscribers`; btn.disabled = false;
+            statusDiv.className = "mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200";
+            statusDiv.innerHTML = `<strong>✅ Campaign Complete!</strong><br>Successfully sent to ${successCount} users. Failed: ${failCount}.`;
+            e.target.reset();
+        };
+
+        async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
+            // ⚠️ REPLACE WITH YOUR ACTUAL EMAILJS IDs
+            const serviceID = "service_oc8ek8p"; 
+            const templateID = "template_e7mxtuu"; // The Newsletter Template ID
+
+            if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
+                console.error("EMAILJS ERROR: Keys not configured in code!");
+                if (isTest) alert("ERROR: EmailJS keys are not configured. Update the code.");
+                return false;
+            }
+
+            try {
+                await emailjs.send(serviceID, templateID, {
+                    to_email: toEmail,
+                    subscriber_name: subscriberName,
+                    headline: headline,
+                    message: message,
+                    shop_link: shopLink
+                });
+                console.log("Successfully sent newsletter to:", toEmail);
+                return true;
+            } catch (err) {
+                console.error("Failed to send to", toEmail, err);
+                return false;
+            }
+        }
+
+        window.printReceipt = function(order) {
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            const date = new Date(order.createdAt).toLocaleString();
+            const itemsHtml = order.items.map(item => `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.title}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price * item.qty}</td></tr>`).join('');
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Receipt - ${order.orderId}</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:600px;margin:0 auto;color:#333}.header{text-align:center;border-bottom:2px dashed #333;padding-bottom:10px;margin-bottom:15px}.header h1{margin:0;font-size:24px}.header p{margin:4px 0;font-size:14px}.details{margin-bottom:15px;font-size:14px;line-height:1.6}.details p{margin:4px 0}table{width:100%;border-collapse:collapse;margin-bottom:15px;font-size:14px}th{text-align:left;border-bottom:2px solid #333;padding:8px 4px}.totals{text-align:right;font-size:14px}.totals p{margin:4px 0}.total-final{font-size:18px;font-weight:bold;border-top:2px dashed #333;padding-top:8px;margin-top:8px}.footer{text-align:center;margin-top:30px;border-top:2px dashed #333;padding-top:10px;font-size:14px}.no-print{text-align:center;margin-top:30px}.btn{padding:10px 20px;font-size:14px;cursor:pointer;border:none;border-radius:4px;margin:0 5px}.btn-print{background:#333;color:white}.btn-close{background:#eee;color:#333}@media print{body{padding:0}.no-print{display:none!important}}</style></head><body>
+                <div class="header"><h1>The Book Shelf</h1><p>123 Literary Lane, Kathmandu, Nepal</p><p>Phone: +977 9800000000</p></div>
+                <div class="details"><p><strong>Order ID:</strong> ${order.orderId}</p><p><strong>Date:</strong> ${date}</p><p><strong>Customer:</strong> ${order.userName}</p><p><strong>Address:</strong> ${order.deliveryAddress}</p><p><strong>Payment:</strong> ${order.paymentMethod}</p></div>
+                <table><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+                <div class="totals"><p>Subtotal: Rs. ${order.subtotal}</p>${order.discount > 0 ? `<p>Membership Discount: -Rs. ${order.discount}</p>` : ''}${order.appliedDiscount > 0 ? `<p>Coupon Discount: -Rs. ${order.appliedDiscount}</p>` : ''}<p>Shipping: Rs. ${order.shippingCost}</p><p class="total-final">Total: Rs. ${order.totalAmount}</p></div>
+                <div class="footer"><p>Thank you for shopping with The Book Shelf!</p><p>Happy Reading!</p></div>
+                <div class="no-print"><button class="btn btn-print" onclick="window.print()">🖨️ Print Receipt</button><button class="btn btn-close" onclick="window.close()">Close</button></div></body></html>`);
+            printWindow.document.close();
+            setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
+        };
+
+        window.fetchBooks = async function(isFeatured, category = 'All') {
+            try {
+                let q = collection(db, "books");
+                if (category && category !== 'All') q = query(q, where("category", "==", category));
+                if (isFeatured) q = query(q, orderBy("rating", "desc"), limit(4));
+                const querySnapshot = await getDocs(q);
+                const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
+                window.currentBooks = books; window.state.books = books;
+                const targetEl = document.getElementById(isFeatured ? 'featuredBooks' : 'shopBooks');
+                if (!targetEl) return;
+                if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books found.</p>`; return; }
+                targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
+            } catch (error) { console.error("Error fetching books:", error); }
+        };
+
+        window.fetchAllBooksForHome = async function() {
+            try {
+                const q = query(collection(db, "books"), limit(8));
+                const querySnapshot = await getDocs(q);
+                const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
+                const targetEl = document.getElementById('allBooksGrid');
+                if (!targetEl) return;
+                if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books available.</p>`; return; }
+                targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
+            } catch (error) { console.error("Error fetching all books for home:", error); }
+        };
+
+        window.applyShopFilters = function() { window.router('shop', document.getElementById('filterCategory').value); };
+        window.showBookDetails = function(bookId) { const book = window.currentBooks.find(b => b.id === bookId); if (book) renderBookDetails(document.getElementById('app'), book); };
+        
+        window.addToCart = function(bookId) {
+            const book = window.currentBooks.find(b => b.id === bookId);
+            if (!book || Number(book.stock) <= 0) { alert('Sorry, this book is currently out of stock!'); return; }
+            const existing = window.state.cart.find(item => item.id === bookId);
+            if (existing) existing.qty++;
+            else window.state.cart.push({ ...book, qty: 1, price: book.discountPrice || book.price });
+            window.saveCart(); alert('Added to cart!');
+        };
+
+        window.saveCart = function() {
+            localStorage.setItem('cart', JSON.stringify(window.state.cart));
+            const el = document.getElementById('cartCount');
+            if(el) el.innerText = window.state.cart.reduce((sum, item) => sum + item.qty, 0);
+        };
+
+        window.updateQty = function(idx, change) {
+            window.state.cart[idx].qty += change;
+            if (window.state.cart[idx].qty <= 0) window.state.cart.splice(idx, 1);
+            window.saveCart(); window.router('cart');
+        };
+
+        window.removeFromCart = function(idx) {
+            window.state.cart.splice(idx, 1);
+            window.saveCart(); window.router('cart');
+        };
+
+        window.applyDiscountCode = function() {
+            const code = document.getElementById('discountCodeInput').value.trim().toUpperCase();
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const codes = { 'SAVE10': { type: 'percent', value: 10 }, 'FLAT50': { type: 'fixed', value: 50 }, 'BOOKSHELF': { type: 'percent', value: 15 } };
+            if (codes[code]) {
+                const amount = codes[code].type === 'percent' ? Math.round(subtotal * (codes[code].value / 100)) : codes[code].value;
+                window.state.appliedDiscount = { code, amount };
+            } else {
+                window.state.appliedDiscount = { code: '', amount: 0 };
+            }
+            window.router('cart');
+        };
+
+        window.handleCheckout = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const isGuest = !window.state.user;
+            const userEmail = formData.get('email');
+            const userName = formData.get('name');
+            let membershipDiscount = 0, finalShipping = 100;
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            if (!isGuest) {
+                if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
+                else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
+            }
+            const couponDiscount = window.state.appliedDiscount.amount;
+            const trackingCode = 'TRK-' + Math.random().toString(36).substr(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4);
+            const orderId = 'ORD-' + Date.now();
+            const orderData = {
+                orderId: orderId, trackingCode: trackingCode, userId: isGuest ? 'guest' : window.state.user.uid,
+                userEmail: userEmail, userName: userName, items: window.state.cart,
+                subtotal: subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
+                totalAmount: subtotal - membershipDiscount - couponDiscount + finalShipping,
+                paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', createdAt: new Date().toISOString()
+            };
+            if (orderData.paymentMethod === 'eSewa' || orderData.paymentMethod === 'Khalti') alert('Redirecting to ' + orderData.paymentMethod + '... (Mock Integration)');
+            try {
+                await addDoc(collection(db, "orders"), orderData);
+                const itemsList = orderData.items.map(i => `• ${i.title} (Qty: ${i.qty}) - Rs. ${i.price}`).join('\n');
+                try {
+                    const orderTemplateId = "YOUR_ORDER_TEMPLATE_ID"; 
+                    const serviceId = "YOUR_EMAILJS_SERVICE_ID";
+                    if (orderTemplateId !== "YOUR_ORDER_TEMPLATE_ID") {
+                        await emailjs.send(serviceId, orderTemplateId, { to_email: userEmail, customer_name: userName, order_id: orderId, tracking_code: trackingCode, total_amount: orderData.totalAmount, items_list: itemsList, payment_method: orderData.paymentMethod });
+                    }
+                } catch (err) { console.error("Failed to send order email:", err); }
+                window.state.cart = []; window.state.appliedDiscount = { code: '', amount: 0 }; window.saveCart();
+                const trackMsg = isGuest ? `<br><br><strong>✅ Confirmation sent to ${userEmail}</strong><br>Order ID: ${orderId}<br>Code: ${trackingCode}` : `<br><br>✅ Confirmation sent to ${userEmail}. Track in Profile.`;
+                alert(`Order Placed Successfully! ${membershipDiscount > 0 ? `Membership saved: Rs.${membershipDiscount} ` : ''}${couponDiscount > 0 ? `Coupon saved: Rs.${couponDiscount} ` : ''}${trackMsg}`);
+                window.router('home');
+            } catch (error) { console.error("Error placing order:", error); alert("Failed to place order."); }
+        };
+
+        window.handleTrackOrder = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const orderId = formData.get('orderId').trim();
+            const email = formData.get('email').trim().toLowerCase();
+            const resultDiv = document.getElementById('trackResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<p class="text-center text-gray-500"><i class="bi bi-arrow-repeat animate-spin"></i> Searching...</p>';
+            try {
+                const q = query(collection(db, "orders"), where("orderId", "==", orderId));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Order not found.</div>`; return; }
+                let order = null;
+                snapshot.forEach(doc => { const d = doc.data(); if (d.userEmail && d.userEmail.toLowerCase() === email) order = { id: doc.id, ...d }; });
+                if (!order) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email mismatch.</div>`; return; }
+                const date = new Date(order.createdAt).toLocaleDateString();
+                const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
+                const orderStr = JSON.stringify(order).replace(/"/g, '&quot;');
+                resultDiv.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in"><div class="flex justify-between items-start mb-4"><div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div><span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span></div><div class="border-t border-green-200 pt-4 space-y-2 text-sm"><p><strong>Code:</strong> ${order.trackingCode}</p><p><strong>Total:</strong> Rs. ${order.totalAmount}</p><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p></div><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button></div>`;
+            } catch (err) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error.</div>`; }
+        };
+
+        window.handleLogin = async function(e) {
+            e.preventDefault();
+            try {
+                const cred = await signInWithEmailAndPassword(auth, new FormData(e.target).get('email'), new FormData(e.target).get('password'));
+                const docSnap = await getDoc(doc(db, "users", cred.user.uid));
+                const role = docSnap.exists() ? docSnap.data().role : 'user';
+                alert('Login Successful!');
+                window.router(role === 'admin' ? 'admin' : 'profile');
+            } catch (err) { alert("Login failed: " + err.message); }
+        };
+
+        window.handleRegister = async function(e) {
+            e.preventDefault(); const fd = new FormData(e.target);
+            try {
+                const uc = await createUserWithEmailAndPassword(auth, fd.get('email'), fd.get('password'));
+                await setDoc(doc(db, "users", uc.user.uid), { name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), role: "user", membershipTier: "free", createdAt: new Date().toISOString() });
+                alert("Account created! Please login."); window.router('login');
+            } catch (err) { alert("Registration failed: " + err.message); }
+        };
+
+        window.handleNewsletter = async function(e) {
+            e.preventDefault();
+            try { await addDoc(collection(db, "newsletter"), { email: e.target.email.value, createdAt: new Date().toISOString() }); alert("Subscribed successfully!"); e.target.reset(); } 
+            catch (err) { alert("Failed to subscribe."); }
+        };
+
+        window.openMembershipPayment = function(tier, name, price) {
+            if (!window.state.user) return window.router('login');
+            document.getElementById('modalPlanName').innerText = name;
+            document.getElementById('modalPlanPrice').innerHTML = `Rs. ${price} <span class="text-sm font-normal text-gray-500">/ year</span>`;
+            document.getElementById('modalPlanTier').value = tier; document.getElementById('modalPlanAmount').value = price;
+            document.getElementById('membershipPaymentModal').classList.remove('hidden');
+        };
+        window.closeMembershipPayment = function() { document.getElementById('membershipPaymentModal').classList.add('hidden'); };
+        
+        window.processMembershipPayment = async function(e) {
+            e.preventDefault(); const tier = document.getElementById('modalPlanTier').value; const amount = document.getElementById('modalPlanAmount').value; const method = e.target.paymentMethod.value;
+            const btn = document.getElementById('payMembershipBtn'); btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...'; btn.disabled = true;
+            setTimeout(async () => {
+                try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier, membershipUpgradedAt: new Date().toISOString() }); window.state.user.membershipTier = tier; alert(`Payment successful!`); window.closeMembershipPayment(); window.router('profile'); } 
+                catch (err) { alert("Failed."); } finally { btn.innerHTML = '<span>Pay Now & Activate</span><i class="bi bi-arrow-right"></i>'; btn.disabled = false; }
+            }, 1500);
+        };
+
+        window.handleJoinMembership = async function(tier) {
+            if (!window.state.user) return window.router('login');
+            try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier }); window.state.user.membershipTier = tier; alert(`Updated to Free Reader.`); window.router('profile'); } 
+            catch (err) { alert("Failed."); }
+        };
+
+        window.loadUserOrders = async function() {
+            try {
+                const snapshot = await getDocs(query(collection(db, "orders"), where("userId", "==", window.state.user.uid)));
+                const container = document.getElementById('userOrdersList');
+                if (snapshot.empty) { container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-gray-500 border border-cream-200">No orders yet. <button onclick="window.router('shop')" class="text-wood-600 hover:underline">Start Shopping</button></div>`; return; }
+                const orders = []; snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() })); orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                container.innerHTML = orders.map(order => {
+                    const date = new Date(order.createdAt).toLocaleDateString();
+                    const colors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
+                    const str = JSON.stringify(order).replace(/"/g, '&quot;');
+                    return `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition"><div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4"><div><p class="text-sm text-gray-500">Order: <span class="font-mono font-bold">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">${date}</p></div><div class="flex items-center gap-4"><span class="px-3 py-1 rounded-full text-sm font-bold ${colors[order.status]}">${order.status}</span><span class="text-xl font-bold">Rs. ${order.totalAmount}</span></div></div><div class="border-t border-cream-100 pt-4 text-sm"><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${str}" class="mt-3 text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1"><i class="bi bi-printer"></i> Print Receipt</button></div></div>`;
+                }).join('');
+            } catch (err) { console.error(err); }
+        };
+
+        window.loadAdminStats = async function() {
+            try {
+                const snap = await getDocs(collection(db, "orders"));
+                let tot = 0, pend = 0, rev = 0;
+                snap.forEach(d => { const o = d.data(); tot++; if(o.status==='Pending') pend++; rev += (o.totalAmount||0); });
+                document.getElementById('adminTotalOrders').innerText = tot; document.getElementById('adminPendingOrders').innerText = pend; document.getElementById('adminRevenue').innerText = 'Rs. '+rev;
+            } catch (err) { console.error(err); }
+        };
+
+        window.resetBookForm = function() {
+            window.state.editingBookId = null; document.getElementById('bookForm').reset(); document.getElementById('customDocId').disabled = false;
+            document.getElementById('formTitle').innerText = "Add New Book"; document.getElementById('bookSubmitBtn').innerText = "Add Book"; document.getElementById('bookCancelBtn').classList.add('hidden');
+        };
+        window.editBook = function(id) {
+            const b = window.currentBooks.find(x=>x.id===id) || window.state.books.find(x=>x.id===id); if(!b) return;
+            window.state.editingBookId = id; document.getElementById('customDocId').value=id; document.getElementById('customDocId').disabled=true;
+            document.getElementById('bookTitle').value=b.title||''; document.getElementById('bookAuthor').value=b.author||''; document.getElementById('bookCategory').value=b.category||'Fiction';
+            document.getElementById('bookPrice').value=b.price||''; document.getElementById('bookDiscount').value=b.discountPrice||''; document.getElementById('bookStock').value=b.stock||'';
+            document.getElementById('bookIsbn').value=b.isbn||''; document.getElementById('bookPages').value=b.pages||''; document.getElementById('bookLang').value=b.language||'';
+            document.getElementById('bookPub').value=b.publisher||''; document.getElementById('bookRating').value=b.rating||5; document.getElementById('bookCover').value=b.coverUrl||'';
+            document.getElementById('bookDesc').value=b.description||''; document.getElementById('formTitle').innerText="Edit Book"; document.getElementById('bookSubmitBtn').innerText="Update"; document.getElementById('bookCancelBtn').classList.remove('hidden');
+            document.getElementById('bookForm').scrollIntoView({behavior:'smooth'});
+        };
+        window.deleteBook = async function(id) {
+            if(!confirm("Delete book?")) return;
+            try { await deleteDoc(doc(db,"books",id)); alert("Deleted!"); window.showAdminTab('books'); } catch(e){alert("Failed.");}
+        };
+        window.saveBook = async function(e) {
+            e.preventDefault(); const d={title:document.getElementById('bookTitle').value,author:document.getElementById('bookAuthor').value,category:document.getElementById('bookCategory').value,price:Number(document.getElementById('bookPrice').value),stock:Number(document.getElementById('bookStock').value),coverUrl:document.getElementById('bookCover').value||'https://via.placeholder.com/300x450',description:document.getElementById('bookDesc').value,rating:Number(document.getElementById('bookRating').value)||5,isbn:document.getElementById('bookIsbn').value||'',pages:Number(document.getElementById('bookPages').value)||0,language:document.getElementById('bookLang').value||'English',publisher:document.getElementById('bookPub').value||'Unknown',discountPrice:Number(document.getElementById('bookDiscount').value)||null,updatedAt:new Date().toISOString()};
+            try {
+                if(window.state.editingBookId){await updateDoc(doc(db,"books",window.state.editingBookId),d);alert("Updated!");}
+                else{const cid=document.getElementById('customDocId').value.trim(); cid?await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()}):await addDoc(collection(db,"books"),{...d,createdAt:new Date()});alert("Added!");}
+                window.resetBookForm(); window.showAdminTab('books');
+            } catch(err){alert("Save failed: "+err.message);}
+        };
+        window.updateOrderStatus = async function(id,s){
+            try{await updateDoc(doc(db,"orders",id),{status:s});window.loadAdminStats();window.showAdminTab('orders');}catch(e){alert("Failed.");}
+        };
+        window.handleSearch = function(q) {
+            if(!q){if(window.state.currentView==='shop')window.fetchBooks(false,'All');return;}
+            if(window.state.currentView!=='shop'){window.router('shop');setTimeout(()=>window.handleSearch(q),400);return;}
+            const l=q.toLowerCase(); const f=window.state.books.filter(b=>(b.title&&b.title.toLowerCase().includes(l))||(b.author&&b.author.toLowerCase().includes(l))||(b.isbn&&b.isbn.toLowerCase().includes(l)));
+            const el=document.getElementById('shopBooks');
+            if(el){if(f.length===0)el.innerHTML=`<p class="col-span-full text-center text-gray-500 py-8">No matches.</p>`;else el.innerHTML=f.map(window.generateBookCardHTML).join('');}
+        };
+
+        window.saveCart();
+
+// ✅ NEW: Check if the URL has a hash (e.g., #membership) and load that view
+const urlHash = window.location.hash.replace('#', '');
+const validViews = ['home', 'shop', 'membership', 'track', 'login', 'register', 'profile', 'admin'];
+
+if (urlHash && validViews.includes(urlHash)) {
+    window.router(urlHash);
+} else {
+    window.router('home'); // Default to home if no hash or invalid hash
+}
+    </script>
+</body>
+</html>
