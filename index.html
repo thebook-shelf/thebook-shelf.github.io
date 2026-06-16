@@ -13,7 +13,7 @@
     <script type="text/javascript">
         (function() { 
             // ⚠️ REPLACE WITH YOUR EMAILJS PUBLIC KEY
-            emailjs.init("Os-_6NjnXHyQhrkW9"); 
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); 
         })();
     </script>
     
@@ -57,7 +57,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ UPDATED: Added Home next to Track, removed Shop -->
                 <div class="flex items-center space-x-4">
                     <button onclick="window.router('home')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Home</button>
                     <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Track</button>
@@ -160,19 +159,16 @@
         import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
-  authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
-  projectId: "the-book-shelf-8b4d5",
-  storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
-  messagingSenderId: "978399325740",
-  appId: "1:978399325740:web:b3d7cdc9ff1fe810b72b89"
+            apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT_ID.firebaseapp.com", projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com", messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
+        // ✅ Added currentParam to state for routing
+        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', currentParam: null, editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
         window.currentBooks = [];
 
         window.getDiscountPercent = function(price, discountPrice) {
@@ -181,13 +177,14 @@
             return Math.round(((p - dp) / p) * 100);
         };
 
+        // ✅ Updated to use router for book links
         window.generateBookCardHTML = function(book) {
             const isOutOfStock = Number(book.stock) <= 0;
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
             return `
-            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.showBookDetails('${book.id}')">
+            <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.router('book', '${book.id}')">
                 <div class="relative h-64 overflow-hidden bg-gray-100">
                     <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
@@ -235,20 +232,41 @@
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
 
-        // ✅ UPDATED ROUTER: Prevents redundant calls and updates URL hash
+        // ✅ UPDATED ROUTER: Handles parameters (e.g., #book/123) and updates URL hash
         window.router = function(view, param = null) {
-            if (window.state.currentView === view && window.location.hash === '#' + view) return;
+            const newHash = view + (param ? '/' + param : '');
+            if (window.state.currentView === view && window.state.currentParam === param && window.location.hash === '#' + newHash) return;
+            
             window.state.currentView = view;
-            if (window.location.hash !== '#' + view) {
-                window.location.hash = view;
+            window.state.currentParam = param;
+            
+            if (window.location.hash !== '#' + newHash) {
+                window.location.hash = newHash;
             }
             
             const appDiv = document.getElementById('app');
             appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
+            
             setTimeout(() => {
                 if (view === 'home') renderHome(appDiv);
                 else if (view === 'shop') renderShop(appDiv, param);
-                else if (view === 'book') renderBookDetails(appDiv, param);
+                else if (view === 'book') {
+                    const book = window.currentBooks.find(b => b.id === param) || window.state.books.find(b => b.id === param);
+                    if (book) {
+                        renderBookDetails(appDiv, book);
+                    } else {
+                        // If book not in memory (e.g. direct link), fetch it
+                        appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
+                        window.fetchBooksData().then(() => {
+                            const b = window.currentBooks.find(x => x.id === param);
+                            if(b) renderBookDetails(appDiv, b);
+                            else { 
+                                appDiv.innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center fade-in"><i class="bi bi-book text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Book Not Found</h2><p class="text-gray-500 mb-8">The book you are looking for does not exist or has been removed.</p><button onclick="window.router(\'shop\')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition">Browse All Books</button></div>'; 
+                            }
+                        });
+                        return; 
+                    }
+                }
                 else if (view === 'cart') renderCart(appDiv);
                 else if (view === 'login') renderLogin(appDiv);
                 else if (view === 'register') renderRegister(appDiv);
@@ -656,7 +674,7 @@
         };
 
         async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
-            const serviceID = "service_oc8ek8p"; // ⚠️ REPLACE WITH YOUR SERVICE ID
+            const serviceID = "YOUR_EMAILJS_SERVICE_ID"; // ⚠️ REPLACE WITH YOUR SERVICE ID
             const templateID = "template_e7mxtuu";       // ✅ Your Newsletter Template ID
 
             if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
@@ -719,8 +737,23 @@
             } catch (error) { console.error("Error fetching all books for home:", error); }
         };
 
+        // ✅ NEW: Fetches books silently for direct book links
+        window.fetchBooksData = async function() {
+            if (window.currentBooks.length > 0) return;
+            try {
+                const q = collection(db, "books");
+                const querySnapshot = await getDocs(q);
+                const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
+                window.currentBooks = books; window.state.books = books;
+            } catch (error) { console.error("Error fetching books:", error); }
+        };
+
         window.applyShopFilters = function() { window.router('shop', document.getElementById('filterCategory').value); };
-        window.showBookDetails = function(bookId) { const book = window.currentBooks.find(b => b.id === bookId); if (book) renderBookDetails(document.getElementById('app'), book); };
+        
+        // ✅ Updated to use router
+        window.showBookDetails = function(bookId) { 
+            window.router('book', bookId); 
+        };
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
@@ -936,17 +969,20 @@
 
         window.saveCart();
 
-        // ✅ Handle browser back/forward buttons
+        // ✅ UPDATED: Handle browser back/forward buttons with parameters
         window.addEventListener('hashchange', () => {
-            const hash = window.location.hash.replace('#', '') || 'home';
-            if (window.state.currentView !== hash) {
-                window.router(hash);
+            const hashParts = window.location.hash.replace('#', '').split('/');
+            const view = hashParts[0] || 'home';
+            const param = hashParts[1] || null;
+            
+            if (window.state.currentView !== view || window.state.currentParam !== param) {
+                window.router(view, param);
             }
         });
 
-        // ✅ Initial page load based on URL hash
-        const initialHash = window.location.hash.replace('#', '') || 'home';
-        window.router(initialHash);
+        // ✅ UPDATED: Initial page load based on URL hash (supports #book/ID)
+        const initHashParts = window.location.hash.replace('#', '').split('/');
+        window.router(initHashParts[0] || 'home', initHashParts[1] || null);
     </script>
 </body>
 </html>
