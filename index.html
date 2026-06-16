@@ -11,7 +11,10 @@
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
-        (function() { emailjs.init("Os-_6NjnXHyQhrkW9"); })();
+        (function() { 
+            // ⚠️ REPLACE WITH YOUR EMAILJS PUBLIC KEY
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); 
+        })();
     </script>
     
     <script>
@@ -45,6 +48,7 @@
                     <i class="bi bi-book-half text-wood-600 text-3xl mr-2"></i>
                     <span class="font-serif text-2xl font-bold text-charcoal-900">The Book Shelf</span>
                 </div>
+
                 <div class="hidden md:flex flex-1 mx-10">
                     <div class="relative w-full max-w-lg">
                         <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." 
@@ -52,8 +56,11 @@
                         <i class="bi bi-search absolute left-3 top-3 text-wood-600"></i>
                     </div>
                 </div>
+
+                <!-- ✅ UPDATED: Added Home next to Track, removed Shop -->
                 <div class="flex items-center space-x-4">
-                    <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Track Order</button>
+                    <button onclick="window.router('home')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Home</button>
+                    <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Track</button>
                     <button onclick="window.router('membership')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block">Membership</button>
                     <button onclick="window.router('cart')" class="relative text-charcoal-800 hover:text-wood-600 transition">
                         <i class="bi bi-cart3 text-2xl"></i>
@@ -228,10 +235,14 @@
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
 
+        // ✅ UPDATED ROUTER: Prevents redundant calls and updates URL hash
         window.router = function(view, param = null) {
+            if (window.state.currentView === view && window.location.hash === '#' + view) return;
             window.state.currentView = view;
-            // ✅ NEW: Update the URL hash so the link can be shared/copied
-    window.location.hash = view; 
+            if (window.location.hash !== '#' + view) {
+                window.location.hash = view;
+            }
+            
             const appDiv = document.getElementById('app');
             appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
             setTimeout(() => {
@@ -563,7 +574,6 @@
             window.showAdminTab('orders');
         }
 
-        // ✅ NEW: Professional Newsletter Builder Logic
         window.showAdminTab = async function(tab) {
             document.getElementById('tab-orders').className = tab==='orders'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
             document.getElementById('tab-books').className = tab==='books'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
@@ -584,68 +594,42 @@
                 const snap = await getDocs(collection(db,"books")); const bl=[]; snap.forEach(d=>bl.push({id:d.id,...d.data()}));
                 div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${b.stock<=0?'text-red-600 font-bold':''}">${b.stock<=0?'Out of Stock':b.stock}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3><form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4"><input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed"><input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded"><input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded"><select id="bookCategory" class="p-2 border rounded"><option>Fiction</option><option>Nepali Books</option><option>Business</option></select><input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded"><input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded"><input type="number" id="bookStock" placeholder="Stock" required class="p-2 border rounded"><input type="text" id="bookIsbn" placeholder="ISBN" class="p-2 border rounded"><input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded"><input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded"><input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded"><input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded"><input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded"><textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea><div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add</button><button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button></div></form>`;
             } else if (tab === 'newsletter') {
-                // ✅ PROFESSIONAL NEWSLETTER BUILDER UI
                 const subsSnap = await getDocs(collection(db, "newsletter"));
                 const count = subsSnap.size;
                 div.innerHTML = `
                     <div class="max-w-3xl mx-auto">
                         <h3 class="font-serif text-2xl font-bold mb-2">Newsletter Builder</h3>
-                        <p class="text-gray-500 mb-6">You have <span class="font-bold text-wood-600">${count}</span> active subscribers. Fill out the details below to send a beautifully formatted HTML newsletter.</p>
-                        
-                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 text-sm text-blue-800">
-                            <strong>💡 Tip:</strong> Ensure you have created the HTML template in your EmailJS dashboard with the variables: <code>{{headline}}</code>, <code>{{message}}</code>, and <code>{{shop_link}}</code>.
-                        </div>
-
+                        <p class="text-gray-500 mb-6">You have <span class="font-bold text-wood-600">${count}</span> active subscribers.</p>
                         <form onsubmit="window.sendFormattedNewsletter(event, ${count})" class="space-y-5">
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Email Subject Line</label>
-                                <input type="text" name="subject" required placeholder="e.g., 📚 New Arrivals & Exclusive 20% Off Inside!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Hero Headline (Large Text)</label>
-                                <input type="text" name="headline" required placeholder="e.g., Summer Reading Sale is Here!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none font-serif text-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Main Message</label>
-                                <textarea name="message" required rows="6" placeholder="Write your newsletter content here. You can mention new books, sales, or reading tips..." class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none leading-relaxed"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1">Button Link (Shop URL)</label>
-                                <input type="url" name="shop_link" value="${window.location.origin}" placeholder="https://yourwebsite.com/shop" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
-                            </div>
-                            
+                            <div><label class="block text-sm font-semibold mb-1">Email Subject Line</label><input type="text" name="subject" required placeholder="e.g., 📚 New Arrivals & Exclusive 20% Off Inside!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                            <div><label class="block text-sm font-semibold mb-1">Hero Headline (Large Text)</label><input type="text" name="headline" required placeholder="e.g., Summer Reading Sale is Here!" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none font-serif text-lg"></div>
+                            <div><label class="block text-sm font-semibold mb-1">Main Message</label><textarea name="message" required rows="6" placeholder="Write your newsletter content here..." class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none leading-relaxed"></textarea></div>
+                            <div><label class="block text-sm font-semibold mb-1">Button Link (Shop URL)</label><input type="url" name="shop_link" value="${window.location.origin + '/#shop'}" placeholder="https://yourwebsite.com/#shop" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
                             <div class="flex gap-4 pt-4">
-                                <button type="button" onclick="window.testNewsletterEmail()" class="px-6 py-3 border border-wood-600 text-wood-600 font-bold rounded-lg hover:bg-wood-50 transition flex items-center gap-2">
-                                    <i class="bi bi-envelope"></i> Test to My Email
-                                </button>
-                                <button type="submit" id="sendNewsletterBtn" class="flex-1 bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2">
-                                    <i class="bi bi-send"></i> Send to All ${count} Subscribers
-                                </button>
+                                <button type="button" onclick="window.testNewsletterEmail()" class="px-6 py-3 border border-wood-600 text-wood-600 font-bold rounded-lg hover:bg-wood-50 transition flex items-center gap-2"><i class="bi bi-envelope"></i> Test to My Email</button>
+                                <button type="submit" id="sendNewsletterBtn" class="flex-1 bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2"><i class="bi bi-send"></i> Send to All ${count} Subscribers</button>
                             </div>
                         </form>
-                        <div id="newsletterStatus" class="mt-6 hidden p-4 rounded-lg"></div are>
+                        <div id="newsletterStatus" class="mt-6 hidden p-4 rounded-lg"></div>
                     </div>
                 `;
             }
         };
 
-        // ✅ NEW: Formatted Newsletter Sending Logic
         window.testNewsletterEmail = async function() {
             if (!window.state.user || !window.state.user.email) { alert("Please log in as admin to test."); return; }
-            const formData = new FormData(document.querySelector('form')); // Grabs current form data if filled
+            const formData = new FormData(document.querySelector('form'));
             await sendSingleFormattedEmail(window.state.user.email, formData.get('subject') || 'Test Newsletter', formData.get('headline') || 'Test Headline', formData.get('message') || 'This is a test message.', formData.get('shop_link') || window.location.origin, true);
         };
 
         window.sendFormattedNewsletter = async function(e, subscriberCount) {
             e.preventDefault();
             if (subscriberCount === 0) { alert("No subscribers found yet."); return; }
-            if (!confirm(`Send this newsletter to ${subscriberCount} subscribers? This action cannot be undone.`)) return;
+            if (!confirm(`Send this newsletter to ${subscriberCount} subscribers?`)) return;
 
             const formData = new FormData(e.target);
-            const subject = formData.get('subject');
-            const headline = formData.get('headline');
-            const message = formData.get('message');
-            const shopLink = formData.get('shop_link');
+            const subject = formData.get('subject'); const headline = formData.get('headline');
+            const message = formData.get('message'); const shopLink = formData.get('shop_link');
             
             const btn = document.getElementById('sendNewsletterBtn');
             const statusDiv = document.getElementById('newsletterStatus');
@@ -660,7 +644,6 @@
             
             for (const doc of subsSnap.docs) {
                 const email = doc.data().email;
-                // Extract name from email for personalization (e.g., "user" from "user@gmail.com")
                 const subscriberName = email.split('@')[0]; 
                 const success = await sendSingleFormattedEmail(email, subject, headline, message, shopLink, false, subscriberName);
                 if (success) successCount++; else failCount++;
@@ -673,23 +656,18 @@
         };
 
         async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
-            // ⚠️ REPLACE WITH YOUR ACTUAL EMAILJS IDs
-            const serviceID = "service_oc8ek8p"; 
-            const templateID = "template_e7mxtuu"; // The Newsletter Template ID
+            const serviceID = "YOUR_EMAILJS_SERVICE_ID"; // ⚠️ REPLACE WITH YOUR SERVICE ID
+            const templateID = "template_e7mxtuu";       // ✅ Your Newsletter Template ID
 
             if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
-                console.error("EMAILJS ERROR: Keys not configured in code!");
-                if (isTest) alert("ERROR: EmailJS keys are not configured. Update the code.");
+                console.error("EMAILJS ERROR: Service ID not configured in code!");
+                if (isTest) alert("ERROR: Please update YOUR_EMAILJS_SERVICE_ID in the code.");
                 return false;
             }
 
             try {
                 await emailjs.send(serviceID, templateID, {
-                    to_email: toEmail,
-                    subscriber_name: subscriberName,
-                    headline: headline,
-                    message: message,
-                    shop_link: shopLink
+                    to_email: toEmail, subscriber_name: subscriberName, headline: headline, message: message, shop_link: shopLink
                 });
                 console.log("Successfully sent newsletter to:", toEmail);
                 return true;
@@ -958,15 +936,17 @@
 
         window.saveCart();
 
-// ✅ NEW: Check if the URL has a hash (e.g., #membership) and load that view
-const urlHash = window.location.hash.replace('#', '');
-const validViews = ['home', 'shop', 'membership', 'track', 'login', 'register', 'profile', 'admin'];
+        // ✅ Handle browser back/forward buttons
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '') || 'home';
+            if (window.state.currentView !== hash) {
+                window.router(hash);
+            }
+        });
 
-if (urlHash && validViews.includes(urlHash)) {
-    window.router(urlHash);
-} else {
-    window.router('home'); // Default to home if no hash or invalid hash
-}
+        // ✅ Initial page load based on URL hash
+        const initialHash = window.location.hash.replace('#', '') || 'home';
+        window.router(initialHash);
     </script>
 </body>
 </html>
