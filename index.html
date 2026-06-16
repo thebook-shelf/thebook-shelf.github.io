@@ -12,7 +12,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() { 
-            // ⚠️ REPLACE WITH YOUR EMAILJS PUBLIC KEY
             emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); 
         })();
     </script>
@@ -156,7 +155,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
@@ -183,10 +182,8 @@
         };
 
         window.generateBookCardHTML = function(book) {
-            // ✅ FIXED: Robust stock checking to prevent false "Out of Stock"
             const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
             const isOutOfStock = stock <= 0;
-            
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
@@ -240,7 +237,6 @@
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
 
-        // ✅ NEW: Smart Login Redirect
         window.handleLoginRedirect = function() {
             if (window.state.user) {
                 window.router(window.state.user.role === 'admin' ? 'admin' : 'profile');
@@ -250,7 +246,6 @@
         };
 
         window.router = async function(view, param = null) {
-            // ✅ If already logged in, redirect 'login' requests to the appropriate dashboard
             if (view === 'login' && window.state.user) {
                 view = window.state.user.role === 'admin' ? 'admin' : 'profile';
             }
@@ -296,10 +291,58 @@
                 else if (view === 'track') renderTrackOrder(appDiv);
                 else if (view === 'membership') renderMembership(appDiv);
                 else if (view === 'subscribe') renderSubscribePage(appDiv);
+                else if (view === 'order-success') renderOrderSuccess(appDiv, param);
                 else if (view === 'admin') renderAdmin(appDiv);
             }, 100);
             window.scrollTo(0, 0);
         };
+
+        function renderOrderSuccess(container, orderId) {
+            container.innerHTML = `
+                <div class="max-w-2xl mx-auto px-4 py-16 fade-in text-center">
+                    <div class="bg-green-50 border border-green-200 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                        <i class="bi bi-check-circle-fill text-green-500 text-5xl"></i>
+                    </div>
+                    <h2 class="font-serif text-4xl font-bold text-charcoal-900 mb-4">Order Placed Successfully!</h2>
+                    <p class="text-gray-600 mb-8 text-lg">Thank you for shopping with The Book Shelf. Your order has been confirmed and is being prepared.</p>
+                    
+                    <div class="bg-cream-100 border border-cream-200 rounded-xl p-6 mb-8 text-left">
+                        <h3 class="font-serif text-xl font-bold text-charcoal-900 mb-4">Order Details</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-cream-200 pb-2">
+                                <span class="text-gray-600">Order ID:</span>
+                                <span class="font-mono font-bold text-charcoal-900">${orderId}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-cream-200 pb-2">
+                                <span class="text-gray-600">Status:</span>
+                                <span class="text-yellow-700 font-semibold bg-yellow-100 px-2 py-0.5 rounded">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-left">
+                        <h3 class="font-serif text-lg font-bold text-blue-900 mb-2 flex items-center gap-2">
+                            <i class="bi bi-info-circle"></i> How to Track Your Order
+                        </h3>
+                        <p class="text-blue-800 text-sm mb-3">You can track your order status at any time using your <strong>Order ID</strong>.</p>
+                        <ul class="text-sm text-blue-800 space-y-2 list-disc list-inside">
+                            <li>Go to the <strong>"Track your order"</strong> page from the top navigation menu.</li>
+                            <li>Enter your Order ID (<span class="font-mono font-bold">${orderId}</span>) and the email address you used at checkout.</li>
+                            <li>Logged-in users can also view this order in their <strong>Profile</strong> dashboard.</li>
+                        </ul>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="window.router('home')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2">
+                            <i class="bi bi-house"></i> Continue Shopping
+                        </button>
+                        <button onclick="window.router('track')" class="border-2 border-wood-600 text-wood-600 font-semibold py-3 px-8 rounded-lg hover:bg-wood-50 transition flex items-center justify-center gap-2">
+                            <i class="bi bi-truck"></i> Track Order
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
         function renderHome(container) {
             container.innerHTML = `
@@ -409,11 +452,8 @@
 
         function renderBookDetails(container, book) {
             if (!book) return window.router('shop');
-            
-            // ✅ FIXED: Robust stock checking
             const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
             const isOutOfStock = stock <= 0;
-            
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
@@ -449,7 +489,6 @@
                                     <div><strong>ISBN:</strong> ${book.isbn || 'N/A'}</div>
                                     <div><strong>Language:</strong> ${book.language || 'N/A'}</div>
                                     <div><strong>Format:</strong> ${book.format || 'Paperback'}</div>
-                                    <!-- ✅ UPDATED: Shows "Available" or "Out of Stock" instead of numbers -->
                                     <div class="col-span-2"><strong>Stock:</strong> <span class="${isOutOfStock ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">${isOutOfStock ? 'Out of Stock' : 'Available'}</span></div>
                                 </div>
                                 <div class="flex gap-4">
@@ -673,14 +712,20 @@
                 });
                 div.innerHTML = h + '</tbody></table></div>';
             } else if (tab === 'books') {
-                const snap = await getDocs(collection(db,"books")); const bl=[]; snap.forEach(d=>bl.push({id:d.id,...d.data()}));
+                const snap = await getDocs(collection(db,"books")); 
+                const bl = []; 
+                snap.forEach(d => bl.push({id: d.id, ...d.data()}));
+                
+                // ✅ FIX: Update global state so editBook can always find the book data
+                window.state.books = bl;
+                window.currentBooks = bl;
+                
                 div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${Number(b.stock)<=0?'text-red-600 font-bold':''}">${Number(b.stock)<=0?'Out of Stock':(b.stock || 'Available')}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3>
                 <form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4">
                     <input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed">
                     <input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded">
                     <input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded">
                     <select id="bookCategory" class="p-2 border rounded">${window.CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
-                    <!-- ✅ NEW: Format Dropdown -->
                     <select id="bookFormat" class="p-2 border rounded">
                         <option value="Paperback">Paperback</option>
                         <option value="Hardcover">Hardcover</option>
@@ -831,16 +876,22 @@
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
-            // ✅ FIXED: Robust stock checking to prevent false "Out of Stock" alerts
             const stock = book?.stock !== undefined && book?.stock !== null ? Number(book.stock) : 999;
+            const existing = window.state.cart.find(item => item.id === bookId);
+            const currentQty = existing ? existing.qty : 0;
+            
             if (!book || isNaN(stock) || stock <= 0) { 
                 alert('Sorry, this book is currently out of stock!'); 
                 return; 
             }
-            const existing = window.state.cart.find(item => item.id === bookId);
+            if (currentQty + 1 > stock) {
+                alert(`Sorry, you can only add up to ${stock} of this book to your cart.`);
+                return;
+            }
+            
             if (existing) existing.qty++;
             else window.state.cart.push({ ...book, qty: 1, price: book.discountPrice || book.price });
-            window.saveCart(); alert('Added to cart!');
+            window.saveCart(); 
         };
 
         window.saveCart = function() {
@@ -850,8 +901,19 @@
         };
 
         window.updateQty = function(idx, change) {
-            window.state.cart[idx].qty += change;
-            if (window.state.cart[idx].qty <= 0) window.state.cart.splice(idx, 1);
+            const item = window.state.cart[idx];
+            const newQty = item.qty + change;
+            if (newQty <= 0) {
+                window.state.cart.splice(idx, 1);
+            } else {
+                const book = window.currentBooks.find(b => b.id === item.id) || window.state.books.find(b => b.id === item.id);
+                const stock = book?.stock !== undefined && book?.stock !== null ? Number(book.stock) : 999;
+                if (newQty > stock) {
+                    alert(`Sorry, only ${stock} copies are available in stock.`);
+                    return;
+                }
+                item.qty = newQty;
+            }
             window.saveCart(); 
             renderCart(document.getElementById('app'));
         };
@@ -882,12 +944,37 @@
 
         window.handleCheckout = async function(e) {
             e.preventDefault();
+            const cartItems = window.state.cart;
+            
+            let stockValid = true;
+            let stockErrorMsg = "";
+            
+            for (const item of cartItems) {
+                const bookRef = doc(db, "books", item.id);
+                const bookSnap = await getDoc(bookRef);
+                if (bookSnap.exists()) {
+                    const currentStock = Number(bookSnap.data().stock) || 0;
+                    if (item.qty > currentStock) {
+                        stockValid = false;
+                        stockErrorMsg = `Sorry, "${item.title}" only has ${currentStock} copies left in stock. Please adjust your cart.`;
+                        break;
+                    }
+                }
+            }
+            
+            if (!stockValid) {
+                alert(stockErrorMsg);
+                window.router('cart');
+                return;
+            }
+
             const formData = new FormData(e.target);
             const isGuest = !window.state.user;
             const userEmail = formData.get('email');
             const userName = formData.get('name');
             let membershipDiscount = 0, finalShipping = 100;
-            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
             if (!isGuest) {
                 if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
                 else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
@@ -895,31 +982,39 @@
             const couponDiscount = window.state.appliedDiscount.amount;
             const trackingCode = 'TRK-' + Math.random().toString(36).substr(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4);
             const orderId = 'ORD-' + Date.now();
+            
             const orderData = {
                 orderId: orderId, trackingCode: trackingCode, userId: isGuest ? 'guest' : window.state.user.uid,
-                userEmail: userEmail, userName: userName, items: window.state.cart,
+                userEmail: userEmail, userName: userName, items: cartItems,
                 subtotal: subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
                 totalAmount: subtotal - membershipDiscount - couponDiscount + finalShipping,
                 paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', createdAt: new Date().toISOString()
             };
-            if (orderData.paymentMethod === 'eSewa' || orderData.paymentMethod === 'Khalti') alert('Redirecting to ' + orderData.paymentMethod + '... (Mock Integration)');
+
+            if (orderData.paymentMethod === 'eSewa' || orderData.paymentMethod === 'Khalti') {
+                // Mock integration
+            }
+
             try {
+                for (const item of cartItems) {
+                    const bookRef = doc(db, "books", item.id);
+                    await updateDoc(bookRef, { stock: increment(-item.qty) });
+                }
+
                 await addDoc(collection(db, "orders"), orderData);
-                const itemsList = orderData.items.map(i => `• ${i.title} (Qty: ${i.qty}) - Rs. ${i.price}`).join('\n');
-                try {
-                    const orderTemplateId = "YOUR_ORDER_TEMPLATE_ID"; 
-                    const serviceId = "YOUR_EMAILJS_SERVICE_ID";
-                    if (orderTemplateId !== "YOUR_ORDER_TEMPLATE_ID") {
-                        await emailjs.send(serviceId, orderTemplateId, { to_email: userEmail, customer_name: userName, order_id: orderId, tracking_code: trackingCode, total_amount: orderData.totalAmount, items_list: itemsList, payment_method: orderData.paymentMethod });
-                    }
-                } catch (err) { console.error("Failed to send order email:", err); }
-                window.state.cart = []; window.state.appliedDiscount = { code: '', amount: 0 }; window.saveCart();
-                const trackMsg = isGuest ? `<br><br><strong>✅ Confirmation sent to ${userEmail}</strong><br>Order ID: ${orderId}<br>Code: ${trackingCode}` : `<br><br>✅ Confirmation sent to ${userEmail}. Track in Profile.`;
-                alert(`Order Placed Successfully! ${membershipDiscount > 0 ? `Membership saved: Rs.${membershipDiscount} ` : ''}${couponDiscount > 0 ? `Coupon saved: Rs.${couponDiscount} ` : ''}${trackMsg}`);
-                window.router('home');
-            } catch (error) { console.error("Error placing order:", error); alert("Failed to place order."); }
+                
+                window.state.cart = []; 
+                window.state.appliedDiscount = { code: '', amount: 0 }; 
+                window.saveCart();
+                
+                window.router('order-success', orderId);
+            } catch (error) { 
+                console.error("Error placing order:", error); 
+                alert("Failed to place order. Please try again."); 
+            }
         };
 
+        // ✅ UPDATED: Added Payment Method and Payment Status to tracking results
         window.handleTrackOrder = async function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -938,8 +1033,33 @@
                 const date = new Date(order.createdAt).toLocaleDateString();
                 const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
                 const orderStr = JSON.stringify(order).replace(/"/g, '&quot;');
-                resultDiv.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in"><div class="flex justify-between items-start mb-4"><div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div><span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span></div><div class="border-t border-green-200 pt-4 space-y-2 text-sm"><p><strong>Code:</strong> ${order.trackingCode}</p><p><strong>Total:</strong> Rs. ${order.totalAmount}</p><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p></div><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button></div>`;
-            } catch (err) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error.</div>`; }
+                
+                const paymentStatus = order.paymentMethod === 'COD' ? 'Pay on Delivery' : 'Paid';
+                const paymentColor = order.paymentMethod === 'COD' ? 'text-blue-600' : 'text-green-600';
+
+                resultDiv.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4>
+                                <p class="text-sm text-gray-600">Placed on: ${date}</p>
+                            </div>
+                            <span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span>
+                        </div>
+                        <div class="border-t border-green-200 pt-4 space-y-2 text-sm">
+                            <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
+                            <p><strong>Total Amount:</strong> Rs. ${order.totalAmount}</p>
+                            <p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
+                            <p><strong>Delivery Address:</strong> ${order.deliveryAddress}</p>
+                            <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
+                            <p><strong>Payment Status:</strong> <span class="font-semibold ${paymentColor}">${paymentStatus}</span></p>
+                        </div>
+                        <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button>
+                    </div>`;
+            } catch (err) { 
+                console.error(err);
+                resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error tracking order.</div>`; 
+            }
         };
 
         window.handleLogin = async function(e) {
@@ -1030,7 +1150,7 @@
             const b = window.currentBooks.find(x=>x.id===id) || window.state.books.find(x=>x.id===id); if(!b) return;
             window.state.editingBookId = id; document.getElementById('customDocId').value=id; document.getElementById('customDocId').disabled=true;
             document.getElementById('bookTitle').value=b.title||''; document.getElementById('bookAuthor').value=b.author||''; document.getElementById('bookCategory').value=b.category||'Fiction';
-            document.getElementById('bookFormat').value=b.format||'Paperback'; // ✅ NEW: Populate format
+            document.getElementById('bookFormat').value=b.format||'Paperback';
             document.getElementById('bookPrice').value=b.price||''; document.getElementById('bookDiscount').value=b.discountPrice||''; document.getElementById('bookStock').value=b.stock||'';
             document.getElementById('bookIsbn').value=b.isbn||''; document.getElementById('bookPages').value=b.pages||''; document.getElementById('bookLang').value=b.language||'';
             document.getElementById('bookPub').value=b.publisher||''; document.getElementById('bookRating').value=b.rating||5; document.getElementById('bookCover').value=b.coverUrl||'';
@@ -1049,7 +1169,7 @@
                 title: document.getElementById('bookTitle').value,
                 author: document.getElementById('bookAuthor').value,
                 category: document.getElementById('bookCategory').value,
-                format: document.getElementById('bookFormat').value, // ✅ NEW: Save format
+                format: document.getElementById('bookFormat').value,
                 price: Number(document.getElementById('bookPrice').value),
                 stock: Number(document.getElementById('bookStock').value),
                 coverUrl: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x450',
