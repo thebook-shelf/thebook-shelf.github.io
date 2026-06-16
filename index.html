@@ -171,7 +171,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ✅ Added currentParam to state for routing
         window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: 'home', currentParam: null, editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
         window.currentBooks = [];
 
@@ -181,7 +180,6 @@
             return Math.round(((p - dp) / p) * 100);
         };
 
-        // ✅ Updated to use router for book links
         window.generateBookCardHTML = function(book) {
             const isOutOfStock = Number(book.stock) <= 0;
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
@@ -236,7 +234,6 @@
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
 
-        // ✅ UPDATED ROUTER: Handles parameters (e.g., #book/123) and updates URL hash
         window.router = function(view, param = null) {
             const newHash = view + (param ? '/' + param : '');
             if (window.state.currentView === view && window.state.currentParam === param && window.location.hash === '#' + newHash) return;
@@ -259,7 +256,6 @@
                     if (book) {
                         renderBookDetails(appDiv, book);
                     } else {
-                        // If book not in memory (e.g. direct link), fetch it
                         appDiv.innerHTML = '<div class="flex justify-center items-center h-64"><i class="bi bi-arrow-repeat animate-spin text-4xl text-wood-600"></i></div>';
                         window.fetchBooksData().then(() => {
                             const b = window.currentBooks.find(x => x.id === param);
@@ -406,10 +402,13 @@
         function renderCart(container) {
             const isLoggedIn = !!window.state.user;
             const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            // ✅ FIX: Properly handles empty cart state instantly
             if (window.state.cart.length === 0) {
                 container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center"><i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2><button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button><p class="text-gray-500">Have an account? <a href="#" onclick="window.router('login')" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p></div>`;
                 return;
             }
+            
             let membershipDiscount = 0, finalShipping = 100;
             if (isLoggedIn) {
                 if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
@@ -678,8 +677,8 @@
         };
 
         async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
-            const serviceID = "YOUR_EMAILJS_SERVICE_ID"; // ⚠️ REPLACE WITH YOUR SERVICE ID
-            const templateID = "template_e7mxtuu";       // ✅ Your Newsletter Template ID
+            const serviceID = "YOUR_EMAILJS_SERVICE_ID"; 
+            const templateID = "template_e7mxtuu";       
 
             if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
                 console.error("EMAILJS ERROR: Service ID not configured in code!");
@@ -741,7 +740,6 @@
             } catch (error) { console.error("Error fetching all books for home:", error); }
         };
 
-        // ✅ NEW: Fetches books silently for direct book links
         window.fetchBooksData = async function() {
             if (window.currentBooks.length > 0) return;
             try {
@@ -753,11 +751,7 @@
         };
 
         window.applyShopFilters = function() { window.router('shop', document.getElementById('filterCategory').value); };
-        
-        // ✅ Updated to use router
-        window.showBookDetails = function(bookId) { 
-            window.router('book', bookId); 
-        };
+        window.showBookDetails = function(bookId) { window.router('book', bookId); };
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
@@ -774,28 +768,38 @@
             if(el) el.innerText = window.state.cart.reduce((sum, item) => sum + item.qty, 0);
         };
 
+        // ✅ FIX: Directly calls renderCart to force UI update
         window.updateQty = function(idx, change) {
             window.state.cart[idx].qty += change;
             if (window.state.cart[idx].qty <= 0) window.state.cart.splice(idx, 1);
-            window.saveCart(); window.router('cart');
+            window.saveCart(); 
+            renderCart(document.getElementById('app'));
         };
 
+        // ✅ FIX: Directly calls renderCart to force UI update
         window.removeFromCart = function(idx) {
             window.state.cart.splice(idx, 1);
-            window.saveCart(); window.router('cart');
+            window.saveCart(); 
+            renderCart(document.getElementById('app'));
         };
 
+        // ✅ FIX: Added alerts and directly calls renderCart to force UI update
         window.applyDiscountCode = function() {
-            const code = document.getElementById('discountCodeInput').value.trim().toUpperCase();
+            const codeInput = document.getElementById('discountCodeInput');
+            if (!codeInput) return;
+            const code = codeInput.value.trim().toUpperCase();
             const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const codes = { 'SAVE10': { type: 'percent', value: 10 }, 'FLAT50': { type: 'fixed', value: 50 }, 'BOOKSHELF': { type: 'percent', value: 15 } };
+            
             if (codes[code]) {
                 const amount = codes[code].type === 'percent' ? Math.round(subtotal * (codes[code].value / 100)) : codes[code].value;
                 window.state.appliedDiscount = { code, amount };
+                alert(`✅ Success! Code '${code}' applied. You save Rs. ${amount}`);
             } else {
                 window.state.appliedDiscount = { code: '', amount: 0 };
+                alert('❌ Invalid code. Please try: SAVE10, FLAT50, or BOOKSHELF');
             }
-            window.router('cart');
+            renderCart(document.getElementById('app'));
         };
 
         window.handleCheckout = async function(e) {
@@ -973,7 +977,6 @@
 
         window.saveCart();
 
-        // ✅ UPDATED: Handle browser back/forward buttons with parameters
         window.addEventListener('hashchange', () => {
             const hashParts = window.location.hash.replace('#', '').split('/');
             const view = hashParts[0] || 'home';
@@ -984,7 +987,6 @@
             }
         });
 
-        // ✅ UPDATED: Initial page load based on URL hash (supports #book/ID)
         const initHashParts = window.location.hash.replace('#', '').split('/');
         window.router(initHashParts[0] || 'home', initHashParts[1] || null);
     </script>
