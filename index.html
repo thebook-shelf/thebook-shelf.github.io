@@ -47,8 +47,7 @@
                         <span class="font-serif text-2xl font-bold text-charcoal-900">The Book Shelf</span>
                     </div>
                 </div>
-                
-                <div class="hidden md:flex flex-1 max-w-xl mx-4">
+                                <div class="hidden md:flex flex-1 max-w-xl mx-4">
                     <div class="relative w-full">
                         <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." 
                             class="w-full pl-10 pr-4 py-2.5 rounded-full border border-wood-500/30 bg-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 transition shadow-sm" onkeyup="window.handleSearch(this.value)">
@@ -97,8 +96,7 @@
     <main id="app" class="flex-grow pb-20 md:pb-0"></main>
 
     <!-- Footer -->
-    <footer class="bg-charcoal-900 text-cream-100 pt-16 pb-8 border-t-4 border-gold-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer class="bg-charcoal-900 text-cream-100 pt-16 pb-8 border-t-4 border-gold-500">        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                 <div>
                     <div class="flex items-center mb-4"><i class="bi bi-book-half text-gold-500 text-3xl mr-2"></i><span class="font-serif text-2xl font-bold text-cream-50">The Book Shelf</span></div>
@@ -147,8 +145,7 @@
     <div id="membershipPaymentModal" class="fixed inset-0 z-[60] hidden bg-charcoal-900/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in border border-cream-200">
             <div class="bg-wood-600 p-4 flex justify-between items-center">
-                <h3 class="text-white font-serif text-xl font-bold">Complete Upgrade</h3>
-                <button onclick="window.closeMembershipPayment()" class="text-white/80 hover:text-white"><i class="bi bi-x-lg text-xl"></i></button>
+                <h3 class="text-white font-serif text-xl font-bold">Complete Upgrade</h3>                <button onclick="window.closeMembershipPayment()" class="text-white/80 hover:text-white"><i class="bi bi-x-lg text-xl"></i></button>
             </div>
             <div class="p-6">
                 <div class="bg-cream-50 p-4 rounded-xl mb-6 border border-cream-200 text-center">
@@ -182,7 +179,7 @@
         import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-           apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
+            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
   authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
   projectId: "the-book-shelf-8b4d5",
   storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
@@ -194,7 +191,17 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ✅ ENSURED: Exact string match for categories
+        // 77 Districts of Nepal
+        const nepalDistricts = [
+            "Achham", "Arghakhanchi", "Baglung", "Baitadi", "Bajhang", "Bajura", "Banke", "Bara", "Bardiya", "Bhaktapur", 
+            "Bhojpur", "Chitwan", "Dadeldhura", "Dailekh", "Dang", "Darchula", "Dhading", "Dhankuta", "Dhanusha", "Dolakha", 
+            "Dolpa", "Doti", "Gorkha", "Gulmi", "Humla", "Ilam", "Jajarkot", "Jhapa", "Jumla", "Kailali", "Kalikot", 
+            "Kanchanpur", "Kapilvastu", "Kaski", "Kathmandu", "Kavrepalanchok", "Khotang", "Lalitpur", "Lamjung", "Mahottari", 
+            "Makwanpur", "Manang", "Morang", "Mugu", "Mustang", "Myagdi", "Nawalpur", "Nuwakot", "Okhaldhunga", "Palpa", 
+            "Panchthar", "Parasi", "Parbat", "Parsa", "Pyuthan", "Ramechhap", "Rasuwa", "Rautahat", "Rolpa", "Rukum East",             "Rukum West", "Rupandehi", "Salyan", "Sankhuwasabha", "Saptari", "Sarlahi", "Sindhuli", "Sindhupalchok", "Siraha", 
+            "Solukhumbu", "Sunsari", "Surkhet", "Syangja", "Tanahun", "Taplejung", "Terhathum", "Udayapur"
+        ];
+
         window.CATEGORIES = ['Fiction', 'Non-fiction', 'Self Improvement', 'Business', 'Nepali Books', 'Children Books'];
         
         window.state = { 
@@ -240,8 +247,7 @@
                         <span class="font-bold text-charcoal-900">Rs. ${displayPrice}</span>
                     </div>
                     <div class="mt-3 flex justify-end">
-                        <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>
-                            <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
+                        <button onclick="event.stopPropagation(); window.addToCart('${book.id}')" ${isOutOfStock ? 'disabled class="bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-full"' : 'class="bg-cream-100 hover:bg-wood-600 hover:text-white text-wood-600 p-2 rounded-full transition"'}>                            <i class="bi ${isOutOfStock ? 'bi-x-circle' : 'bi-cart-plus'}"></i>
                         </button>
                     </div>
                 </div>
@@ -284,15 +290,13 @@
             } catch (e) { console.error("Error fetching discounts:", e); }
         };
 
-        // ✅ OPTIMIZED: Shows loading state immediately, then fetches
         window.fetchFeaturedBooks = async function(featureTag, targetId) {
             const targetEl = document.getElementById(targetId);
             if (targetEl) {
                 targetEl.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i> Loading...</div>`;
             }
             try {
-                const q = query(collection(db, "books"), where("feature", "==", featureTag), limit(4));
-                const querySnapshot = await getDocs(q);
+                const q = query(collection(db, "books"), where("feature", "==", featureTag), limit(4));                const querySnapshot = await getDocs(q);
                 const books = []; 
                 querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
                 
@@ -341,8 +345,7 @@
             if (window.state.discounts.length === 0) await window.fetchDiscounts();
 
             setTimeout(() => {
-                if (view === 'home') renderHome(appDiv);
-                else if (view === 'shop') renderShop(appDiv, param);
+                if (view === 'home') renderHome(appDiv);                else if (view === 'shop') renderShop(appDiv, param);
                 else if (view === 'cart') renderCart(appDiv);
                 else if (view === 'login') renderLogin(appDiv);
                 else if (view === 'register') renderRegister(appDiv);
@@ -384,7 +387,6 @@
                 </div>`;
         }
 
-        // ✅ UPDATED: Added all 3 sections (Book of the Week, Best Selling, New Arrivals)
         function renderHome(container) {
             container.innerHTML = `
                 <section class="relative bg-charcoal-900 text-cream-50 py-20 md:py-32 overflow-hidden">
@@ -392,8 +394,7 @@
                     <div class="relative max-w-7xl mx-auto px-4 text-center">
                         <h1 class="font-serif text-4xl md:text-6xl font-bold mb-6 text-gold-400">Discover Your Next Great Read</h1>
                         <p class="text-lg md:text-xl text-cream-200 mb-8 max-w-2xl mx-auto">Explore thousands of books across fiction, education, business, self-development, and more.</p>
-                        <div class="flex flex-col sm:flex-row justify-center gap-4">
-                            <button onclick="window.router('shop')" class="bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-semibold py-3 px-8 rounded-full transition transform hover:scale-105">Browse Books</button>
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">                            <button onclick="window.router('shop')" class="bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-semibold py-3 px-8 rounded-full transition transform hover:scale-105">Browse Books</button>
                             <button onclick="window.router('membership')" class="border-2 border-cream-500 hover:bg-cream-500 hover:text-charcoal-900 text-cream-500 font-semibold py-3 px-8 rounded-full transition">Get Membership</button>
                             <button onclick="window.router('subscribe')" class="border-2 border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-charcoal-900 font-semibold py-3 px-8 rounded-full transition">Subscribe Newsletter</button>
                         </div>
@@ -442,8 +443,7 @@
 
         function renderSubscribePage(container) {
             container.innerHTML = `
-                <div class="bg-cream-50 py-20 md:py-32 min-h-[80vh] flex items-center">
-                    <div class="max-w-4xl mx-auto px-4 text-center w-full">
+                <div class="bg-cream-50 py-20 md:py-32 min-h-[80vh] flex items-center">                    <div class="max-w-4xl mx-auto px-4 text-center w-full">
                         <div class="mb-8">
                             <button onclick="window.router('home')" class="text-wood-600 hover:text-wood-700 transition mb-6 inline-flex items-center gap-2 text-sm font-medium"><i class="bi bi-arrow-left"></i> Back to Home</button>
                             <i class="bi bi-envelope-paper-heart text-gold-500 text-6xl mb-4 block"></i>
@@ -492,8 +492,7 @@
             if (!book) return window.router('shop');
             let stock = 999;
             if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
-                stock = Number(book.stock);
-            }
+                stock = Number(book.stock);            }
             const isOutOfStock = isNaN(stock) ? false : stock <= 0;
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
@@ -542,7 +541,6 @@
                     </div>
                 </div>`;
         }
-
         function renderCart(container) {
             const isLoggedIn = !!window.state.user;
             const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -592,8 +590,7 @@
                                 `).join('')}
                             </div>
                             <div class="bg-cream-100 p-6 rounded-xl border border-cream-200 space-y-6">
-                                <div>
-                                    <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
+                                <div>                                    <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
                                     <div class="flex gap-2">
                                         <input type="text" id="discountCodeInput" value="${window.state.appliedDiscount.code}" placeholder="e.g., SUMMER20" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
                                         <button type="button" onclick="window.applyDiscountCode()" class="bg-charcoal-800 text-white font-semibold px-6 rounded-lg hover:bg-charcoal-900 transition">Apply</button>
@@ -625,13 +622,24 @@
                                     <div><label class="block text-sm font-medium mb-1">Full Name</label><input type="text" name="name" required value="${isLoggedIn ? (window.state.user.name || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
                                     <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required value="${isLoggedIn ? (window.state.user.phone || '') : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
                                     <div><label class="block text-sm font-medium mb-1">Email Address <span class="text-red-500">*</span></label><input type="email" name="email" required value="${isLoggedIn ? window.state.user.email : ''}" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
-                                    <div><label class="block text-sm font-medium mb-1">Delivery Address</label><textarea name="address" required rows="3" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea></div>
+                                    
+                                    <!-- District Dropdown -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">District <span class="text-red-500">*</span></label>
+                                        <select name="district" required class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none">
+                                            <option value="">Select District</option>
+                                            ${nepalDistricts.map(d => `<option value="${d}">${d}</option>`).join('')}
+                                        </select>
+                                    </div>
+
+                                    <div><label class="block text-sm font-medium mb-1">Delivery Address (Ward, Street, Landmark) <span class="text-red-500">*</span></label>
+                                    <textarea name="address" required rows="3" placeholder="e.g., Ward 4, near XYZ temple" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></textarea></div>
+                                    
                                     <div>
                                         <label class="block text-sm font-medium mb-2">Payment Method</label>
                                         <div class="space-y-2">
                                             <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="COD" checked class="mr-2"> Cash on Delivery</label>
-                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="eSewa" class="mr-2"> eSewa</label>
-                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="Khalti" class="mr-2"> Khalti</label>
+                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="eSewa" class="mr-2"> eSewa</label>                                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-wood-500 has-[:checked]:border-wood-600 has-[:checked]:bg-wood-50 transition"><input type="radio" name="payment" value="Khalti" class="mr-2"> Khalti</label>
                                         </div>
                                     </div>
                                     <button type="submit" class="w-full bg-gold-500 text-charcoal-900 font-bold py-3 rounded-xl mt-4 hover:bg-gold-600 transition">Place Order</button>
@@ -680,8 +688,7 @@
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-cream-200">
                     <form onsubmit="window.handleTrackOrder(event)" class="space-y-4">
                         <div><label class="block text-sm font-medium mb-1">Order ID</label><input type="text" name="orderId" required placeholder="e.g., ORD-1715000000" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none uppercase"></div>
-                        <div><label class="block text-sm font-medium mb-1">Email Address</label><input type="email" name="email" required placeholder="Email used for checkout" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>
-                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Track Order</button>
+                        <div><label class="block text-sm font-medium mb-1">Email Address</label><input type="email" name="email" required placeholder="Email used for checkout" class="w-full p-3 border rounded-lg bg-cream-50 focus:ring-2 focus:ring-gold-500 outline-none"></div>                        <button type="submit" class="w-full bg-wood-600 text-white font-bold py-3 rounded-lg hover:bg-wood-700 transition">Track Order</button>
                     </form>
                     <div id="trackResult" class="mt-6 hidden"></div>
                 </div>
@@ -730,8 +737,7 @@
                     </div>
                     <button onclick="navigator.clipboard.writeText('${window.state.user.membershipId}'); alert('Membership ID copied to clipboard!')" class="text-gold-600 hover:text-gold-800 text-sm font-semibold flex items-center gap-1 bg-white px-3 py-1.5 rounded border border-gold-200 hover:bg-gold-100 transition">
                         <i class="bi bi-clipboard"></i> Copy
-                    </button>
-                 </div>` : '';
+                    </button>                 </div>` : '';
                  
             container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 mb-8 flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -780,13 +786,12 @@
             document.getElementById('tab-newsletter').className = tab==='newsletter'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
             
             const div = document.getElementById('adminContent'); 
-            div.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';
-            
+            div.innerHTML = '<p class="text-center text-gray-500 py-4">Loading...</p>';            
             if (tab === 'orders') {
                 const snap = await getDocs(query(collection(db, "orders"), orderBy("createdAt","desc")));
                 let h = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
                 snap.forEach(d => {
-                    const o = d.data(); const s = JSON.stringify(o).replace(/"/g, '&quot;');
+                    const o = d.data(); const s = JSON.stringify(o).replace(/"/g, '"');
                     h += `<tr class="border-b"><td class="p-3 text-sm font-mono">${(o.orderId||d.id).substring(0,12)}<br><span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleDateString()}</span></td><td class="p-3 text-sm">${o.userName||'Guest'}<br><span class="text-xs text-gray-400">${o.userEmail||''}</span></td><td class="p-3 font-bold">Rs. ${o.totalAmount}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${o.status==='Pending'?'bg-yellow-100 text-yellow-700': o.status==='Cancelled'?'bg-red-100 text-red-700':'bg-green-100 text-green-700'}">${o.status}</span></td><td class="p-3 text-center"><select onchange="window.updateOrderStatus('${d.id}',this.value)" class="text-sm border rounded p-1 mb-2 block w-full">${['Pending','Confirmed','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-o')))" data-o="${s}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold"><i class="bi bi-printer"></i> Print</button></td></tr>`;
                 });
                 div.innerHTML = h + '</tbody></table></div>';
@@ -830,8 +835,7 @@
             } else if (tab === 'discounts') {
                 div.innerHTML = `
                     <div class="max-w-4xl mx-auto">
-                        <h3 class="font-serif text-xl font-bold mb-4">Manage Discount Codes</h3>
-                        <div class="bg-cream-50 p-6 rounded-xl border border-cream-200 mb-8">
+                        <h3 class="font-serif text-xl font-bold mb-4">Manage Discount Codes</h3>                        <div class="bg-cream-50 p-6 rounded-xl border border-cream-200 mb-8">
                             <h4 class="font-semibold mb-4">Add New Discount Code</h4>
                             <form onsubmit="window.addDiscountCode(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <input type="text" name="code" placeholder="CODE (e.g., SUMMER20)" required class="p-2 border rounded uppercase">
@@ -880,8 +884,7 @@
                             <div class="flex gap-4 pt-4">
                                 <button type="button" onclick="window.testNewsletterEmail()" class="px-6 py-3 border border-wood-600 text-wood-600 font-bold rounded-lg hover:bg-wood-50 transition flex items-center gap-2"><i class="bi bi-envelope"></i> Test to My Email</button>
                                 <button type="submit" id="sendNewsletterBtn" class="flex-1 bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2"><i class="bi bi-send"></i> Send to All ${count} Subscribers</button>
-                            </div>
-                        </form>
+                            </div>                        </form>
                         <div id="newsletterStatus" class="mt-6 hidden p-4 rounded-lg"></div>
                     </div>`;
             }
@@ -930,8 +933,7 @@
 
             if (!memId) {
                 alert("Please enter a Membership ID.");
-                return;
-            }
+                return;            }
 
             try {
                 const q = query(collection(db, "users"), where("membershipId", "==", memId));
@@ -980,8 +982,7 @@
                 return;
             }
 
-            if (window.state.discounts.length === 0) await window.fetchDiscounts();
-            const discount = window.state.discounts.find(d => d.code === code && d.isActive);
+            if (window.state.discounts.length === 0) await window.fetchDiscounts();            const discount = window.state.discounts.find(d => d.code === code && d.isActive);
             
             if (discount) {
                 const amount = discount.type === 'percent' ? Math.round(subtotal * (discount.value / 100)) : discount.value;
@@ -1030,8 +1031,7 @@
         async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
             const serviceID = "YOUR_EMAILJS_SERVICE_ID"; 
             const templateID = "template_e7mxtuu";       
-            if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
-                console.error("EMAILJS ERROR: Service ID not configured in code!");
+            if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {                console.error("EMAILJS ERROR: Service ID not configured in code!");
                 if (isTest) alert("ERROR: Please update YOUR_EMAILJS_SERVICE_ID in the code.");
                 return false;
             }
@@ -1045,10 +1045,11 @@
         window.printReceipt = function(order) {
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             const date = new Date(order.createdAt).toLocaleString();
+            const fullAddress = order.district ? `${order.district} - ${order.deliveryAddress}` : order.deliveryAddress;
             const itemsHtml = order.items.map(item => `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.title}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price}</td><td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right;">Rs. ${item.price * item.qty}</td></tr>`).join('');
             printWindow.document.write(`<!DOCTYPE html><html><head><title>Receipt - ${order.orderId}</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:600px;margin:0 auto;color:#333}.header{text-align:center;border-bottom:2px dashed #333;padding-bottom:10px;margin-bottom:15px}.header h1{margin:0;font-size:24px}.header p{margin:4px 0;font-size:14px}.details{margin-bottom:15px;font-size:14px;line-height:1.6}.details p{margin:4px 0}table{width:100%;border-collapse:collapse;margin-bottom:15px;font-size:14px}th{text-align:left;border-bottom:2px solid #333;padding:8px 4px}.totals{text-align:right;font-size:14px}.totals p{margin:4px 0}.total-final{font-size:18px;font-weight:bold;border-top:2px dashed #333;padding-top:8px;margin-top:8px}.footer{text-align:center;margin-top:30px;border-top:2px dashed #333;padding-top:10px;font-size:14px}.no-print{text-align:center;margin-top:30px}.btn{padding:10px 20px;font-size:14px;cursor:pointer;border:none;border-radius:4px;margin:0 5px}.btn-print{background:#333;color:white}.btn-close{background:#eee;color:#333}@media print{body{padding:0}.no-print{display:none!important}}</style></head><body>
                 <div class="header"><h1>The Book Shelf</h1><p>123 Literary Lane, Kathmandu, Nepal</p><p>Phone: +977 9800000000</p></div>
-                <div class="details"><p><strong>Order ID:</strong> ${order.orderId}</p><p><strong>Date:</strong> ${date}</p><p><strong>Customer:</strong> ${order.userName}</p><p><strong>Address:</strong> ${order.deliveryAddress}</p><p><strong>Payment:</strong> ${order.paymentMethod}</p></div>
+                <div class="details"><p><strong>Order ID:</strong> ${order.orderId}</p><p><strong>Date:</strong> ${date}</p><p><strong>Customer:</strong> ${order.userName}</p><p><strong>Address:</strong> ${fullAddress}</p><p><strong>Payment:</strong> ${order.paymentMethod}</p></div>
                 <table><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
                 <div class="totals"><p>Subtotal: Rs. ${order.subtotal}</p>${order.discount > 0 ? `<p>Membership Discount: -Rs. ${order.discount}</p>` : ''}${order.appliedDiscount > 0 ? `<p>Coupon Discount: -Rs. ${order.appliedDiscount}</p>` : ''}<p>Shipping: Rs. ${order.shippingCost}</p><p class="total-final">Total: Rs. ${order.totalAmount}</p></div>
                 <div class="footer"><p>Thank you for shopping with The Book Shelf!</p><p>Happy Reading!</p></div>
@@ -1060,7 +1061,6 @@
         window.fetchBooks = async function(isFeatured, category = 'All') {
             try {
                 let q = collection(db, "books");
-                // ✅ ENSURED: Exact string match and trim to prevent first-click failures
                 if (category && category !== 'All') q = query(q, where("category", "==", category.trim()));
                 if (isFeatured) q = query(q, orderBy("rating", "desc"), limit(4));
                 const querySnapshot = await getDocs(q);
@@ -1080,8 +1080,7 @@
         window.showBookDetails = function(bookId) { window.router('book', bookId); };
         
         window.addToCart = function(bookId) {
-            const book = window.currentBooks.find(b => b.id === bookId);
-            let stock = 999;
+            const book = window.currentBooks.find(b => b.id === bookId);            let stock = 999;
             if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
                 stock = Number(book.stock);
             }
@@ -1125,12 +1124,12 @@
 
         window.removeFromCart = function(idx) { window.state.cart.splice(idx, 1); window.saveCart(); renderCart(document.getElementById('app')); };
 
+        // ✅ NEW: District delivery restriction check
         window.handleCheckout = async function(e) {
             e.preventDefault();
             const cartItems = window.state.cart;
             let stockValid = true, stockErrorMsg = "";
-            for (const item of cartItems) {
-                const bookSnap = await getDoc(doc(db, "books", item.id));
+            for (const item of cartItems) {                const bookSnap = await getDoc(doc(db, "books", item.id));
                 if (bookSnap.exists()) {
                     const currentStock = Number(bookSnap.data().stock) || 0;
                     if (item.qty > currentStock) { stockValid = false; stockErrorMsg = `Sorry, "${item.title}" only has ${currentStock} copies left.`; break; }
@@ -1142,6 +1141,14 @@
             const isGuest = !window.state.user;
             const userEmail = formData.get('email');
             const userName = formData.get('name');
+            const district = formData.get('district');
+
+            // ✅ Check if district is allowed
+            const allowedDistricts = ['Kathmandu', 'Lalitpur', 'Bhaktapur'];
+            if (!allowedDistricts.includes(district)) {
+                alert("For now the delivery is available to the (Kathmandu, Lalitpur and Bhaktapur only).");
+                return; // Stop the checkout process
+            }
             
             let membershipDiscount = 0, finalShipping = 100;
             let appliedMemberTier = null;
@@ -1169,7 +1176,9 @@
                 orderId, trackingCode, userId: isGuest ? 'guest' : window.state.user.uid, userEmail, userName, items: cartItems,
                 subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
                 totalAmount: subtotal - membershipDiscount - couponDiscount + finalShipping,
-                paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', 
+                paymentMethod: formData.get('payment'), 
+                district: district, // Saved separately for clean data
+                deliveryAddress: formData.get('address'),                 status: 'Pending', 
                 membershipTierApplied: appliedMemberTier,
                 createdAt: new Date().toISOString()
             };
@@ -1199,9 +1208,10 @@
                 if (!order) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Email mismatch.</div>`; return; }
                 const date = new Date(order.createdAt).toLocaleDateString();
                 const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
-                const orderStr = JSON.stringify(order).replace(/"/g, '&quot;');
+                const orderStr = JSON.stringify(order).replace(/"/g, '"');
                 const paymentStatus = order.paymentMethod === 'COD' ? 'Pay on Delivery' : 'Paid';
                 const paymentColor = order.paymentMethod === 'COD' ? 'text-blue-600' : 'text-green-600';
+                const fullAddress = order.district ? `${order.district} - ${order.deliveryAddress}` : order.deliveryAddress;
 
                 resultDiv.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
                     <div class="flex justify-between items-start mb-4"><div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div><span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span></div>
@@ -1209,15 +1219,14 @@
                         <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
                         <p><strong>Total Amount:</strong> Rs. ${order.totalAmount}</p>
                         <p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
-                        <p><strong>Delivery Address:</strong> ${order.deliveryAddress}</p>
-                        <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
+                        <p><strong>Delivery Address:</strong> ${fullAddress}</p>
+                        <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
                         <p><strong>Payment Status:</strong> <span class="font-semibold ${paymentColor}">${paymentStatus}</span></p>
                     </div>
                     <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button>
                 </div>`;
             } catch (err) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error tracking order.</div>`; }
         };
-
         window.handleLogin = async function(e) {
             e.preventDefault();
             try {
@@ -1267,8 +1276,7 @@
                     const newMembershipId = 'MEM-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
                     await updateDoc(doc(db, "users", window.state.user.uid), { 
                         membershipTier: tier, 
-                        membershipId: newMembershipId,
-                        membershipUpgradedAt: new Date().toISOString() 
+                        membershipId: newMembershipId,                        membershipUpgradedAt: new Date().toISOString() 
                     }); 
                     window.state.user.membershipTier = tier; 
                     window.state.user.membershipId = newMembershipId;
@@ -1303,8 +1311,10 @@
                 container.innerHTML = orders.map(order => {
                     const date = new Date(order.createdAt).toLocaleDateString();
                     const colors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
-                    const str = JSON.stringify(order).replace(/"/g, '&quot;');
-                    return `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition"><div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4"><div><p class="text-sm text-gray-500">Order: <span class="font-mono font-bold">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">${date}</p></div><div class="flex items-center gap-4"><span class="px-3 py-1 rounded-full text-sm font-bold ${colors[order.status]}">${order.status}</span><span class="text-xl font-bold">Rs. ${order.totalAmount}</span></div></div><div class="border-t border-cream-100 pt-4 text-sm"><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${order.deliveryAddress}</p><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${str}" class="mt-3 text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1"><i class="bi bi-printer"></i> Print Receipt</button></div></div>`;
+                    const str = JSON.stringify(order).replace(/"/g, '"');
+                    const fullAddress = order.district ? `${order.district} - ${order.deliveryAddress}` : order.deliveryAddress;
+                    
+                    return `<div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 hover:shadow-md transition"><div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4"><div><p class="text-sm text-gray-500">Order: <span class="font-mono font-bold">${order.orderId || order.id}</span></p><p class="text-sm text-gray-500">${date}</p></div><div class="flex items-center gap-4"><span class="px-3 py-1 rounded-full text-sm font-bold ${colors[order.status]}">${order.status}</span><span class="text-xl font-bold">Rs. ${order.totalAmount}</span></div></div><div class="border-t border-cream-100 pt-4 text-sm"><p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p><p><strong>Delivery:</strong> ${fullAddress}</p><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${str}" class="mt-3 text-wood-600 hover:text-wood-800 font-semibold flex items-center gap-1"><i class="bi bi-printer"></i> Print Receipt</button></div></div>`;
                 }).join('');
             } catch (err) { console.error(err); }
         };
@@ -1315,8 +1325,7 @@
                 let tot = 0, pend = 0, rev = 0;
                 snap.forEach(d => { 
                     const o = d.data(); 
-                    if (o.status !== 'Cancelled') {
-                        tot++; 
+                    if (o.status !== 'Cancelled') {                        tot++; 
                         if (o.status === 'Pending') pend++; 
                         rev += (o.totalAmount || 0); 
                     }
@@ -1365,8 +1374,7 @@
                 stock: Number(document.getElementById('bookStock').value), 
                 coverUrl: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x450', 
                 description: document.getElementById('bookDesc').value, 
-                rating: Number(document.getElementById('bookRating').value) || 5, 
-                isbn: document.getElementById('bookIsbn').value || '', 
+                rating: Number(document.getElementById('bookRating').value) || 5,                 isbn: document.getElementById('bookIsbn').value || '', 
                 pages: Number(document.getElementById('bookPages').value) || 0, 
                 language: document.getElementById('bookLang').value || 'English', 
                 publisher: document.getElementById('bookPub').value || 'Unknown', 
@@ -1415,8 +1423,7 @@
         
         window.handleSearch = function(q) {
             if(!q){if(window.state.currentView==='shop')window.fetchBooks(false,'All');return;}
-            if(window.state.currentView!=='shop'){window.router('shop');setTimeout(()=>window.handleSearch(q),400);return;}
-            const l=q.toLowerCase(); const f=window.state.books.filter(b=>(b.title&&b.title.toLowerCase().includes(l))||(b.author&&b.author.toLowerCase().includes(l))||(b.isbn&&b.isbn.toLowerCase().includes(l)));
+            if(window.state.currentView!=='shop'){window.router('shop');setTimeout(()=>window.handleSearch(q),400);return;}            const l=q.toLowerCase(); const f=window.state.books.filter(b=>(b.title&&b.title.toLowerCase().includes(l))||(b.author&&b.author.toLowerCase().includes(l))||(b.isbn&&b.isbn.toLowerCase().includes(l)));
             const el=document.getElementById('shopBooks');
             if(el){if(f.length===0)el.innerHTML=`<p class="col-span-full text-center text-gray-500 py-8">No matches.</p>`;else el.innerHTML=f.map(window.generateBookCardHTML).join('');}
         };
