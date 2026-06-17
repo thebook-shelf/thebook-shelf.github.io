@@ -11,9 +11,7 @@
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
-        (function() { 
-            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); 
-        })();
+        (function() { emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); })();
     </script>
     
     <script>
@@ -39,31 +37,57 @@
 </head>
 <body class="bg-cream-50 text-charcoal-800 font-sans antialiased flex flex-col min-h-screen">
 
-    <!-- Navbar -->
+    <!-- Organized Navbar -->
     <nav class="sticky top-0 z-50 bg-cream-50/95 backdrop-blur-md border-b border-wood-500/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center cursor-pointer" onclick="window.router('home')">
-                    <i class="bi bi-book-half text-wood-600 text-3xl mr-2"></i>
-                    <span class="font-serif text-2xl font-bold text-charcoal-900">The Book Shelf</span>
-                </div>
-                <div class="hidden md:flex flex-1 mx-10">
-                    <div class="relative w-full max-w-lg">
-                        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." 
-                            class="w-full pl-10 pr-4 py-2 rounded-full border border-wood-500/30 bg-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 transition" onkeyup="window.handleSearch(this.value)">
-                        <i class="bi bi-search absolute left-3 top-3 text-wood-600"></i>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3 md:py-0">
+                <div class="flex items-center justify-between w-full md:w-auto">
+                    <div class="flex items-center cursor-pointer flex-shrink-0" onclick="window.router('home')">
+                        <i class="bi bi-book-half text-wood-600 text-3xl mr-2"></i>
+                        <span class="font-serif text-2xl font-bold text-charcoal-900">The Book Shelf</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="window.router('home')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Home</button>
-                    <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block text-sm">Track your order</button>
-                    <button onclick="window.router('membership')" class="text-charcoal-800 hover:text-wood-600 transition font-medium hidden sm:block">Membership</button>
-                    <button onclick="window.router('cart')" class="relative text-charcoal-800 hover:text-wood-600 transition">
-                        <i class="bi bi-cart3 text-2xl"></i>
-                        <span id="cartCount" class="absolute -top-2 -right-2 bg-gold-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                
+                <div class="hidden md:flex flex-1 max-w-xl mx-4">
+                    <div class="relative w-full">
+                        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-full border border-wood-500/30 bg-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 transition shadow-sm" onkeyup="window.handleSearch(this.value)">
+                        <i class="bi bi-search absolute left-3.5 top-3 text-wood-600"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-1 lg:space-x-2 flex-shrink-0">
+                    <button onclick="window.router('home')" class="text-charcoal-800 hover:text-wood-600 transition font-medium px-3 py-2 rounded-lg hover:bg-cream-100 text-sm hidden lg:block">Home</button>
+                    <button onclick="window.router('shop')" class="text-charcoal-800 hover:text-wood-600 transition font-medium px-3 py-2 rounded-lg hover:bg-cream-100 text-sm">Explore All Books</button>
+                    
+                    <div class="relative group hidden lg:block">
+                        <button class="text-charcoal-800 hover:text-wood-600 transition font-medium flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-cream-100 text-sm">
+                            Categories <i class="bi bi-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-cream-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-1 overflow-hidden">
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Fiction')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Fiction</a>
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Non-fiction')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Non-fiction</a>
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Self Improvement')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Self Improvement</a>
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Business')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Business</a>
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Nepali Books')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Nepali Books</a>
+                            <a href="javascript:void(0)" onclick="window.router('shop', 'Children Books')" class="block px-4 py-2.5 text-sm text-charcoal-800 hover:bg-cream-100 hover:text-wood-600 transition">Children Books</a>
+                        </div>
+                    </div>
+
+                    <div class="h-6 w-px bg-cream-200 mx-2 hidden lg:block"></div>
+
+                    <button onclick="window.router('track')" class="text-charcoal-800 hover:text-wood-600 transition p-2 rounded-full hover:bg-cream-100" title="Track Order">
+                        <i class="bi bi-truck text-lg"></i>
                     </button>
-                    <button id="authBtn" onclick="window.router('profile')" class="text-charcoal-800 hover:text-wood-600 transition">
-                        <i class="bi bi-person-circle text-2xl"></i>
+                    <button onclick="window.router('membership')" class="text-charcoal-800 hover:text-wood-600 transition p-2 rounded-full hover:bg-cream-100" title="Membership">
+                        <i class="bi bi-star text-lg"></i>
+                    </button>
+                    <button onclick="window.router('cart')" class="relative text-charcoal-800 hover:text-wood-600 transition p-2 rounded-full hover:bg-cream-100" title="Cart">
+                        <i class="bi bi-cart3 text-lg"></i>
+                        <span id="cartCount" class="absolute top-1 right-1 bg-gold-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                    </button>
+                    <button id="authBtn" onclick="window.router('profile')" class="text-charcoal-800 hover:text-wood-600 transition p-2 rounded-full hover:bg-cream-100" title="Profile">
+                        <i class="bi bi-person-circle text-lg"></i>
                     </button>
                 </div>
             </div>
@@ -84,7 +108,7 @@
                     <h4 class="font-serif text-lg font-bold text-gold-400 mb-4">Quick Links</h4>
                     <ul class="space-y-3 text-sm">
                         <li><a href="javascript:void(0)" onclick="window.router('home')" class="hover:text-gold-400 transition">Home</a></li>
-                        <li><a href="javascript:void(0)" onclick="window.router('shop')" class="hover:text-gold-400 transition">Shop All Books</a></li>
+                        <li><a href="javascript:void(0)" onclick="window.router('shop')" class="hover:text-gold-400 transition">Explore All Books</a></li>
                         <li><a href="javascript:void(0)" onclick="window.router('track')" class="hover:text-gold-400 transition">Track Your Order</a></li>
                     </ul>
                 </div>
@@ -158,7 +182,7 @@
         import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, orderBy, limit, setDoc, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
+           apiKey: "AIzaSyBIivAvwWiFNyOMVzXWH-Ib1M8Dsz7QVM0",
   authDomain: "the-book-shelf-8b4d5.firebaseapp.com",
   projectId: "the-book-shelf-8b4d5",
   storageBucket: "the-book-shelf-8b4d5.firebasestorage.app",
@@ -170,9 +194,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // ✅ ENSURED: Exact string match for categories
         window.CATEGORIES = ['Fiction', 'Non-fiction', 'Self Improvement', 'Business', 'Nepali Books', 'Children Books'];
-
-        window.state = { cart: JSON.parse(localStorage.getItem('cart')) || [], user: null, books: [], currentView: '', currentParam: '', editingBookId: null, appliedDiscount: { code: '', amount: 0 } };
+        
+        window.state = { 
+            cart: JSON.parse(localStorage.getItem('cart')) || [], 
+            user: null, 
+            books: [], 
+            discounts: [], 
+            currentView: '', 
+            currentParam: '', 
+            editingBookId: null, 
+            appliedDiscount: { code: '', amount: 0 },
+            appliedMembership: { id: '', tier: '', amount: 0 }
+        };
         window.currentBooks = [];
 
         window.getDiscountPercent = function(price, discountPrice) {
@@ -182,9 +217,11 @@
         };
 
         window.generateBookCardHTML = function(book) {
-            const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
-            const isOutOfStock = stock <= 0;
-            const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
+            let stock = 999;
+            if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
+                stock = Number(book.stock);
+            }
+            const isOutOfStock = isNaN(stock) ? false : stock <= 0;
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
             
@@ -192,7 +229,6 @@
             <div class="bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-md transition group cursor-pointer relative" onclick="window.router('book', '${book.id}')">
                 <div class="relative h-64 overflow-hidden bg-gray-100">
                     <img src="${book.coverUrl || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                    ${discountPercent > 0 ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${discountPercent}%</span>` : ''}
                     ${isOutOfStock ? '<span class="absolute top-2 right-2 bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</span>' : ''}
                 </div>
                 <div class="p-4">
@@ -236,21 +272,47 @@
         }
 
         window.handleLogout = async () => { await signOut(auth); window.state.user = null; updateAuthUI(false); window.router('home'); };
-
         window.handleLoginRedirect = function() {
-            if (window.state.user) {
-                window.router(window.state.user.role === 'admin' ? 'admin' : 'profile');
-            } else {
-                window.router('login');
+            if (window.state.user) window.router(window.state.user.role === 'admin' ? 'admin' : 'profile');
+            else window.router('login');
+        };
+
+        window.fetchDiscounts = async function() {
+            try {
+                const snap = await getDocs(collection(db, "discounts"));
+                window.state.discounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.error("Error fetching discounts:", e); }
+        };
+
+        // ✅ OPTIMIZED: Shows loading state immediately, then fetches
+        window.fetchFeaturedBooks = async function(featureTag, targetId) {
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                targetEl.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i> Loading...</div>`;
+            }
+            try {
+                const q = query(collection(db, "books"), where("feature", "==", featureTag), limit(4));
+                const querySnapshot = await getDocs(q);
+                const books = []; 
+                querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
+                
+                if (targetEl) {
+                    if (books.length === 0) { 
+                        targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books found. Add books with the "<strong>${featureTag}</strong>" feature in the Admin Panel.</p>`; 
+                        return; 
+                    }
+                    targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
+                }
+            } catch (error) { 
+                console.error("Error fetching featured books:", error); 
+                if (targetEl) targetEl.innerHTML = `<p class="col-span-full text-center text-red-500 py-8">Error loading books.</p>`;
             }
         };
 
         window.router = async function(view, param = null) {
-            if (view === 'login' && window.state.user) {
-                view = window.state.user.role === 'admin' ? 'admin' : 'profile';
-            }
+            if (view === 'login' && window.state.user) view = window.state.user.role === 'admin' ? 'admin' : 'profile';
 
-            const newHash = view + (param ? '/' + param : '');
+            const newHash = view + (param ? '/' + encodeURIComponent(param) : '');
             if (window.state.currentView === view && window.state.currentParam === param && window.location.hash === '#' + newHash) return;
             
             window.state.currentView = view;
@@ -271,15 +333,12 @@
                         book = window.state.books.find(b => b.id === param);
                     } catch (e) { console.error(e); }
                 }
-                if (book) {
-                    setTimeout(() => renderBookDetails(appDiv, book), 100);
-                } else {
-                    setTimeout(() => {
-                        appDiv.innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center fade-in"><i class="bi bi-book text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Book Not Found</h2><p class="text-gray-500 mb-8">The book you are looking for does not exist.</p><button onclick="window.router(\'shop\')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition">Browse All Books</button></div>';
-                    }, 100);
-                }
+                if (book) setTimeout(() => renderBookDetails(appDiv, book), 100);
+                else setTimeout(() => { appDiv.innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center fade-in"><i class="bi bi-book text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Book Not Found</h2><button onclick="window.router(\'shop\')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition">Browse All Books</button></div>'; }, 100);
                 return;
             }
+
+            if (window.state.discounts.length === 0) await window.fetchDiscounts();
 
             setTimeout(() => {
                 if (view === 'home') renderHome(appDiv);
@@ -300,50 +359,32 @@
         function renderOrderSuccess(container, orderId) {
             container.innerHTML = `
                 <div class="max-w-2xl mx-auto px-4 py-16 fade-in text-center">
-                    <div class="bg-green-50 border border-green-200 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-                        <i class="bi bi-check-circle-fill text-green-500 text-5xl"></i>
-                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6"><i class="bi bi-check-circle-fill text-green-500 text-5xl"></i></div>
                     <h2 class="font-serif text-4xl font-bold text-charcoal-900 mb-4">Order Placed Successfully!</h2>
-                    <p class="text-gray-600 mb-8 text-lg">Thank you for shopping with The Book Shelf. Your order has been confirmed and is being prepared.</p>
-                    
+                    <p class="text-gray-600 mb-8 text-lg">Thank you for shopping with The Book Shelf. Your order has been confirmed.</p>
                     <div class="bg-cream-100 border border-cream-200 rounded-xl p-6 mb-8 text-left">
                         <h3 class="font-serif text-xl font-bold text-charcoal-900 mb-4">Order Details</h3>
                         <div class="space-y-3 text-sm">
-                            <div class="flex justify-between border-b border-cream-200 pb-2">
-                                <span class="text-gray-600">Order ID:</span>
-                                <span class="font-mono font-bold text-charcoal-900">${orderId}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-cream-200 pb-2">
-                                <span class="text-gray-600">Status:</span>
-                                <span class="text-yellow-700 font-semibold bg-yellow-100 px-2 py-0.5 rounded">Pending</span>
-                            </div>
+                            <div class="flex justify-between border-b border-cream-200 pb-2"><span class="text-gray-600">Order ID:</span><span class="font-mono font-bold text-charcoal-900">${orderId}</span></div>
+                            <div class="flex justify-between border-b border-cream-200 pb-2"><span class="text-gray-600">Status:</span><span class="text-yellow-700 font-semibold bg-yellow-100 px-2 py-0.5 rounded">Pending</span></div>
                         </div>
                     </div>
-
                     <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-left">
-                        <h3 class="font-serif text-lg font-bold text-blue-900 mb-2 flex items-center gap-2">
-                            <i class="bi bi-info-circle"></i> How to Track Your Order
-                        </h3>
+                        <h3 class="font-serif text-lg font-bold text-blue-900 mb-2 flex items-center gap-2"><i class="bi bi-info-circle"></i> How to Track Your Order</h3>
                         <p class="text-blue-800 text-sm mb-3">You can track your order status at any time using your <strong>Order ID</strong>.</p>
                         <ul class="text-sm text-blue-800 space-y-2 list-disc list-inside">
                             <li>Go to the <strong>"Track your order"</strong> page from the top navigation menu.</li>
-                            <li>Enter your Order ID (<span class="font-mono font-bold">${orderId}</span>) and the email address you used at checkout.</li>
-                            <li>Logged-in users can also view this order in their <strong>Profile</strong> dashboard.</li>
+                            <li>Enter your Order ID (<span class="font-mono font-bold">${orderId}</span>) and your checkout email.</li>
                         </ul>
                     </div>
-
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onclick="window.router('home')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2">
-                            <i class="bi bi-house"></i> Continue Shopping
-                        </button>
-                        <button onclick="window.router('track')" class="border-2 border-wood-600 text-wood-600 font-semibold py-3 px-8 rounded-lg hover:bg-wood-50 transition flex items-center justify-center gap-2">
-                            <i class="bi bi-truck"></i> Track Order
-                        </button>
+                        <button onclick="window.router('home')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-house"></i> Continue Shopping</button>
+                        <button onclick="window.router('track')" class="border-2 border-wood-600 text-wood-600 font-semibold py-3 px-8 rounded-lg hover:bg-wood-50 transition flex items-center justify-center gap-2"><i class="bi bi-truck"></i> Track Order</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
+        // ✅ UPDATED: Added all 3 sections (Book of the Week, Best Selling, New Arrivals)
         function renderHome(container) {
             container.innerHTML = `
                 <section class="relative bg-charcoal-900 text-cream-50 py-20 md:py-32 overflow-hidden">
@@ -358,42 +399,45 @@
                         </div>
                     </div>
                 </section>
-
+                
                 <section class="bg-cream-100 py-20">
                     <div class="max-w-4xl mx-auto px-4 text-center">
                         <span class="text-wood-600 font-semibold tracking-widest uppercase text-sm">Our Story</span>
                         <h2 class="font-serif text-4xl md:text-5xl font-bold text-charcoal-900 mt-4 mb-6">Welcome to <br><span class="text-wood-600">The Book Shelf</span></h2>
-                        <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">Step into a world where stories come alive. The Book Shelf is your gateway to thousands of captivating reads.</p>
+                        <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">Step into a world where stories come alive. The Book Shelf is your gateway to thousands of captivating reads — from timeless classics to the latest bestsellers. Whether you're a passionate reader or just beginning your journey, we have the perfect book waiting for you on our shelves.</p>
                     </div>
                 </section>
-
-                <section class="max-w-7xl mx-auto px-4 py-16">
-                    <h2 class="font-serif text-3xl font-bold text-center mb-10 text-charcoal-900">Popular Categories</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-                        ${window.CATEGORIES.map(cat => `
-                            <div onclick="window.router('shop', '${cat}')" class="bg-white hover:bg-wood-500 hover:text-white text-charcoal-800 p-6 rounded-xl text-center cursor-pointer transition shadow-sm hover:shadow-md border border-cream-200">
-                                <i class="bi bi-book text-2xl mb-2 block"></i><span class="font-semibold text-sm">${cat}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </section>
-
+                
                 <section class="bg-cream-50 py-16">
                     <div class="max-w-7xl mx-auto px-4">
-                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Best Selling Books</h2>
-                        <div id="featuredBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Book of the Week</h2>
+                        <div id="bookOfWeekGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div class="col-span-full text-center text-gray-500 py-8"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i> Loading...</div>
+                        </div>
                     </div>
                 </section>
 
                 <section class="bg-cream-100 py-16 border-t border-cream-200">
                     <div class="max-w-7xl mx-auto px-4">
-                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Explore All Books</h2>
-                        <div id="allBooksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">Best Selling Books</h2>
+                        <div id="bestSellingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div class="col-span-full text-center text-gray-500 py-8"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i> Loading...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-cream-50 py-16 border-t border-cream-200">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <h2 class="font-serif text-3xl font-bold mb-8 text-charcoal-900">New Arrivals</h2>
+                        <div id="newArrivalsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div class="col-span-full text-center text-gray-500 py-8"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i> Loading...</div>
+                        </div>
                     </div>
                 </section>
             `;
-            window.fetchBooks(true);
-            window.fetchAllBooksForHome();
+            window.fetchFeaturedBooks('Book of the Week', 'bookOfWeekGrid');
+            window.fetchFeaturedBooks('Best Selling', 'bestSellingGrid');
+            window.fetchFeaturedBooks('New Arrivals', 'newArrivalsGrid');
         }
 
         function renderSubscribePage(container) {
@@ -401,31 +445,25 @@
                 <div class="bg-cream-50 py-20 md:py-32 min-h-[80vh] flex items-center">
                     <div class="max-w-4xl mx-auto px-4 text-center w-full">
                         <div class="mb-8">
-                            <button onclick="window.router('home')" class="text-wood-600 hover:text-wood-700 transition mb-6 inline-flex items-center gap-2 text-sm font-medium">
-                                <i class="bi bi-arrow-left"></i> Back to Home
-                            </button>
+                            <button onclick="window.router('home')" class="text-wood-600 hover:text-wood-700 transition mb-6 inline-flex items-center gap-2 text-sm font-medium"><i class="bi bi-arrow-left"></i> Back to Home</button>
                             <i class="bi bi-envelope-paper-heart text-gold-500 text-6xl mb-4 block"></i>
                             <h1 class="font-serif text-4xl md:text-5xl font-bold mb-4 text-charcoal-900">Join The Literary Club</h1>
                             <p class="text-lg text-gray-600 max-w-2xl mx-auto">Subscribe to our newsletter and receive handpicked book recommendations, exclusive deals, and special discounts directly in your inbox.</p>
                         </div>
-                        
                         <div class="bg-white border-2 border-gold-500 rounded-2xl p-8 md:p-12 max-w-xl mx-auto shadow-lg relative">
                             <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gold-500 text-charcoal-900 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide">Free Subscription</span>
                             <h3 class="font-serif text-2xl text-charcoal-900 mb-4 mt-2">Get Weekly Book Picks</h3>
                             <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-600 mb-8">
                                 <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> Weekly updates</span>
                                 <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> Exclusive Coupons</span>
-                                <span class="flex items-center gap-1"><i class="bi bi-check-circle-fill text-green-500"></i> New Arrivals</span>
                             </div>
                             <form onsubmit="window.handleNewsletter(event)" class="flex flex-col gap-4">
                                 <input type="email" name="email" placeholder="Enter your email address" required class="w-full p-4 rounded-lg bg-cream-50 border border-wood-500/30 text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 text-lg placeholder-gray-400">
                                 <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold px-6 py-4 rounded-lg transition text-lg shadow-md hover:shadow-lg">Join Now</button>
                             </form>
-                            <p class="text-xs text-center text-gray-400 mt-6"><i class="bi bi-shield-lock"></i> We respect your privacy. Unsubscribe at any time.</p>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
         function renderShop(container, categoryFilter = 'All') {
@@ -452,8 +490,11 @@
 
         function renderBookDetails(container, book) {
             if (!book) return window.router('shop');
-            const stock = book.stock !== undefined && book.stock !== null ? Number(book.stock) : 999;
-            const isOutOfStock = stock <= 0;
+            let stock = 999;
+            if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
+                stock = Number(book.stock);
+            }
+            const isOutOfStock = isNaN(stock) ? false : stock <= 0;
             const discountPercent = window.getDiscountPercent(book.price, book.discountPrice);
             const displayPrice = book.discountPrice || book.price;
             const originalPrice = book.discountPrice ? book.price : null;
@@ -509,11 +550,20 @@
                 container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-16 fade-in text-center"><i class="bi bi-cart-x text-6xl text-gray-300 mb-6"></i><h2 class="font-serif text-3xl font-bold text-charcoal-900 mb-4">Your cart is empty</h2><button onclick="window.router('shop')" class="bg-wood-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-wood-700 transition mb-8">Continue shopping</button><p class="text-gray-500">Have an account? <a href="javascript:void(0)" onclick="window.handleLoginRedirect()" class="text-wood-600 hover:underline font-semibold">Log in</a> to check out faster.</p></div>`;
                 return;
             }
+            
             let membershipDiscount = 0, finalShipping = 100;
-            if (isLoggedIn) {
-                if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
-                else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
+            if (isLoggedIn && window.state.user.membershipTier === 'premium') { 
+                membershipDiscount = Math.round(subtotal * 0.10); 
+                if (subtotal >= 1000) finalShipping = 0; 
+            } else if (isLoggedIn && window.state.user.membershipTier === 'vip') { 
+                membershipDiscount = Math.round(subtotal * 0.20); 
+                finalShipping = 0; 
+            } else if (window.state.appliedMembership.amount > 0) {
+                membershipDiscount = window.state.appliedMembership.amount;
+                if (window.state.appliedMembership.tier === 'vip') finalShipping = 0;
+                else if (window.state.appliedMembership.tier === 'premium' && subtotal >= 1000) finalShipping = 0;
             }
+            
             const couponDiscount = window.state.appliedDiscount.amount;
             const total = subtotal - membershipDiscount - couponDiscount + finalShipping;
 
@@ -541,13 +591,23 @@
                                     </div>
                                 `).join('')}
                             </div>
-                            <div class="bg-cream-100 p-6 rounded-xl border border-cream-200">
-                                <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
-                                <div class="flex gap-2">
-                                    <input type="text" id="discountCodeInput" value="${window.state.appliedDiscount.code}" placeholder="e.g., SAVE10, FLAT50" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
-                                    <button type="button" onclick="window.applyDiscountCode()" class="bg-charcoal-800 text-white font-semibold px-6 rounded-lg hover:bg-charcoal-900 transition">Apply</button>
+                            <div class="bg-cream-100 p-6 rounded-xl border border-cream-200 space-y-6">
+                                <div>
+                                    <h3 class="font-serif text-lg font-bold mb-3">Have a discount code?</h3>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="discountCodeInput" value="${window.state.appliedDiscount.code}" placeholder="e.g., SUMMER20" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
+                                        <button type="button" onclick="window.applyDiscountCode()" class="bg-charcoal-800 text-white font-semibold px-6 rounded-lg hover:bg-charcoal-900 transition">Apply</button>
+                                    </div>
+                                    <p id="discountMessage" class="text-sm mt-2 h-5 font-medium">${window.state.appliedDiscount.code ? `<span class="text-green-600">✅ Code applied! You save Rs. ${window.state.appliedDiscount.amount}</span>` : ''}</p>
                                 </div>
-                                <p id="discountMessage" class="text-sm mt-2 h-5 font-medium">${window.state.appliedDiscount.code ? `<span class="text-green-600">✅ Code applied! You save Rs. ${window.state.appliedDiscount.amount}</span>` : ''}</p>
+                                <div class="border-t border-cream-200 pt-6">
+                                    <h3 class="font-serif text-lg font-bold mb-3">Membership ID</h3>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="membershipIdInput" value="${window.state.appliedMembership.id}" placeholder="e.g., MEM-A1B2-C3D4" class="flex-1 p-3 border rounded-lg bg-white uppercase focus:ring-2 focus:ring-gold-500 outline-none">
+                                        <button type="button" onclick="window.applyMembershipId()" class="bg-wood-600 text-white font-semibold px-6 rounded-lg hover:bg-wood-700 transition">Apply</button>
+                                    </div>
+                                    <p id="membershipMessage" class="text-sm mt-2 h-5 font-medium">${window.state.appliedMembership.id ? `<span class="text-green-600">✅ ${window.state.appliedMembership.tier === 'premium' ? 'Premium' : 'VIP'} Member applied! You save Rs. ${window.state.appliedMembership.amount}</span>` : ''}</p>
+                                </div>
                             </div>
                         </div>
                         <div class="lg:col-span-1">
@@ -661,9 +721,26 @@
         function renderProfile(container) {
             if (!window.state.user) return window.router('login');
             const tierDisplay = window.state.user.membershipTier === 'vip' ? 'Literary Legend 👑' : window.state.user.membershipTier === 'premium' ? 'Bookworm Premium ⭐' : 'Free Reader';
+            
+            const memberIdHtml = window.state.user.membershipId ? 
+                `<div class="mt-3 p-3 bg-gold-50 border border-gold-200 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gold-700 font-semibold uppercase">Your Membership ID</p>
+                        <p class="font-mono text-lg font-bold text-charcoal-900">${window.state.user.membershipId}</p>
+                    </div>
+                    <button onclick="navigator.clipboard.writeText('${window.state.user.membershipId}'); alert('Membership ID copied to clipboard!')" class="text-gold-600 hover:text-gold-800 text-sm font-semibold flex items-center gap-1 bg-white px-3 py-1.5 rounded border border-gold-200 hover:bg-gold-100 transition">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                 </div>` : '';
+                 
             container.innerHTML = `<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-cream-200 mb-8 flex flex-col md:flex-row justify-between md:items-center gap-4">
-                    <div><h2 class="font-serif text-2xl font-bold text-charcoal-900">Hello, ${window.state.user.name || 'User'}</h2><p class="text-gray-500">${window.state.user.email}</p><span class="inline-block mt-2 px-3 py-1 bg-gold-100 text-gold-700 text-sm font-bold rounded-full">${tierDisplay}</span></div>
+                    <div>
+                        <h2 class="font-serif text-2xl font-bold text-charcoal-900">Hello, ${window.state.user.name || 'User'}</h2>
+                        <p class="text-gray-500">${window.state.user.email}</p>
+                        <span class="inline-block mt-2 px-3 py-1 bg-gold-100 text-gold-700 text-sm font-bold rounded-full">${tierDisplay}</span>
+                        ${memberIdHtml}
+                    </div>
                     <button onclick="window.handleLogout()" class="text-red-500 hover:text-red-700 font-semibold flex items-center gap-2 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 transition self-start md:self-auto"><i class="bi bi-box-arrow-right"></i> Logout</button>
                 </div>
                 <h3 class="font-serif text-2xl font-bold mb-6">My Orders & Tracking</h3>
@@ -687,6 +764,7 @@
                 <div class="flex gap-4 mb-6 border-b border-cream-200 overflow-x-auto">
                     <button onclick="window.showAdminTab('orders')" id="tab-orders" class="px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600 whitespace-nowrap">Manage Orders</button>
                     <button onclick="window.showAdminTab('books')" id="tab-books" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Manage Books</button>
+                    <button onclick="window.showAdminTab('discounts')" id="tab-discounts" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Discount Codes</button>
                     <button onclick="window.showAdminTab('newsletter')" id="tab-newsletter" class="px-4 py-2 font-semibold text-gray-500 hover:text-wood-600 whitespace-nowrap">Send Newsletter</button>
                 </div>
                 <div id="adminContent" class="bg-white p-6 rounded-xl shadow-sm border border-cream-200"><p class="text-center text-gray-500">Loading data...</p></div>
@@ -698,6 +776,7 @@
         window.showAdminTab = async function(tab) {
             document.getElementById('tab-orders').className = tab==='orders'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
             document.getElementById('tab-books').className = tab==='books'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
+            document.getElementById('tab-discounts').className = tab==='discounts'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
             document.getElementById('tab-newsletter').className = tab==='newsletter'?"px-4 py-2 font-semibold text-wood-600 border-b-2 border-wood-600":"px-4 py-2 font-semibold text-gray-500 hover:text-wood-600";
             
             const div = document.getElementById('adminContent'); 
@@ -708,28 +787,34 @@
                 let h = `<h3 class="font-serif text-xl font-bold mb-4">Recent Orders</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-cream-100 text-sm text-gray-600"><th class="p-3">Order ID</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3 text-center">Actions</th></tr></thead><tbody>`;
                 snap.forEach(d => {
                     const o = d.data(); const s = JSON.stringify(o).replace(/"/g, '&quot;');
-                    h += `<tr class="border-b"><td class="p-3 text-sm font-mono">${(o.orderId||d.id).substring(0,12)}<br><span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleDateString()}</span></td><td class="p-3 text-sm">${o.userName||'Guest'}<br><span class="text-xs text-gray-400">${o.userEmail||''}</span></td><td class="p-3 font-bold">Rs. ${o.totalAmount}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${o.status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}">${o.status}</span></td><td class="p-3 text-center"><select onchange="window.updateOrderStatus('${d.id}',this.value)" class="text-sm border rounded p-1 mb-2 block w-full">${['Pending','Confirmed','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-o')))" data-o="${s}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold"><i class="bi bi-printer"></i> Print</button></td></tr>`;
+                    h += `<tr class="border-b"><td class="p-3 text-sm font-mono">${(o.orderId||d.id).substring(0,12)}<br><span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleDateString()}</span></td><td class="p-3 text-sm">${o.userName||'Guest'}<br><span class="text-xs text-gray-400">${o.userEmail||''}</span></td><td class="p-3 font-bold">Rs. ${o.totalAmount}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${o.status==='Pending'?'bg-yellow-100 text-yellow-700': o.status==='Cancelled'?'bg-red-100 text-red-700':'bg-green-100 text-green-700'}">${o.status}</span></td><td class="p-3 text-center"><select onchange="window.updateOrderStatus('${d.id}',this.value)" class="text-sm border rounded p-1 mb-2 block w-full">${['Pending','Confirmed','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-o')))" data-o="${s}" class="text-wood-600 hover:text-wood-800 text-sm font-semibold"><i class="bi bi-printer"></i> Print</button></td></tr>`;
                 });
                 div.innerHTML = h + '</tbody></table></div>';
             } else if (tab === 'books') {
                 const snap = await getDocs(collection(db,"books")); 
-                const bl = []; 
-                snap.forEach(d => bl.push({id: d.id, ...d.data()}));
+                const bl = []; snap.forEach(d => bl.push({id: d.id, ...d.data()}));
+                window.state.books = bl; window.currentBooks = bl;
                 
-                // ✅ FIX: Update global state so editBook can always find the book data
-                window.state.books = bl;
-                window.currentBooks = bl;
-                
-                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b"><td class="p-3 font-semibold">${b.title}</td><td class="p-3">${b.category}</td><td class="p-3">Rs. ${b.discountPrice||b.price}</td><td class="p-3 ${Number(b.stock)<=0?'text-red-600 font-bold':''}">${Number(b.stock)<=0?'Out of Stock':(b.stock || 'Available')}</td><td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td></tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3>
+                div.innerHTML = `<h3 class="font-serif text-xl font-bold mb-4">Existing Books</h3><div class="overflow-x-auto mb-8 max-h-96 overflow-y-auto"><table class="w-full text-left"><thead class="bg-cream-100"><tr><th class="p-3">Title</th><th class="p-3">Category</th><th class="p-3">Feature</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3 text-right">Actions</th></tr></thead><tbody>${bl.map(b=>`<tr class="border-b border-cream-100">
+                    <td class="p-3 font-semibold">${b.title}</td>
+                    <td class="p-3">${b.category}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${b.feature && b.feature !== 'none' ? 'bg-gold-100 text-gold-700' : 'bg-gray-100 text-gray-500'}">${b.feature === 'none' || !b.feature ? 'None' : b.feature}</span></td>
+                    <td class="p-3">Rs. ${b.discountPrice||b.price}</td>
+                    <td class="p-3 ${Number(b.stock)<=0?'text-red-600 font-bold':''}">${Number(b.stock)<=0?'Out of Stock':(b.stock || 'Available')}</td>
+                    <td class="p-3 text-right space-x-2"><button onclick="window.editBook('${b.id}')" class="text-blue-600">Edit</button><button onclick="window.deleteBook('${b.id}')" class="text-red-600">Delete</button></td>
+                </tr>`).join('')}</tbody></table></div><hr class="my-6"><h3 class="font-serif text-xl font-bold mb-4" id="formTitle">Add New Book</h3>
                 <form onsubmit="window.saveBook(event)" id="bookForm" class="grid md:grid-cols-2 gap-4">
                     <input type="text" id="customDocId" placeholder="ID (Optional)" class="p-2 border rounded md:col-span-2 border-dashed">
                     <input type="text" id="bookTitle" placeholder="Title" required class="p-2 border rounded">
                     <input type="text" id="bookAuthor" placeholder="Author" required class="p-2 border rounded">
                     <select id="bookCategory" class="p-2 border rounded">${window.CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
-                    <select id="bookFormat" class="p-2 border rounded">
-                        <option value="Paperback">Paperback</option>
-                        <option value="Hardcover">Hardcover</option>
+                    <select id="bookFeature" class="p-2 border rounded">
+                        <option value="none">None</option>
+                        <option value="Book of the Week">Book of the Week</option>
+                        <option value="Best Selling">Best Selling</option>
+                        <option value="New Arrivals">New Arrivals</option>
                     </select>
+                    <select id="bookFormat" class="p-2 border rounded"><option value="Paperback">Paperback</option><option value="Hardcover">Hardcover</option></select>
                     <input type="number" id="bookPrice" placeholder="Price" required class="p-2 border rounded">
                     <input type="number" id="bookDiscount" placeholder="Discount Price" class="p-2 border rounded">
                     <input type="number" id="bookStock" placeholder="Stock Quantity" required class="p-2 border rounded">
@@ -737,14 +822,49 @@
                     <input type="number" id="bookPages" placeholder="Pages" class="p-2 border rounded">
                     <input type="text" id="bookLang" placeholder="Language" class="p-2 border rounded">
                     <input type="text" id="bookPub" placeholder="Publisher" class="p-2 border rounded">
-                    <input type="number" id="bookRating" placeholder="Rating" value="5" class="p-2 border rounded">
+                    <input type="number" id="bookRating" placeholder="Rating" value="5" step="0.1" min="1" max="5" class="p-2 border rounded">
                     <input type="text" id="bookCover" placeholder="Cover URL" class="p-2 border rounded">
                     <textarea id="bookDesc" placeholder="Description" required class="md:col-span-2 p-2 border rounded" rows="3"></textarea>
-                    <div class="md:col-span-2 flex gap-4">
-                        <button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add Book</button>
-                        <button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button>
-                    </div>
+                    <div class="md:col-span-2 flex gap-4"><button type="submit" id="bookSubmitBtn" class="flex-1 bg-wood-600 text-white py-3 rounded">Add Book</button><button type="button" id="bookCancelBtn" onclick="window.resetBookForm()" class="hidden px-6 border rounded">Cancel</button></div>
                 </form>`;
+            } else if (tab === 'discounts') {
+                div.innerHTML = `
+                    <div class="max-w-4xl mx-auto">
+                        <h3 class="font-serif text-xl font-bold mb-4">Manage Discount Codes</h3>
+                        <div class="bg-cream-50 p-6 rounded-xl border border-cream-200 mb-8">
+                            <h4 class="font-semibold mb-4">Add New Discount Code</h4>
+                            <form onsubmit="window.addDiscountCode(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <input type="text" name="code" placeholder="CODE (e.g., SUMMER20)" required class="p-2 border rounded uppercase">
+                                <select name="type" class="p-2 border rounded">
+                                    <option value="percent">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount (Rs.)</option>
+                                </select>
+                                <input type="number" name="value" placeholder="Value (e.g., 20)" required class="p-2 border rounded">
+                                <button type="submit" class="bg-wood-600 text-white font-bold py-2 rounded hover:bg-wood-700 transition">Add Code</button>
+                            </form>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-cream-100 text-sm text-gray-600">
+                                    <tr><th class="p-3">Code</th><th class="p-3">Type</th><th class="p-3">Value</th><th class="p-3">Status</th><th class="p-3 text-right">Action</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${window.state.discounts.map(d => `
+                                        <tr class="border-b border-cream-100">
+                                            <td class="p-3 font-mono font-bold">${d.code}</td>
+                                            <td class="p-3 capitalize">${d.type}</td>
+                                            <td class="p-3">${d.type === 'percent' ? d.value + '%' : 'Rs. ' + d.value}</td>
+                                            <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${d.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">${d.isActive ? 'Active' : 'Inactive'}</span></td>
+                                            <td class="p-3 text-right">
+                                                <button onclick="window.toggleDiscountStatus('${d.id}', ${!d.isActive})" class="text-blue-600 hover:text-blue-800 text-sm mr-3">${d.isActive ? 'Deactivate' : 'Activate'}</button>
+                                                <button onclick="window.deleteDiscount('${d.id}')" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                                            </td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="5" class="p-4 text-center text-gray-500">No discount codes created yet.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
             } else if (tab === 'newsletter') {
                 const subsSnap = await getDocs(collection(db, "newsletter"));
                 const count = subsSnap.size;
@@ -763,9 +883,115 @@
                             </div>
                         </form>
                         <div id="newsletterStatus" class="mt-6 hidden p-4 rounded-lg"></div>
-                    </div>
-                `;
+                    </div>`;
             }
+        };
+
+        window.addDiscountCode = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const code = formData.get('code').trim().toUpperCase();
+            const type = formData.get('type');
+            const value = Number(formData.get('value'));
+            try {
+                await addDoc(collection(db, "discounts"), { code, type, value, isActive: true, createdAt: new Date().toISOString() });
+                alert("Discount code added successfully!");
+                await window.fetchDiscounts();
+                window.showAdminTab('discounts');
+            } catch (err) { alert("Failed to add code: " + err.message); }
+        };
+
+        window.toggleDiscountStatus = async function(id, newStatus) {
+            try {
+                await updateDoc(doc(db, "discounts", id), { isActive: newStatus });
+                await window.fetchDiscounts();
+                window.showAdminTab('discounts');
+            } catch (err) { alert("Failed to update status: " + err.message); }
+        };
+
+        window.deleteDiscount = async function(id) {
+            if (!confirm("Are you sure you want to delete this discount code?")) return;
+            try {
+                await deleteDoc(doc(db, "discounts", id));
+                await window.fetchDiscounts();
+                window.showAdminTab('discounts');
+            } catch (err) { alert("Failed to delete: " + err.message); }
+        };
+
+        window.applyMembershipId = async function() {
+            const input = document.getElementById('membershipIdInput');
+            if (!input) return;
+            const memId = input.value.trim().toUpperCase();
+            
+            if (window.state.user && (window.state.user.membershipTier === 'premium' || window.state.user.membershipTier === 'vip')) {
+                alert("Your account already has an active paid membership. Benefits are applied automatically!");
+                return;
+            }
+
+            if (!memId) {
+                alert("Please enter a Membership ID.");
+                return;
+            }
+
+            try {
+                const q = query(collection(db, "users"), where("membershipId", "==", memId));
+                const snap = await getDocs(q);
+                
+                if (!snap.empty) {
+                    const userData = snap.docs[0].data();
+                    if (userData.membershipTier === 'premium' || userData.membershipTier === 'vip') {
+                        const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                        let discount = 0;
+                        if (userData.membershipTier === 'premium') discount = Math.round(subtotal * 0.10);
+                        else if (userData.membershipTier === 'vip') discount = Math.round(subtotal * 0.20);
+                        
+                        window.state.appliedMembership = { id: memId, tier: userData.membershipTier, amount: discount };
+                        window.state.appliedDiscount = { code: '', amount: 0 };
+                        
+                        alert(`✅ Success! ${userData.membershipTier === 'premium' ? 'Premium' : 'VIP'} membership applied. You save Rs. ${discount}`);
+                        renderCart(document.getElementById('app'));
+                    } else {
+                        alert("This Membership ID is active but does not have paid premium benefits.");
+                        window.state.appliedMembership = { id: '', tier: '', amount: 0 };
+                        renderCart(document.getElementById('app'));
+                    }
+                } else {
+                    alert("❌ Invalid Membership ID.");
+                    window.state.appliedMembership = { id: '', tier: '', amount: 0 };
+                    renderCart(document.getElementById('app'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error verifying Membership ID.");
+            }
+        };
+
+        window.applyDiscountCode = async function() {
+            const codeInput = document.getElementById('discountCodeInput');
+            if (!codeInput) return;
+            const code = codeInput.value.trim().toUpperCase();
+            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            const hasPaidMembership = (window.state.user && (window.state.user.membershipTier === 'premium' || window.state.user.membershipTier === 'vip')) || 
+                                      (window.state.appliedMembership && window.state.appliedMembership.amount > 0);
+            
+            if (hasPaidMembership) {
+                alert("⚠️ Paid membership benefits cannot be combined with other discount codes.");
+                return;
+            }
+
+            if (window.state.discounts.length === 0) await window.fetchDiscounts();
+            const discount = window.state.discounts.find(d => d.code === code && d.isActive);
+            
+            if (discount) {
+                const amount = discount.type === 'percent' ? Math.round(subtotal * (discount.value / 100)) : discount.value;
+                window.state.appliedDiscount = { code, amount };
+                alert(`✅ Success! Code '${code}' applied. You save Rs. ${amount}`);
+            } else {
+                window.state.appliedDiscount = { code: '', amount: 0 };
+                alert('❌ Invalid, inactive, or expired code.');
+            }
+            renderCart(document.getElementById('app'));
         };
 
         window.testNewsletterEmail = async function() {
@@ -778,29 +1004,23 @@
             e.preventDefault();
             if (subscriberCount === 0) { alert("No subscribers found yet."); return; }
             if (!confirm(`Send this newsletter to ${subscriberCount} subscribers?`)) return;
-
             const formData = new FormData(e.target);
             const subject = formData.get('subject'); const headline = formData.get('headline');
             const message = formData.get('message'); const shopLink = formData.get('shop_link');
-            
             const btn = document.getElementById('sendNewsletterBtn');
             const statusDiv = document.getElementById('newsletterStatus');
-            
             btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Sending...'; btn.disabled = true;
             statusDiv.classList.remove('hidden');
             statusDiv.className = "mt-6 p-4 rounded-lg bg-blue-50 text-blue-700 border border-blue-200";
             statusDiv.innerText = `Starting to send to ${subscriberCount} users. Please keep this tab open...`;
-
             let successCount = 0, failCount = 0;
             const subsSnap = await getDocs(collection(db, "newsletter"));
-            
             for (const doc of subsSnap.docs) {
                 const email = doc.data().email;
                 const subscriberName = email.split('@')[0]; 
                 const success = await sendSingleFormattedEmail(email, subject, headline, message, shopLink, false, subscriberName);
                 if (success) successCount++; else failCount++;
             }
-
             btn.innerHTML = `<i class="bi bi-send"></i> Send to All ${subscriberCount} Subscribers`; btn.disabled = false;
             statusDiv.className = "mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200";
             statusDiv.innerHTML = `<strong>✅ Campaign Complete!</strong><br>Successfully sent to ${successCount} users. Failed: ${failCount}.`;
@@ -810,23 +1030,16 @@
         async function sendSingleFormattedEmail(toEmail, subject, headline, message, shopLink, isTest, subscriberName = "Reader") {
             const serviceID = "YOUR_EMAILJS_SERVICE_ID"; 
             const templateID = "template_e7mxtuu";       
-
             if (serviceID === "YOUR_EMAILJS_SERVICE_ID") {
                 console.error("EMAILJS ERROR: Service ID not configured in code!");
                 if (isTest) alert("ERROR: Please update YOUR_EMAILJS_SERVICE_ID in the code.");
                 return false;
             }
-
             try {
-                await emailjs.send(serviceID, templateID, {
-                    to_email: toEmail, subscriber_name: subscriberName, headline: headline, message: message, shop_link: shopLink
-                });
+                await emailjs.send(serviceID, templateID, { to_email: toEmail, subscriber_name: subscriberName, headline: headline, message: message, shop_link: shopLink });
                 console.log("Successfully sent newsletter to:", toEmail);
                 return true;
-            } catch (err) {
-                console.error("Failed to send to", toEmail, err);
-                return false;
-            }
+            } catch (err) { console.error("Failed to send to", toEmail, err); return false; }
         }
 
         window.printReceipt = function(order) {
@@ -847,7 +1060,8 @@
         window.fetchBooks = async function(isFeatured, category = 'All') {
             try {
                 let q = collection(db, "books");
-                if (category && category !== 'All') q = query(q, where("category", "==", category));
+                // ✅ ENSURED: Exact string match and trim to prevent first-click failures
+                if (category && category !== 'All') q = query(q, where("category", "==", category.trim()));
                 if (isFeatured) q = query(q, orderBy("rating", "desc"), limit(4));
                 const querySnapshot = await getDocs(q);
                 const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
@@ -859,24 +1073,18 @@
             } catch (error) { console.error("Error fetching books:", error); }
         };
 
-        window.fetchAllBooksForHome = async function() {
-            try {
-                const q = query(collection(db, "books"), limit(8));
-                const querySnapshot = await getDocs(q);
-                const books = []; querySnapshot.forEach((doc) => books.push({ id: doc.id, ...doc.data() }));
-                const targetEl = document.getElementById('allBooksGrid');
-                if (!targetEl) return;
-                if (books.length === 0) { targetEl.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">No books available.</p>`; return; }
-                targetEl.innerHTML = books.map(window.generateBookCardHTML).join('');
-            } catch (error) { console.error("Error fetching all books for home:", error); }
+        window.applyShopFilters = function() { 
+            window.router('shop', document.getElementById('filterCategory').value); 
         };
-
-        window.applyShopFilters = function() { window.router('shop', document.getElementById('filterCategory').value); };
+        
         window.showBookDetails = function(bookId) { window.router('book', bookId); };
         
         window.addToCart = function(bookId) {
             const book = window.currentBooks.find(b => b.id === bookId);
-            const stock = book?.stock !== undefined && book?.stock !== null ? Number(book.stock) : 999;
+            let stock = 999;
+            if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
+                stock = Number(book.stock);
+            }
             const existing = window.state.cart.find(item => item.id === bookId);
             const currentQty = existing ? existing.qty : 0;
             
@@ -884,11 +1092,10 @@
                 alert('Sorry, this book is currently out of stock!'); 
                 return; 
             }
-            if (currentQty + 1 > stock) {
-                alert(`Sorry, you can only add up to ${stock} of this book to your cart.`);
-                return;
+            if (currentQty + 1 > stock) { 
+                alert(`Sorry, you can only add up to ${stock} of this book to your cart.`); 
+                return; 
             }
-            
             if (existing) existing.qty++;
             else window.state.cart.push({ ...book, qty: 1, price: book.discountPrice || book.price });
             window.saveCart(); 
@@ -903,118 +1110,78 @@
         window.updateQty = function(idx, change) {
             const item = window.state.cart[idx];
             const newQty = item.qty + change;
-            if (newQty <= 0) {
-                window.state.cart.splice(idx, 1);
-            } else {
+            if (newQty <= 0) { window.state.cart.splice(idx, 1); } 
+            else {
                 const book = window.currentBooks.find(b => b.id === item.id) || window.state.books.find(b => b.id === item.id);
-                const stock = book?.stock !== undefined && book?.stock !== null ? Number(book.stock) : 999;
-                if (newQty > stock) {
-                    alert(`Sorry, only ${stock} copies are available in stock.`);
-                    return;
+                let stock = 999;
+                if (book && book.stock !== undefined && book.stock !== null && book.stock !== '') {
+                    stock = Number(book.stock);
                 }
+                if (newQty > stock) { alert(`Sorry, only ${stock} copies are available in stock.`); return; }
                 item.qty = newQty;
             }
-            window.saveCart(); 
-            renderCart(document.getElementById('app'));
+            window.saveCart(); renderCart(document.getElementById('app'));
         };
 
-        window.removeFromCart = function(idx) {
-            window.state.cart.splice(idx, 1);
-            window.saveCart(); 
-            renderCart(document.getElementById('app'));
-        };
-
-        window.applyDiscountCode = function() {
-            const codeInput = document.getElementById('discountCodeInput');
-            if (!codeInput) return;
-            const code = codeInput.value.trim().toUpperCase();
-            const subtotal = window.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const codes = { 'SAVE10': { type: 'percent', value: 10 }, 'FLAT50': { type: 'fixed', value: 50 }, 'BOOKSHELF': { type: 'percent', value: 15 } };
-            
-            if (codes[code]) {
-                const amount = codes[code].type === 'percent' ? Math.round(subtotal * (codes[code].value / 100)) : codes[code].value;
-                window.state.appliedDiscount = { code, amount };
-                alert(`✅ Success! Code '${code}' applied. You save Rs. ${amount}`);
-            } else {
-                window.state.appliedDiscount = { code: '', amount: 0 };
-                alert('❌ Invalid code. Please try: SAVE10, FLAT50, or BOOKSHELF');
-            }
-            renderCart(document.getElementById('app'));
-        };
+        window.removeFromCart = function(idx) { window.state.cart.splice(idx, 1); window.saveCart(); renderCart(document.getElementById('app')); };
 
         window.handleCheckout = async function(e) {
             e.preventDefault();
             const cartItems = window.state.cart;
-            
-            let stockValid = true;
-            let stockErrorMsg = "";
-            
+            let stockValid = true, stockErrorMsg = "";
             for (const item of cartItems) {
-                const bookRef = doc(db, "books", item.id);
-                const bookSnap = await getDoc(bookRef);
+                const bookSnap = await getDoc(doc(db, "books", item.id));
                 if (bookSnap.exists()) {
                     const currentStock = Number(bookSnap.data().stock) || 0;
-                    if (item.qty > currentStock) {
-                        stockValid = false;
-                        stockErrorMsg = `Sorry, "${item.title}" only has ${currentStock} copies left in stock. Please adjust your cart.`;
-                        break;
-                    }
+                    if (item.qty > currentStock) { stockValid = false; stockErrorMsg = `Sorry, "${item.title}" only has ${currentStock} copies left.`; break; }
                 }
             }
-            
-            if (!stockValid) {
-                alert(stockErrorMsg);
-                window.router('cart');
-                return;
-            }
+            if (!stockValid) { alert(stockErrorMsg); window.router('cart'); return; }
 
             const formData = new FormData(e.target);
             const isGuest = !window.state.user;
             const userEmail = formData.get('email');
             const userName = formData.get('name');
-            let membershipDiscount = 0, finalShipping = 100;
-            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
-            if (!isGuest) {
-                if (window.state.user.membershipTier === 'premium') { membershipDiscount = Math.round(subtotal * 0.10); if (subtotal >= 1000) finalShipping = 0; } 
-                else if (window.state.user.membershipTier === 'vip') { membershipDiscount = Math.round(subtotal * 0.20); finalShipping = 0; }
+            let membershipDiscount = 0, finalShipping = 100;
+            let appliedMemberTier = null;
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            if (window.state.user && (window.state.user.membershipTier === 'premium' || window.state.user.membershipTier === 'vip')) {
+                appliedMemberTier = window.state.user.membershipTier;
+            } else if (window.state.appliedMembership.amount > 0) {
+                appliedMemberTier = window.state.appliedMembership.tier;
             }
+
+            if (appliedMemberTier === 'premium') {
+                membershipDiscount = Math.round(subtotal * 0.10);
+                if (subtotal >= 1000) finalShipping = 0;
+            } else if (appliedMemberTier === 'vip') {
+                membershipDiscount = Math.round(subtotal * 0.20);
+                finalShipping = 0;
+            }
+
             const couponDiscount = window.state.appliedDiscount.amount;
             const trackingCode = 'TRK-' + Math.random().toString(36).substr(2, 6).toUpperCase() + '-' + Date.now().toString().slice(-4);
             const orderId = 'ORD-' + Date.now();
             
             const orderData = {
-                orderId: orderId, trackingCode: trackingCode, userId: isGuest ? 'guest' : window.state.user.uid,
-                userEmail: userEmail, userName: userName, items: cartItems,
-                subtotal: subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
+                orderId, trackingCode, userId: isGuest ? 'guest' : window.state.user.uid, userEmail, userName, items: cartItems,
+                subtotal, shippingCost: finalShipping, discount: membershipDiscount, appliedDiscount: couponDiscount,
                 totalAmount: subtotal - membershipDiscount - couponDiscount + finalShipping,
-                paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', createdAt: new Date().toISOString()
+                paymentMethod: formData.get('payment'), deliveryAddress: formData.get('address'), status: 'Pending', 
+                membershipTierApplied: appliedMemberTier,
+                createdAt: new Date().toISOString()
             };
 
-            if (orderData.paymentMethod === 'eSewa' || orderData.paymentMethod === 'Khalti') {
-                // Mock integration
-            }
-
             try {
-                for (const item of cartItems) {
-                    const bookRef = doc(db, "books", item.id);
-                    await updateDoc(bookRef, { stock: increment(-item.qty) });
-                }
-
+                for (const item of cartItems) await updateDoc(doc(db, "books", item.id), { stock: increment(-item.qty) });
                 await addDoc(collection(db, "orders"), orderData);
-                
-                window.state.cart = []; 
-                window.state.appliedDiscount = { code: '', amount: 0 }; 
-                window.saveCart();
-                
+                window.state.cart = []; window.state.appliedDiscount = { code: '', amount: 0 }; window.state.appliedMembership = { id: '', tier: '', amount: 0 }; window.saveCart();
                 window.router('order-success', orderId);
-            } catch (error) { 
-                console.error("Error placing order:", error); 
-                alert("Failed to place order. Please try again."); 
-            }
+            } catch (error) { console.error("Error placing order:", error); alert("Failed to place order."); }
         };
 
-        // ✅ UPDATED: Added Payment Method and Payment Status to tracking results
         window.handleTrackOrder = async function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -1033,33 +1200,22 @@
                 const date = new Date(order.createdAt).toLocaleDateString();
                 const statusColors = { 'Pending': 'bg-yellow-100 text-yellow-700', 'Confirmed': 'bg-blue-100 text-blue-700', 'Shipped': 'bg-purple-100 text-purple-700', 'Delivered': 'bg-green-100 text-green-700', 'Cancelled': 'bg-red-100 text-red-700' };
                 const orderStr = JSON.stringify(order).replace(/"/g, '&quot;');
-                
                 const paymentStatus = order.paymentMethod === 'COD' ? 'Pay on Delivery' : 'Paid';
                 const paymentColor = order.paymentMethod === 'COD' ? 'text-blue-600' : 'text-green-600';
 
-                resultDiv.innerHTML = `
-                    <div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4>
-                                <p class="text-sm text-gray-600">Placed on: ${date}</p>
-                            </div>
-                            <span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span>
-                        </div>
-                        <div class="border-t border-green-200 pt-4 space-y-2 text-sm">
-                            <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
-                            <p><strong>Total Amount:</strong> Rs. ${order.totalAmount}</p>
-                            <p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
-                            <p><strong>Delivery Address:</strong> ${order.deliveryAddress}</p>
-                            <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
-                            <p><strong>Payment Status:</strong> <span class="font-semibold ${paymentColor}">${paymentStatus}</span></p>
-                        </div>
-                        <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button>
-                    </div>`;
-            } catch (err) { 
-                console.error(err);
-                resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error tracking order.</div>`; 
-            }
+                resultDiv.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl p-6 fade-in">
+                    <div class="flex justify-between items-start mb-4"><div><h4 class="font-serif text-xl font-bold text-charcoal-900">Order Found!</h4><p class="text-sm text-gray-600">Placed on: ${date}</p></div><span class="px-4 py-2 rounded-full text-sm font-bold ${statusColors[order.status]}">${order.status}</span></div>
+                    <div class="border-t border-green-200 pt-4 space-y-2 text-sm">
+                        <p><strong>Tracking Code:</strong> ${order.trackingCode}</p>
+                        <p><strong>Total Amount:</strong> Rs. ${order.totalAmount}</p>
+                        <p><strong>Items:</strong> ${order.items.map(i => `${i.title} (x${i.qty})`).join(', ')}</p>
+                        <p><strong>Delivery Address:</strong> ${order.deliveryAddress}</p>
+                        <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
+                        <p><strong>Payment Status:</strong> <span class="font-semibold ${paymentColor}">${paymentStatus}</span></p>
+                    </div>
+                    <button onclick="window.printReceipt(JSON.parse(this.getAttribute('data-order')))" data-order="${orderStr}" class="mt-4 w-full bg-wood-600 text-white font-bold py-2 rounded-lg hover:bg-wood-700 transition flex items-center justify-center gap-2"><i class="bi bi-printer"></i> Print Receipt</button>
+                </div>`;
+            } catch (err) { resultDiv.innerHTML = `<div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-center">Error tracking order.</div>`; }
         };
 
         window.handleLogin = async function(e) {
@@ -1084,13 +1240,8 @@
 
         window.handleNewsletter = async function(e) {
             e.preventDefault();
-            try { 
-                await addDoc(collection(db, "newsletter"), { email: e.target.email.value, createdAt: new Date().toISOString() }); 
-                alert("✅ Subscribed successfully! Welcome to the Literary Club."); 
-                e.target.reset(); 
-            } catch (err) { 
-                alert("Failed to subscribe. Please try again."); 
-            }
+            try { await addDoc(collection(db, "newsletter"), { email: e.target.email.value, createdAt: new Date().toISOString() }); alert("✅ Subscribed successfully!"); e.target.reset(); } 
+            catch (err) { alert("Failed to subscribe."); }
         };
 
         window.openMembershipPayment = function(tier, name, price) {
@@ -1103,18 +1254,44 @@
         window.closeMembershipPayment = function() { document.getElementById('membershipPaymentModal').classList.add('hidden'); };
         
         window.processMembershipPayment = async function(e) {
-            e.preventDefault(); const tier = document.getElementById('modalPlanTier').value; const amount = document.getElementById('modalPlanAmount').value; const method = e.target.paymentMethod.value;
-            const btn = document.getElementById('payMembershipBtn'); btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...'; btn.disabled = true;
+            e.preventDefault(); 
+            const tier = document.getElementById('modalPlanTier').value; 
+            const amount = document.getElementById('modalPlanAmount').value; 
+            const method = e.target.paymentMethod.value;
+            const btn = document.getElementById('payMembershipBtn'); 
+            btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Processing...'; 
+            btn.disabled = true;
+            
             setTimeout(async () => {
-                try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier, membershipUpgradedAt: new Date().toISOString() }); window.state.user.membershipTier = tier; alert(`Payment successful!`); window.closeMembershipPayment(); window.router('profile'); } 
-                catch (err) { alert("Failed."); } finally { btn.innerHTML = '<span>Pay Now & Activate</span><i class="bi bi-arrow-right"></i>'; btn.disabled = false; }
+                try { 
+                    const newMembershipId = 'MEM-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+                    await updateDoc(doc(db, "users", window.state.user.uid), { 
+                        membershipTier: tier, 
+                        membershipId: newMembershipId,
+                        membershipUpgradedAt: new Date().toISOString() 
+                    }); 
+                    window.state.user.membershipTier = tier; 
+                    window.state.user.membershipId = newMembershipId;
+                    alert(`Payment successful!\n\nYour Membership ID is: ${newMembershipId}\n\nPlease save this ID to claim your benefits at checkout!`); 
+                    window.closeMembershipPayment(); 
+                    window.router('profile'); 
+                } catch (err) { alert("Failed: " + err.message); } 
+                finally { btn.innerHTML = '<span>Pay Now & Activate</span><i class="bi bi-arrow-right"></i>'; btn.disabled = false; }
             }, 1500);
         };
 
         window.handleJoinMembership = async function(tier) {
             if (!window.state.user) return window.router('login');
-            try { await updateDoc(doc(db, "users", window.state.user.uid), { membershipTier: tier }); window.state.user.membershipTier = tier; alert(`Updated to Free Reader.`); window.router('profile'); } 
-            catch (err) { alert("Failed."); }
+            try { 
+                await updateDoc(doc(db, "users", window.state.user.uid), { 
+                    membershipTier: tier,
+                    membershipId: tier === 'free' ? '' : window.state.user.membershipId 
+                }); 
+                window.state.user.membershipTier = tier; 
+                if (tier === 'free') window.state.user.membershipId = '';
+                alert(`Updated to Free Reader.`); 
+                window.router('profile'); 
+            } catch (err) { alert("Failed."); }
         };
 
         window.loadUserOrders = async function() {
@@ -1136,8 +1313,20 @@
             try {
                 const snap = await getDocs(collection(db, "orders"));
                 let tot = 0, pend = 0, rev = 0;
-                snap.forEach(d => { const o = d.data(); tot++; if(o.status==='Pending') pend++; rev += (o.totalAmount||0); });
-                document.getElementById('adminTotalOrders').innerText = tot; document.getElementById('adminPendingOrders').innerText = pend; document.getElementById('adminRevenue').innerText = 'Rs. '+rev;
+                snap.forEach(d => { 
+                    const o = d.data(); 
+                    if (o.status !== 'Cancelled') {
+                        tot++; 
+                        if (o.status === 'Pending') pend++; 
+                        rev += (o.totalAmount || 0); 
+                    }
+                });
+                const el1 = document.getElementById('adminTotalOrders');
+                const el2 = document.getElementById('adminPendingOrders');
+                const el3 = document.getElementById('adminRevenue');
+                if(el1) el1.innerText = tot; 
+                if(el2) el2.innerText = pend; 
+                if(el3) el3.innerText = 'Rs. ' + rev;
             } catch (err) { console.error(err); }
         };
 
@@ -1150,6 +1339,7 @@
             const b = window.currentBooks.find(x=>x.id===id) || window.state.books.find(x=>x.id===id); if(!b) return;
             window.state.editingBookId = id; document.getElementById('customDocId').value=id; document.getElementById('customDocId').disabled=true;
             document.getElementById('bookTitle').value=b.title||''; document.getElementById('bookAuthor').value=b.author||''; document.getElementById('bookCategory').value=b.category||'Fiction';
+            document.getElementById('bookFeature').value = b.feature || 'none';
             document.getElementById('bookFormat').value=b.format||'Paperback';
             document.getElementById('bookPrice').value=b.price||''; document.getElementById('bookDiscount').value=b.discountPrice||''; document.getElementById('bookStock').value=b.stock||'';
             document.getElementById('bookIsbn').value=b.isbn||''; document.getElementById('bookPages').value=b.pages||''; document.getElementById('bookLang').value=b.language||'';
@@ -1165,39 +1355,62 @@
         
         window.saveBook = async function(e) {
             e.preventDefault(); 
-            const d = {
-                title: document.getElementById('bookTitle').value,
-                author: document.getElementById('bookAuthor').value,
-                category: document.getElementById('bookCategory').value,
-                format: document.getElementById('bookFormat').value,
-                price: Number(document.getElementById('bookPrice').value),
-                stock: Number(document.getElementById('bookStock').value),
-                coverUrl: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x450',
-                description: document.getElementById('bookDesc').value,
-                rating: Number(document.getElementById('bookRating').value) || 5,
-                isbn: document.getElementById('bookIsbn').value || '',
-                pages: Number(document.getElementById('bookPages').value) || 0,
-                language: document.getElementById('bookLang').value || 'English',
-                publisher: document.getElementById('bookPub').value || 'Unknown',
-                discountPrice: Number(document.getElementById('bookDiscount').value) || null,
-                updatedAt: new Date().toISOString()
+            const d = { 
+                title: document.getElementById('bookTitle').value, 
+                author: document.getElementById('bookAuthor').value, 
+                category: document.getElementById('bookCategory').value, 
+                feature: document.getElementById('bookFeature').value,
+                format: document.getElementById('bookFormat').value, 
+                price: Number(document.getElementById('bookPrice').value), 
+                stock: Number(document.getElementById('bookStock').value), 
+                coverUrl: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x450', 
+                description: document.getElementById('bookDesc').value, 
+                rating: Number(document.getElementById('bookRating').value) || 5, 
+                isbn: document.getElementById('bookIsbn').value || '', 
+                pages: Number(document.getElementById('bookPages').value) || 0, 
+                language: document.getElementById('bookLang').value || 'English', 
+                publisher: document.getElementById('bookPub').value || 'Unknown', 
+                discountPrice: Number(document.getElementById('bookDiscount').value) || null, 
+                updatedAt: new Date().toISOString() 
             };
             try {
-                if(window.state.editingBookId){
-                    await updateDoc(doc(db,"books",window.state.editingBookId),d);
-                    alert("Updated!");
-                } else {
-                    const cid=document.getElementById('customDocId').value.trim(); 
-                    if(cid) await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()});
-                    else await addDoc(collection(db,"books"),{...d,createdAt:new Date()});
-                    alert("Added!");
-                }
+                if(window.state.editingBookId) { await updateDoc(doc(db,"books",window.state.editingBookId),d); alert("Updated!"); } 
+                else { const cid=document.getElementById('customDocId').value.trim(); if(cid) await setDoc(doc(db,"books",cid),{...d,createdAt:new Date()}); else await addDoc(collection(db,"books"),{...d,createdAt:new Date()}); alert("Added!"); }
                 window.resetBookForm(); window.showAdminTab('books');
             } catch(err){alert("Save failed: "+err.message);}
         };
         
-        window.updateOrderStatus = async function(id,s){
-            try{await updateDoc(doc(db,"orders",id),{status:s});window.loadAdminStats();window.showAdminTab('orders');}catch(e){alert("Failed.");}
+        window.updateOrderStatus = async function(id, s) {
+            try {
+                const orderRef = doc(db, "orders", id);
+                const orderSnap = await getDoc(orderRef);
+                
+                if (orderSnap.exists()) {
+                    const orderData = orderSnap.data();
+                    const oldStatus = orderData.status;
+                    
+                    if (s === 'Cancelled' && oldStatus !== 'Cancelled') {
+                        for (const item of orderData.items) {
+                            const bookRef = doc(db, "books", item.id);
+                            await updateDoc(bookRef, { stock: increment(item.qty) });
+                        }
+                    } else if (oldStatus === 'Cancelled' && s !== 'Cancelled') {
+                        for (const item of orderData.items) {
+                            const bookRef = doc(db, "books", item.id);
+                            await updateDoc(bookRef, { stock: increment(-item.qty) });
+                        }
+                    }
+                    
+                    await updateDoc(orderRef, { status: s });
+                    alert(`Order status updated to ${s}`);
+                }
+                
+                window.loadAdminStats();
+                window.showAdminTab('orders');
+            } catch(e) {
+                console.error(e);
+                alert("Failed to update: " + e.message);
+            }
         };
         
         window.handleSearch = function(q) {
@@ -1209,19 +1422,17 @@
         };
 
         window.saveCart();
+        await window.fetchDiscounts();
 
         window.addEventListener('hashchange', () => {
             const hashParts = window.location.hash.replace('#', '').split('/');
             const view = hashParts[0] || 'home';
-            const param = hashParts[1] || null;
-            
-            if (window.state.currentView !== view || window.state.currentParam !== param) {
-                window.router(view, param);
-            }
+            const param = hashParts[1] ? decodeURIComponent(hashParts[1]) : null;
+            if (window.state.currentView !== view || window.state.currentParam !== param) window.router(view, param);
         });
 
         const initHashParts = window.location.hash.replace('#', '').split('/');
-        window.router(initHashParts[0] || 'home', initHashParts[1] || null);
+        window.router(initHashParts[0] || 'home', initHashParts[1] ? decodeURIComponent(initHashParts[1]) : null);
     </script>
 </body>
 </html>
