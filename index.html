@@ -27,8 +27,10 @@
   .navbar .nav-link:hover{background:rgba(201,169,97,.15);color:var(--gold) !important}
   .nav-icon{color:var(--gold);font-size:1.2rem;position:relative;cursor:pointer;margin-left:1rem}
   .nav-icon .badge{position:absolute;top:-8px;right:-10px;background:var(--gold);color:var(--brown);font-size:.65rem;border-radius:50%;padding:3px 6px}
-  .search-box{background:var(--cream);border:1px solid var(--border);border-radius:30px;padding:.3rem .8rem;width:180px;display:flex;align-items:center;gap:.4rem}
-  .search-box input{border:none;background:transparent;outline:none;width:100%;font-size:.9rem}
+  /* ✅ Search box fix - icon inline with input */
+  .search-box{background:var(--cream);border:1px solid var(--border);border-radius:30px;padding:.3rem .8rem;width:200px;display:inline-flex;align-items:center;gap:.4rem;vertical-align:middle}
+  .search-box input{border:none;background:transparent;outline:none;flex:1;font-size:.9rem;min-width:0}
+  .search-box i{color:var(--muted);flex-shrink:0}
   .dropdown-menu{background:var(--cream);border:1px solid var(--border)}
   .dropdown-item{color:var(--brown);cursor:pointer}
   .dropdown-item:hover{background:var(--gold);color:var(--brown)}
@@ -157,6 +159,7 @@
   .social-card h4{color:var(--gold);margin-bottom:1rem}
   .social-card .social-icons-big a{display:inline-flex;width:50px;height:50px;border-radius:50%;background:rgba(201,169,97,.15);color:var(--gold);align-items:center;justify-content:center;margin:.3rem;font-size:1.3rem;transition:.2s}
   .social-card .social-icons-big a:hover{background:var(--gold);color:var(--brown);transform:translateY(-3px)}
+  /* ✅ Book description with Quill alignment support */
   .book-description-content{line-height:1.7;color:var(--text)}
   .book-description-content h1,.book-description-content h2,.book-description-content h3{color:var(--brown);margin:1rem 0 .5rem;font-family:'Playfair Display',serif}
   .book-description-content h1{font-size:1.5rem}
@@ -167,6 +170,25 @@
   .book-description-content ul,.book-description-content ol{margin:0 0 1rem 1.5rem}
   .book-description-content a{color:var(--gold-dark);text-decoration:underline}
   .book-description-content strong{color:var(--brown)}
+  /* ✅ Quill alignment classes - THIS FIXES THE ALIGNMENT ISSUE */
+  .book-description-content .ql-align-center,
+  .book-description-content p.ql-align-center,
+  .book-description-content h1.ql-align-center,
+  .book-description-content h2.ql-align-center,
+  .book-description-content h3.ql-align-center,
+  .book-description-content li.ql-align-center{text-align:center}
+  .book-description-content .ql-align-right,
+  .book-description-content p.ql-align-right,
+  .book-description-content h1.ql-align-right,
+  .book-description-content h2.ql-align-right,
+  .book-description-content h3.ql-align-right,
+  .book-description-content li.ql-align-right{text-align:right}
+  .book-description-content .ql-align-justify,
+  .book-description-content p.ql-align-justify,
+  .book-description-content h1.ql-align-justify,
+  .book-description-content h2.ql-align-justify,
+  .book-description-content h3.ql-align-justify,
+  .book-description-content li.ql-align-justify{text-align:justify}
   .ql-toolbar.ql-snow{border:1px solid var(--border);border-radius:8px 8px 0 0;background:var(--cream-2)}
   .ql-container.ql-snow{border:1px solid var(--border);border-radius:0 0 8px 8px;font-family:'Inter',sans-serif;font-size:.95rem;min-height:180px}
   .ql-editor{min-height:180px}
@@ -225,7 +247,7 @@
       </ul>
       <div class="d-flex align-items-center flex-wrap">
         <div class="search-box d-none d-md-block">
-          <input id="searchInput" type="text" placeholder="Search..." oninput="searchBooks(this.value)">
+          <input id="searchInput" type="text" placeholder="Search books..." oninput="searchBooks(this.value)">
           <i class="bi bi-search"></i>
         </div>
         <span class="nav-icon" onclick="navigateTo('cart')" title="Cart">
@@ -637,20 +659,6 @@
   </div></div>
 </div>
 
-<!-- ORDER DETAILS MODAL -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
-  <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title" id="odTitle">Order Details</h5>
-      <div>
-        <button class="btn btn-sm btn-outline-brown me-2" onclick="printCurrentOrder()"><i class="bi bi-printer"></i> Print</button>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-    </div>
-    <div class="modal-body" id="odBody"></div>
-  </div></div>
-</div>
-
 <!-- BOOK MODAL (Admin) -->
 <div class="modal fade" id="bookModal" tabindex="-1" data-bs-backdrop="static">
   <div class="modal-dialog modal-lg"><div class="modal-content">
@@ -946,11 +954,13 @@ function seedBooks(){
   ];
   DB.books=b;return b;
 }
+
+// ✅ UPDATED MEMBERSHIP PLANS with new shipping rules
 function seedPlans(){
   const p=[
     {id:1,name:"Basic",price:0,period:"lifetime",discount:0,multiplier:1,features:["Browse all books","Standard delivery (Rs. 100)","Email support"]},
-    {id:2,name:"Reader",price:500,period:"yearly",discount:10,multiplier:1.5,features:["10% off all orders","Free delivery over Rs. 1000","1.5x loyalty points","Early access to new arrivals"],featured:true},
-    {id:3,name:"Bibliophile",price:1500,period:"lifetime",discount:20,multiplier:2,features:["20% off all orders","Always free delivery","2x loyalty points","Monthly free book","Exclusive events"]}
+    {id:2,name:"Reader",price:500,period:"yearly",discount:10,multiplier:1.5,features:["10% off all orders","Free shipping over Rs. 2000","1.5x loyalty points","Early access to new arrivals"],featured:true},
+    {id:3,name:"Bibliophile",price:1500,period:"lifetime",discount:15,multiplier:2,features:["15% off all orders","Free shipping over Rs. 1000","2x loyalty points","Monthly free book","Exclusive events"]}
   ];
   DB.plans=p;return p;
 }
@@ -1180,15 +1190,14 @@ function openBookDetails(id, updateURL = true){
   document.getElementById('bdPages').textContent = b.pages ? b.pages + ' pages' : 'N/A';
   document.getElementById('bdPublisher').textContent = b.publisher || 'N/A';
   document.getElementById('bdStock').textContent = b.stock > 0 ? b.stock + ' in stock' : 'Out of stock';
+  // ✅ Quill HTML is inserted as-is - alignment classes preserved
   document.getElementById('bdDesc').innerHTML = b.desc || '<p>No description available.</p>';
-  // Only crossed out original + discounted, NO discount badge
   document.getElementById('bdPriceWrap').innerHTML = `<h3 style="color:var(--gold-dark)">${formatBookPrice(b.price, b.discountedPrice)}</h3>`;
   const stars = '★'.repeat(Math.round(b.rating||4))+'☆'.repeat(5-Math.round(b.rating||4));
   document.getElementById('bdStars').textContent = stars;
   const imgWrap = document.getElementById('bdImageWrap');
   if(b.thumbnail) imgWrap.innerHTML = `<img src="${b.thumbnail}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-book\\'></i>'">`;
   else imgWrap.innerHTML = '<i class="bi bi-book"></i>';
-  // Badges - NO discount badge
   let badges = '';
   if(b.featured) badges += '<span class="detail-badge featured">⭐ Featured</span>';
   if(b.bestSeller) badges += '<span class="detail-badge bestseller">🔥 Best Seller</span>';
@@ -1200,7 +1209,6 @@ function openBookDetails(id, updateURL = true){
   new bootstrap.Modal(document.getElementById('bookDetailsModal')).show();
 }
 
-// Fix modal backdrop issue
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal').forEach(modalEl => {
     modalEl.addEventListener('hidden.bs.modal', () => {
@@ -1290,8 +1298,7 @@ function renderCart(){
     }).join('');
   }
   const subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const isMember=DB.currentUser && DB.currentUser.plan!=='Basic';
-  const shipping=subtotal>1000||isMember?0:DELIVERY_CHARGE;
+  const shipping=calculateShipping(subtotal);
   const total=subtotal+shipping;
   document.getElementById('cartSubtotal').textContent='Rs. '+subtotal.toLocaleString();
   document.getElementById('cartShipping').textContent=shipping===0?'FREE':'Rs. '+shipping;
@@ -1307,16 +1314,22 @@ function changeQty(id,d){
 function removeFromCart(id){ DB.cart=DB.cart.filter(i=>i.id!=id); updateCartBadge(); renderCart(); }
 
 /* =========================================================
-   CHECKOUT
+   ✅ UPDATED SHIPPING LOGIC
+   - Basic: Always Rs. 100
+   - Reader: Free over Rs. 2000, else Rs. 100
+   - Bibliophile: Free over Rs. 1000, else Rs. 100
 ========================================================= */
 function calculateShipping(subtotal){
   if(!DB.currentUser) return DELIVERY_CHARGE;
   const plan = DB.currentUser.plan;
-  if(plan === 'Bibliophile') return 0; // Always free
-  if(plan === 'Reader') return subtotal >= 1000 ? 0 : DELIVERY_CHARGE; // Free over 1000
-  return DELIVERY_CHARGE; // Basic pays
+  if(plan === 'Bibliophile') return subtotal >= 1000 ? 0 : DELIVERY_CHARGE;
+  if(plan === 'Reader') return subtotal >= 2000 ? 0 : DELIVERY_CHARGE;
+  return DELIVERY_CHARGE; // Basic always pays
 }
 
+/* =========================================================
+   CHECKOUT
+========================================================= */
 function renderCheckout(){
   if(DB.cart.length===0){ toast("Your cart is empty","warning"); navigateTo('cart'); return; }
   if(DB.currentUser){
@@ -1648,69 +1661,8 @@ function printOrder(order){
 }
 
 /* =========================================================
-   ADMIN ORDER DETAILS
+   ADMIN ORDER STATUS UPDATE
 ========================================================= */
-let currentOrderForPrint = null;
-function viewOrderDetails(orderId){
-  const order = DB.orders.find(o => o.id === orderId);
-  if(!order){ toast("Order not found","danger"); return; }
-  currentOrderForPrint = order;
-  const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-  const statusHistory = order.statusHistory || [{status: order.status || 'Pending', date: order.date}];
-  const statusSteps = ['Pending','Processing','Shipped','Out for Delivery','Delivered'];
-  const currentStatus = order.status || 'Pending';
-  const currentIdx = statusSteps.indexOf(currentStatus);
-
-  document.getElementById('odTitle').textContent = 'Order #' + order.id;
-  document.getElementById('odBody').innerHTML = `
-    <div class="row g-3 mb-3">
-      <div class="col-md-6"><div class="p-3" style="background:var(--cream-2);border-radius:8px">
-        <h6 style="color:var(--brown)"><i class="bi bi-person"></i> Customer</h6>
-        <p class="mb-1"><strong>${order.customer}</strong></p>
-        <p class="mb-1 small">${order.email || ''}</p>
-        <p class="mb-0 small">${order.phone || ''}</p>
-      </div></div>
-      <div class="col-md-6"><div class="p-3" style="background:var(--cream-2);border-radius:8px">
-        <h6 style="color:var(--brown)"><i class="bi bi-info-circle"></i> Order Info</h6>
-        <p class="mb-1 small"><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-        <p class="mb-1 small"><strong>Status:</strong> <span class="badge bg-warning text-dark">${order.status}</span></p>
-        <p class="mb-0 small"><strong>Payment:</strong> ${order.payment || '-'}</p>
-      </div></div>
-    </div>
-    <h6 style="color:var(--brown)"><i class="bi bi-geo-alt"></i> Delivery Address</h6>
-    <div class="address-block mb-3">
-      <div class="addr-row"><span class="addr-label">Country:</span><span>${order.country || 'Nepal'}</span></div>
-      <div class="addr-row"><span class="addr-label">District:</span><span>${order.district || '-'}</span></div>
-      <div class="addr-row"><span class="addr-label">Ward No.:</span><span>${order.ward || '-'}</span></div>
-      <div class="addr-row"><span class="addr-label">Street/Tole:</span><span>${order.street || '-'}</span></div>
-      <div class="addr-row"><span class="addr-label">Landmark:</span><span>${order.landmark || '-'}</span></div>
-    </div>
-    <h6 style="color:var(--brown)"><i class="bi bi-book"></i> Items Ordered</h6>
-    <div class="table-responsive"><table class="table">
-      <thead><tr><th>Book</th><th>Author</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-      <tbody>${items.map(i => `<tr><td>${i.title}</td><td>${i.author}</td><td>${i.qty}</td><td>Rs. ${Number(i.price).toLocaleString()}</td><td>Rs. ${(i.price*i.qty).toLocaleString()}</td></tr>`).join('')}</tbody>
-      <tfoot>
-        <tr><td colspan="4" class="text-end">Subtotal:</td><td>Rs. ${Number(order.subtotal || order.total).toLocaleString()}</td></tr>
-        <tr><td colspan="4" class="text-end">Delivery:</td><td>${Number(order.shipping || 0) === 0 ? 'FREE' : 'Rs. ' + Number(order.shipping || 0).toLocaleString()}</td></tr>
-        ${Number(order.discountAmount || 0) > 0 ? `<tr class="text-success"><td colspan="4" class="text-end">Code Discount (${order.discountCode || 'N/A'}):</td><td class="text-success">-Rs. ${Number(order.discountAmount).toLocaleString()}</td></tr>` : ''}
-        ${Number(order.memberDiscount || 0) > 0 ? `<tr class="text-success"><td colspan="4" class="text-end">Member Discount:</td><td class="text-success">-Rs. ${Number(order.memberDiscount).toLocaleString()}</td></tr>` : ''}
-        <tr><td colspan="4" class="text-end fs-5"><strong>Total:</strong></td><td class="fs-5 fw-bold" style="color:var(--gold-dark)">Rs. ${Number(order.total).toLocaleString()}</td></tr>
-      </tfoot>
-    </table></div>
-    <h6 class="mt-4" style="color:var(--brown)"><i class="bi bi-clock-history"></i> Order Timeline</h6>
-    <div class="timeline">
-      ${statusSteps.map((step, idx) => {
-        const historyEntry = statusHistory.find(h => h.status === step);
-        const isActive = idx <= currentIdx;
-        return `<div class="timeline-item ${isActive ? 'active' : ''}">
-          <div class="timeline-title">${step}</div>
-          <div class="timeline-date">${historyEntry ? new Date(historyEntry.date).toLocaleString() : (isActive ? 'Completed' : 'Pending')}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
-  new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
-}
-function printCurrentOrder(){ if(currentOrderForPrint) printOrder(currentOrderForPrint); }
 async function updateOrderStatus(orderId, newStatus){
   const res = await api('updateOrderStatus', {orderId, status: newStatus});
   if(res.ok){
@@ -2017,6 +1969,7 @@ async function renderAdmin(){
   }).join('');
 
   const statusSteps = ['Pending','Processing','Shipped','Out for Delivery','Delivered','Cancelled'];
+  // ✅ Removed view details button - only print button remains
   document.getElementById('adminOrdersTable').innerHTML = orders.length
     ? orders.map(o=>`<tr>
         <td>${o.id}</td>
@@ -2029,8 +1982,7 @@ async function renderAdmin(){
         </select></td>
         <td>${new Date(o.date).toLocaleDateString()}</td>
         <td>
-          <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetails('${o.id}')" title="View Details"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-sm btn-outline-secondary" onclick='printOrder(${JSON.stringify(o).replace(/'/g,"&#39;")})' title="Print"><i class="bi bi-printer"></i></button>
+          <button class="btn btn-sm btn-outline-secondary" onclick='printOrder(${JSON.stringify(o).replace(/'/g,"&#39;")})' title="Print Invoice"><i class="bi bi-printer"></i> Print</button>
         </td>
       </tr>`).join('')
     : '<tr><td colspan="8" class="text-center text-muted">No orders yet</td></tr>';
